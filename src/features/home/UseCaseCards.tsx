@@ -11,6 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useInView } from "@/lib/useInView";
+import { cn } from "@/lib/utils";
 
 const useCases = [
   {
@@ -44,8 +46,16 @@ const useCases = [
 ];
 
 export function UseCaseCards() {
+  const { ref, inView } = useInView();
+
   return (
-    <section className="py-16">
+    <section
+      ref={ref}
+      className={cn(
+        "py-16 transition-all duration-700",
+        inView ? "animate-fade-in-up" : "opacity-0",
+      )}
+    >
       <h2 className="mb-12 text-center text-2xl font-semibold text-foreground">
         ユースケース
       </h2>

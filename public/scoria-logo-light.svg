@@ -5,10 +5,10 @@
       @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&amp;display=swap');
     </style>
   </defs>
-  <!-- S (accent green) -->
-  <text x="10" y="58" font-family="'Noto Sans JP', sans-serif" font-size="48" font-weight="700" letter-spacing="-0.5" fill="#22c55e">S</text>
+  <!-- S (accent blue) -->
+  <text x="10" y="58" font-family="'Noto Sans JP', sans-serif" font-size="48" font-weight="700" letter-spacing="-0.5" fill="#3b82f6">S</text>
   <!-- Bold Pipe -->
-  <rect x="46" y="12" width="5" height="52" rx="2.5" fill="#22c55e" opacity="0.6"/>
+  <rect x="46" y="12" width="5" height="52" rx="2.5" fill="#3b82f6" opacity="0.6"/>
   <!-- coria (dark text) -->
   <text x="64" y="58" font-family="'Noto Sans JP', sans-serif" font-size="48" font-weight="700" letter-spacing="-0.5" fill="#111827">coria</text>
 </svg>

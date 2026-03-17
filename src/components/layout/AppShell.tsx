@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { Compass, GearSix } from "@phosphor-icons/react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -8,7 +9,23 @@ const navItems = [
   { to: "/settings", label: "設定", icon: GearSix },
 ];
 
+function getResolvedTheme(theme: string): "light" | "dark" {
+  if (theme === "system") {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+  return theme as "light" | "dark";
+}
+
 export function AppShell() {
+  const { theme } = useTheme();
+  const resolved = getResolvedTheme(theme);
+  const logoSrc =
+    resolved === "dark"
+      ? "/scoria-logo-dark.svg"
+      : "/scoria-logo-light.svg";
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -16,9 +33,13 @@ export function AppShell() {
           <div className="flex items-center gap-6">
             <NavLink
               to="/"
-              className="text-lg font-bold text-foreground hover:text-primary transition-colors"
+              className="animate-logo-in transition-transform duration-200 hover:scale-[1.03]"
             >
-              Scoria
+              <img
+                src={logoSrc}
+                alt="Scoria"
+                className="h-7"
+              />
             </NavLink>
             <nav className="flex items-center gap-1">
               {navItems.map((item) => (

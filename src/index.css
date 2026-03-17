@@ -31,6 +31,56 @@
 
   --animate-accordion-open: accordion-down 0.2s ease-out;
   --animate-accordion-close: accordion-up 0.2s ease-out;
+  --animate-logo-in: logo-slide-in 0.5s ease-out both;
+  --animate-fade-in-up: fade-in-up 0.6s ease-out both;
+  --animate-geo-float-1: geo-float-1 25s ease-in-out infinite;
+  --animate-geo-float-2: geo-float-2 32s ease-in-out infinite;
+  --animate-geo-float-3: geo-float-3 20s ease-in-out infinite;
+  --animate-geo-float-4: geo-float-4 38s ease-in-out infinite;
+  --animate-geo-float-5: geo-float-5 28s ease-in-out infinite;
+  --animate-dash-flow: dash-flow 2s linear infinite;
+}
+
+@keyframes logo-slide-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes geo-float-1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -40px) rotate(120deg); }
+  66% { transform: translate(-20px, 20px) rotate(240deg); }
+}
+
+@keyframes geo-float-2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-40px, -30px) rotate(180deg); }
+}
+
+@keyframes geo-float-3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate(20px, -50px) rotate(90deg) scale(1.1); }
+}
+
+@keyframes geo-float-4 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-30px, -20px) rotate(90deg); }
+  50% { transform: translate(10px, -50px) rotate(180deg); }
+  75% { transform: translate(30px, -10px) rotate(270deg); }
+}
+
+@keyframes geo-float-5 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-15px, -35px) scale(0.9); }
+}
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -16; }
 }
 
 @keyframes accordion-down {
@@ -50,19 +100,19 @@
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 142.1 76.2% 56.3%;
+  --primary: 217.2 91.2% 59.8%;
   --primary-foreground: 0 0% 100%;
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 142.1 76.2% 56.3%;
+  --accent: 217.2 91.2% 59.8%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 100%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 142.1 76.2% 56.3%;
+  --ring: 217.2 91.2% 59.8%;
   --radius: 0.5rem;
 }
 
@@ -73,19 +123,19 @@
   --card-foreground: 0 0% 98%;
   --popover: 240 10% 3.9%;
   --popover-foreground: 0 0% 98%;
-  --primary: 142.1 69.2% 67.8%;
+  --primary: 213.1 93.9% 67.8%;
   --primary-foreground: 0 0% 0%;
   --secondary: 240 3.7% 15.9%;
   --secondary-foreground: 0 0% 98%;
   --muted: 240 3.7% 15.9%;
   --muted-foreground: 240 5% 64.9%;
-  --accent: 142.1 69.2% 67.8%;
+  --accent: 213.1 93.9% 67.8%;
   --accent-foreground: 0 0% 0%;
   --destructive: 0 72.2% 70.6%;
   --destructive-foreground: 0 0% 100%;
   --border: 240 3.7% 27.5%;
   --input: 240 3.7% 27.5%;
-  --ring: 142.1 69.2% 67.8%;
+  --ring: 213.1 93.9% 67.8%;
 }
 
 @layer base {
@@ -94,5 +144,13 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

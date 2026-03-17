@@ -1,10 +1,20 @@
 import { Link } from "react-router-dom";
 import { RocketLaunch } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { useInView } from "@/lib/useInView";
+import { cn } from "@/lib/utils";
 
 export function TutorialCTA() {
+  const { ref, inView } = useInView();
+
   return (
-    <section className="rounded-xl border border-border bg-muted/30 px-8 py-12 text-center">
+    <section
+      ref={ref}
+      className={cn(
+        "rounded-xl border border-border bg-muted/30 px-8 py-12 text-center transition-all duration-700",
+        inView ? "animate-fade-in-up" : "opacity-0",
+      )}
+    >
       <RocketLaunch size={40} className="mx-auto text-primary" />
       <h2 className="mt-4 text-xl font-semibold text-foreground">
         はじめての Scoria
