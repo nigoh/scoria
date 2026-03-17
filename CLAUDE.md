@@ -8,15 +8,22 @@
 
 ## 技術スタック
 
+- **フレームワーク:** Vite + React
 - **言語:** TypeScript
-- **ランタイム:** Node.js
+- **UIライブラリ:** shadcn/ui（Radix UI ベース）
+- **スタイリング:** Tailwind CSS v4
+- **アイコン:** Phosphor Icons（@phosphor-icons/react）
 - **テスト:** Vitest
 - **リンター:** ESLint (flat config)
 - **フォーマッター:** Prettier
+- **デプロイ:** Cloudflare Pages
 
 ## よく使うコマンド
 
 ```bash
+# 開発サーバー
+npm run dev
+
 # ビルド
 npm run build
 
@@ -37,10 +44,22 @@ npm run typecheck
 ## ディレクトリ構成
 
 ```
-src/           # ソースコード (.ts)
-  index.ts     # エントリーポイント
-  *.test.ts    # テストファイル (ソースと同じディレクトリに配置)
-dist/          # ビルド出力 (git管理外)
+index.html            # Vite エントリーポイント
+public/               # 静的ファイル（_redirects, _headers）
+src/
+  main.tsx            # React エントリーポイント
+  App.tsx             # ルートコンポーネント
+  index.css           # グローバルCSS + デザイントークン
+  vite-env.d.ts       # Vite 型宣言
+  lib/
+    utils.ts          # cn() ユーティリティ
+    prompt.ts         # プロンプト生成ロジック
+    *.test.ts         # テストファイル
+  components/
+    ui/               # shadcn/ui コンポーネント
+    theme-provider.tsx
+    theme-toggle.tsx
+dist/                 # ビルド出力 (git管理外)
 ```
 
 ## コーディング規約
@@ -52,3 +71,4 @@ dist/          # ビルド出力 (git管理外)
 - 1行の最大幅は100文字
 - テストファイルはソースと同じディレクトリに `*.test.ts` として配置
 - `strict: true` の TypeScript 設定を使用
+- パスエイリアス `@/` で `src/` を参照

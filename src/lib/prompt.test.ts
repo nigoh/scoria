@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateSearchPrompt, ResearchInput } from "./index";
+import { generateSearchPrompt, ResearchInput } from "./prompt";
 
 describe("generateSearchPrompt", () => {
   it("研究テーマと目的からプロンプトを生成する", () => {

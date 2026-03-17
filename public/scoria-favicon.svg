@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&amp;display=swap');
+    </style>
+  </defs>
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#22c55e"/>
+  <!-- S -->
+  <text x="4" y="24" font-family="'Noto Sans JP', sans-serif" font-size="22" font-weight="700" fill="#ffffff">S</text>
+  <!-- Bold Pipe -->
+  <rect x="23" y="6" width="3" height="20" rx="1.5" fill="#ffffff" opacity="0.5"/>
+</svg>

@@ -1,0 +1,77 @@
+import {
+  FirstAid,
+  Monitor,
+  UsersThree,
+  Globe,
+} from "@phosphor-icons/react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+const useCases = [
+  {
+    icon: FirstAid,
+    title: "医学系",
+    subtitle: "PICOで先行研究を網羅的に探す",
+    description:
+      "PICO構造に基づいた系統的レビュー用プロンプトで、PubMed・Cochrane Libraryから網羅的に文献を収集します。",
+  },
+  {
+    icon: Monitor,
+    title: "情報科学",
+    subtitle: "最新のLLM論文をarXivから探す",
+    description:
+      "arXiv・ACM DL・IEEE Xploreを対象に、大規模言語モデルの最新動向を効率的にサーベイするプロンプトを生成します。",
+  },
+  {
+    icon: UsersThree,
+    title: "社会科学",
+    subtitle: "質的研究のフレームワーク比較",
+    description:
+      "SPIDER構造を活用し、JSTOR・SSRN・SAGE Journalsから質的研究のフレームワークを体系的に比較します。",
+  },
+  {
+    icon: Globe,
+    title: "学際的",
+    subtitle: "複数DBを横断した研究動向把握",
+    description:
+      "Google Scholar・Scopus・Web of Scienceを横断し、学際的な研究テーマのトレンドとギャップを発見します。",
+  },
+];
+
+export function UseCaseCards() {
+  return (
+    <section className="py-16">
+      <h2 className="mb-12 text-center text-2xl font-semibold text-foreground">
+        ユースケース
+      </h2>
+      <div className="grid gap-6 sm:grid-cols-2">
+        {useCases.map((uc) => (
+          <Card
+            key={uc.title}
+            className="transition-colors hover:bg-muted/50"
+          >
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <uc.icon size={22} />
+                </div>
+                <div>
+                  <CardTitle className="text-base">{uc.title}</CardTitle>
+                  <CardDescription>{uc.subtitle}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{uc.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
