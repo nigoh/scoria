@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { RocketLaunch } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { TutorialIllustration } from "@/components/illustrations/TutorialIllustration";
 import { useInView } from "@/lib/useInView";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,7 @@ export function TutorialCTA() {
         inView ? "animate-fade-in-up" : "opacity-0",
       )}
     >
-      <RocketLaunch size={40} className="mx-auto text-primary" />
+      <TutorialIllustration className="mx-auto h-40 w-auto" />
       <h2 className="mt-4 text-xl font-semibold text-foreground">
         はじめての Scoria
       </h2>

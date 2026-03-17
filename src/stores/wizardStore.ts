@@ -8,6 +8,8 @@ const initialFormData: WizardFormData = {
   field: null,
   keywords: [],
   purpose: "",
+  comparisonItems: ["", ""],
+  comparisonAxes: [""],
   conditions: {
     enabledDatabaseIds: [...ALL_DATABASE_IDS],
     outputLanguage: "ja",
@@ -26,6 +28,8 @@ interface WizardState {
   addKeyword: (value: string) => void;
   removeKeyword: (id: string) => void;
   setPurpose: (purpose: string) => void;
+  setComparisonItems: (items: string[]) => void;
+  setComparisonAxes: (axes: string[]) => void;
   setOutputLanguage: (lang: "ja" | "en") => void;
   setYearRange: (from: number | null, to: number | null) => void;
   toggleDatabase: (dbId: string) => void;
@@ -82,6 +86,16 @@ export const useWizardStore = create<WizardState>()((set) => ({
   setPurpose: (purpose) =>
     set((state) => ({
       formData: { ...state.formData, purpose },
+    })),
+
+  setComparisonItems: (items) =>
+    set((state) => ({
+      formData: { ...state.formData, comparisonItems: items },
+    })),
+
+  setComparisonAxes: (axes) =>
+    set((state) => ({
+      formData: { ...state.formData, comparisonAxes: axes },
     })),
 
   setOutputLanguage: (lang) =>

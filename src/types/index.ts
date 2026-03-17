@@ -32,6 +32,8 @@ export interface WizardFormData {
   field: string | null;
   keywords: Keyword[];
   purpose: string;
+  comparisonItems: string[];
+  comparisonAxes: string[];
   conditions: WizardConditions;
 }
 
@@ -39,10 +41,12 @@ export interface WizardFormData {
 
 export type PromptBlockType =
   | "role"
+  | "guardrails"
   | "context"
   | "task"
   | "format"
-  | "constraints";
+  | "constraints"
+  | "disclaimer";
 
 export interface PromptBlock {
   id: string;
@@ -54,6 +58,8 @@ export interface PromptBlock {
 
 export interface GeneratedPromptData {
   blocks: PromptBlock[];
+  systemPrompt: string;
+  userPrompt: string;
   fullText: string;
   generatedAt: string;
 }

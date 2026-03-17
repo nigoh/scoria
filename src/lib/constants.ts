@@ -99,11 +99,16 @@ export interface PromptBlockLabel {
 
 export const PROMPT_BLOCK_LABELS: PromptBlockLabel[] = [
   { type: "role", labelJa: "役割設定", labelEn: "Role" },
+  { type: "guardrails", labelJa: "品質ガードレール", labelEn: "Quality Guardrails" },
   { type: "context", labelJa: "研究コンテキスト", labelEn: "Context" },
   { type: "task", labelJa: "タスク指示", labelEn: "Task" },
   { type: "format", labelJa: "出力フォーマット", labelEn: "Format" },
   { type: "constraints", labelJa: "制約条件", labelEn: "Constraints" },
+  { type: "disclaimer", labelJa: "免責事項", labelEn: "Disclaimer" },
 ];
+
+export const SYSTEM_BLOCK_TYPES: PromptBlockType[] = ["role", "guardrails", "disclaimer"];
+export const USER_BLOCK_TYPES: PromptBlockType[] = ["context", "task", "format", "constraints"];
 
 export interface LLMModelInfo {
   id: string;

@@ -2,7 +2,11 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { arrayMove } from "@dnd-kit/sortable";
 import type { GeneratedPromptData } from "@/types";
-import { recomputeFullText } from "@/lib/prompt";
+import {
+  recomputeFullText,
+  recomputeSystemPrompt,
+  recomputeUserPrompt,
+} from "@/lib/prompt";
 
 interface PromptState {
   generatedPrompt: GeneratedPromptData | null;
@@ -38,6 +42,8 @@ export const usePromptStore = create<PromptState>()(
             generatedPrompt: {
               ...state.generatedPrompt,
               blocks: newBlocks,
+              systemPrompt: recomputeSystemPrompt(newBlocks),
+              userPrompt: recomputeUserPrompt(newBlocks),
               fullText: recomputeFullText(newBlocks),
             },
           };
@@ -53,6 +59,8 @@ export const usePromptStore = create<PromptState>()(
             generatedPrompt: {
               ...state.generatedPrompt,
               blocks: newBlocks,
+              systemPrompt: recomputeSystemPrompt(newBlocks),
+              userPrompt: recomputeUserPrompt(newBlocks),
               fullText: recomputeFullText(newBlocks),
             },
           };
@@ -68,6 +76,8 @@ export const usePromptStore = create<PromptState>()(
             generatedPrompt: {
               ...state.generatedPrompt,
               blocks: newBlocks,
+              systemPrompt: recomputeSystemPrompt(newBlocks),
+              userPrompt: recomputeUserPrompt(newBlocks),
               fullText: recomputeFullText(newBlocks),
             },
           };
