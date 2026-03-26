@@ -1,104 +1,82 @@
-// ─── 研究フェーズ（F-014） ───────────────────────────────────
+// ─── 拡張タイプ ──────────────────────────────────────────────
 
-export type ResearchPhase =
-  | "theme_setting"
-  | "prior_research"
-  | "hypothesis_building"
-  | "methodology_design";
+export type ExtensionType = "skill" | "agent" | "plugin";
 
-export interface ResearchField {
-  id: string;
+// ─── テンプレート ────────────────────────────────────────────
+
+export type TemplateId =
+  | "systematic_review"
+  | "meta_analysis"
+  | "citation_check"
+  | "methodology_advisor"
+  | "paper_structure"
+  | "search_strategy"
+  | "custom";
+
+export interface TemplateDefinition {
+  id: TemplateId;
   labelJa: string;
   labelEn: string;
+  descriptionJa: string;
+  supportedTypes: ExtensionType[];
 }
 
 // ─── ウィザード ──────────────────────────────────────────────
 
-export type WizardStep = 1 | 2 | 3 | 4 | 5;
+export type WizardStep = 1 | 2 | 3 | 4;
 
-export interface Keyword {
-  id: string;
-  value: string;
+export interface SkillConfig {
+  argumentHint: string;
+  allowedTools: string[];
+  model: ModelChoice;
+  userInvocable: boolean;
 }
 
-export interface WizardConditions {
-  enabledDatabaseIds: string[];
+export interface AgentConfig {
+  tools: string[];
+  model: ModelChoice;
+  maxTurns: number;
+  researchField: string | null;
+}
+
+export interface PluginConfig {
+  includeSkills: boolean;
+  includeAgents: boolean;
+  includeHooks: boolean;
+  includeClaudeMd: boolean;
+  includeMcp: boolean;
+}
+
+export type ModelChoice = "sonnet" | "opus" | "haiku" | "inherit";
+
+export interface ExtensionFormData {
+  extensionType: ExtensionType | null;
+  templateId: TemplateId | null;
+  name: string;
+  description: string;
   outputLanguage: "ja" | "en";
-  yearRange: { from: number | null; to: number | null };
+  skillConfig: SkillConfig;
+  agentConfig: AgentConfig;
+  pluginConfig: PluginConfig;
 }
 
-export interface WizardFormData {
-  phase: ResearchPhase | null;
-  field: string | null;
-  keywords: Keyword[];
-  purpose: string;
-  comparisonItems: string[];
-  comparisonAxes: string[];
-  conditions: WizardConditions;
+// ─── 生成ファイル ────────────────────────────────────────────
+
+export interface GeneratedFile {
+  path: string;
+  content: string;
+  language: string;
 }
 
-// ─── プロンプトブロック ──────────────────────────────────────
-
-export type PromptBlockType =
-  | "role"
-  | "guardrails"
-  | "context"
-  | "task"
-  | "format"
-  | "constraints"
-  | "disclaimer";
-
-export interface PromptBlock {
+export interface ContentBlock {
   id: string;
-  type: PromptBlockType;
-  labelJa: string;
+  label: string;
   content: string;
   enabled: boolean;
 }
 
-export interface GeneratedPromptData {
-  blocks: PromptBlock[];
-  systemPrompt: string;
-  userPrompt: string;
-  fullText: string;
+export interface GeneratedExtension {
+  files: GeneratedFile[];
+  blocks: ContentBlock[];
   generatedAt: string;
-}
-
-// ─── 学術 DB ─────────────────────────────────────────────────
-
-export type DatabaseCategory =
-  | "multidisciplinary_intl"
-  | "field_specific_intl"
-  | "tool"
-  | "domestic_jp"
-  | "patent";
-
-export interface AcademicDatabase {
-  id: string;
-  name: string;
-  category: DatabaseCategory;
-  field: string;
-  access: "free" | "paid" | "oa";
-  url: string;
-}
-
-// ─── LLM ─────────────────────────────────────────────────────
-
-export type LLMProvider = "anthropic" | "openai";
-
-export interface LLMProviderConfig {
-  provider: LLMProvider;
-  model: string;
-  encryptedApiKey: string | null;
-}
-
-export interface AppSettings {
-  activeProvider: LLMProvider;
-  providers: Record<LLMProvider, LLMProviderConfig>;
-  enabledDatabaseIds: string[];
-}
-
-export interface LLMMessage {
-  role: "user" | "assistant" | "system";
-  content: string;
 }

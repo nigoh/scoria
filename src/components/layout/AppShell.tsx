@@ -1,12 +1,11 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { Compass, GearSix } from "@phosphor-icons/react";
+import { Compass } from "@phosphor-icons/react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/builder", label: "ビルダー", icon: Compass },
-  { to: "/settings", label: "設定", icon: GearSix },
 ];
 
 function getResolvedTheme(theme: string): "light" | "dark" {

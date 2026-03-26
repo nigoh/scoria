@@ -1,14 +1,7 @@
 import { Check } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { WizardStep } from "@/types";
-
-const stepLabels: Record<WizardStep, string> = {
-  1: "研究フェーズ",
-  2: "研究分野",
-  3: "キーワード",
-  4: "研究目的",
-  5: "詳細条件",
-};
+import { WIZARD_STEP_LABELS } from "@/lib/constants";
 
 interface WizardProgressProps {
   currentStep: WizardStep;
@@ -17,7 +10,7 @@ interface WizardProgressProps {
 export function WizardProgress({ currentStep }: WizardProgressProps) {
   return (
     <div className="flex items-center gap-1">
-      {([1, 2, 3, 4, 5] as WizardStep[]).map((step, i) => {
+      {([1, 2, 3, 4] as WizardStep[]).map((step, i) => {
         const isCompleted = step < currentStep;
         const isCurrent = step === currentStep;
         return (
@@ -46,7 +39,7 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
                 isCurrent ? "font-medium text-foreground" : "text-muted-foreground",
               )}
             >
-              {stepLabels[step]}
+              {WIZARD_STEP_LABELS[step]}
             </span>
           </div>
         );

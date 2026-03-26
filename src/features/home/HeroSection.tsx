@@ -20,17 +20,17 @@ export function HeroSection() {
       >
         <div className="text-center md:text-left">
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
-            学術検索のプロンプトを、構造的につくる
+            学術研究を加速する Claude Code 拡張をつくる
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            研究テーマや目的を入力するだけで、学術検索や文献レビューに最適な
-            AIプロンプトを自動生成。あなたの研究フェーズに合わせた高品質なプロンプトで、
-            AIの力を最大限に引き出します。
+            系統的レビュー、メタ分析、引用チェックなど、学術研究に特化した
+            Claude Code のスキル・エージェント・プラグインをウィザード形式で簡単に作成。
+            ZIPでダウンロードしてすぐに使えます。
           </p>
           <div className="mt-10">
             <Button asChild size="lg" className="gap-2 text-base">
               <Link to="/builder">
-                プロンプトを作成する
+                拡張を作成する
                 <ArrowRight size={20} />
               </Link>
             </Button>

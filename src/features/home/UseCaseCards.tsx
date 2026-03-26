@@ -17,31 +17,31 @@ import { cn } from "@/lib/utils";
 const useCases = [
   {
     Illustration: MedicalIllustration,
-    title: "医学系",
-    subtitle: "PICOで先行研究を網羅的に探す",
+    title: "系統的文献レビュー",
+    subtitle: "/systematic-review スキル",
     description:
-      "PICO構造に基づいた系統的レビュー用プロンプトで、PubMed・Cochrane Libraryから網羅的に文献を収集します。",
+      "PRISMA 2020準拠のスキルを生成。PICO分解、検索戦略策定、スクリーニング基準設定を一貫してサポートします。",
   },
   {
     Illustration: CSIllustration,
-    title: "情報科学",
-    subtitle: "最新のLLM論文をarXivから探す",
+    title: "メタ分析支援",
+    subtitle: "meta-analysis-agent エージェント",
     description:
-      "arXiv・ACM DL・IEEE Xploreを対象に、大規模言語モデルの最新動向を効率的にサーベイするプロンプトを生成します。",
+      "効果量計算、異質性評価、分析コード生成を自律的に行うサブエージェントを作成します。",
   },
   {
     Illustration: SocialScienceIllustration,
-    title: "社会科学",
-    subtitle: "質的研究のフレームワーク比較",
+    title: "引用チェック",
+    subtitle: "/citation-check スキル",
     description:
-      "SPIDER構造を活用し、JSTOR・SSRN・SAGE Journalsから質的研究のフレームワークを体系的に比較します。",
+      "論文の引用整合性を検証し、参考文献リストの完全性・書式一貫性を自動チェックするスキルを生成します。",
   },
   {
     Illustration: InterdisciplinaryIllustration,
-    title: "学際的",
-    subtitle: "複数DBを横断した研究動向把握",
+    title: "プラグインパッケージ",
+    subtitle: "スキル + エージェント + CLAUDE.md",
     description:
-      "Google Scholar・Scopus・Web of Scienceを横断し、学際的な研究テーマのトレンドとギャップを発見します。",
+      "スキル・エージェント・フック・CLAUDE.mdを一括生成。研究プロジェクト全体をClaude Codeで加速します。",
   },
 ];
 

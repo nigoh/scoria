@@ -13,11 +13,7 @@ export const router = createBrowserRouter([
         path: "/builder",
         lazy: () => import("./builder/page"),
       },
-      {
-        path: "/settings",
-        lazy: () => import("./settings/page"),
-      },
-      {
+{
         path: "/privacy",
         lazy: () => import("./privacy/page"),
       },

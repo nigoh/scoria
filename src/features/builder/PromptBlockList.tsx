@@ -13,10 +13,11 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { PromptBlock } from "./PromptBlock";
-import { usePromptStore } from "@/stores/promptStore";
+import { useExtensionStore } from "@/stores/extensionStore";
 
 export function PromptBlockList() {
-  const { generatedPrompt, reorderBlocks, toggleBlock } = usePromptStore();
+  const { generatedExtension, reorderBlocks, toggleBlock, updateBlockContent } =
+    useExtensionStore();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -25,9 +26,9 @@ export function PromptBlockList() {
     }),
   );
 
-  if (!generatedPrompt) return null;
+  if (!generatedExtension) return null;
 
-  const blocks = generatedPrompt.blocks;
+  const blocks = generatedExtension.blocks;
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -52,6 +53,7 @@ export function PromptBlockList() {
               key={block.id}
               block={block}
               onToggle={() => toggleBlock(block.id)}
+              onContentChange={(content) => updateBlockContent(block.id, content)}
             />
           ))}
         </div>

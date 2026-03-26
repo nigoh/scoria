@@ -1,39 +1,59 @@
 import { create } from "zustand";
-import { nanoid } from "nanoid";
-import type { ResearchPhase, WizardStep, WizardFormData } from "@/types";
-import { ALL_DATABASE_IDS } from "@/lib/databases";
+import type {
+  ExtensionType,
+  TemplateId,
+  WizardStep,
+  ExtensionFormData,
+  ModelChoice,
+} from "@/types";
 
-const initialFormData: WizardFormData = {
-  phase: null,
-  field: null,
-  keywords: [],
-  purpose: "",
-  comparisonItems: ["", ""],
-  comparisonAxes: [""],
-  conditions: {
-    enabledDatabaseIds: [...ALL_DATABASE_IDS],
-    outputLanguage: "ja",
-    yearRange: { from: null, to: null },
+const initialFormData: ExtensionFormData = {
+  extensionType: null,
+  templateId: null,
+  name: "",
+  description: "",
+  outputLanguage: "ja",
+  skillConfig: {
+    argumentHint: "[研究テーマ]",
+    allowedTools: ["Read", "Grep", "Glob"],
+    model: "sonnet",
+    userInvocable: true,
+  },
+  agentConfig: {
+    tools: ["Read", "Edit", "Write", "Bash", "Grep", "Glob"],
+    model: "sonnet",
+    maxTurns: 30,
+    researchField: null,
+  },
+  pluginConfig: {
+    includeSkills: true,
+    includeAgents: true,
+    includeHooks: false,
+    includeClaudeMd: true,
+    includeMcp: false,
   },
 };
 
 interface WizardState {
   currentStep: WizardStep;
-  formData: WizardFormData;
+  formData: ExtensionFormData;
   setStep: (step: WizardStep) => void;
   nextStep: () => void;
   prevStep: () => void;
-  setPhase: (phase: ResearchPhase) => void;
-  setField: (field: string) => void;
-  addKeyword: (value: string) => void;
-  removeKeyword: (id: string) => void;
-  setPurpose: (purpose: string) => void;
-  setComparisonItems: (items: string[]) => void;
-  setComparisonAxes: (axes: string[]) => void;
+  setExtensionType: (type: ExtensionType) => void;
+  setTemplateId: (id: TemplateId) => void;
+  setName: (name: string) => void;
+  setDescription: (description: string) => void;
   setOutputLanguage: (lang: "ja" | "en") => void;
-  setYearRange: (from: number | null, to: number | null) => void;
-  toggleDatabase: (dbId: string) => void;
-  setAllDatabases: (ids: string[]) => void;
+  setSkillArgumentHint: (hint: string) => void;
+  setSkillAllowedTools: (tools: string[]) => void;
+  setSkillModel: (model: ModelChoice) => void;
+  setSkillUserInvocable: (v: boolean) => void;
+  setAgentTools: (tools: string[]) => void;
+  setAgentModel: (model: ModelChoice) => void;
+  setAgentMaxTurns: (turns: number) => void;
+  setAgentResearchField: (field: string | null) => void;
+  togglePluginComponent: (key: keyof ExtensionFormData["pluginConfig"]) => void;
   reset: () => void;
 }
 
@@ -45,7 +65,7 @@ export const useWizardStore = create<WizardState>()((set) => ({
 
   nextStep: () =>
     set((state) => ({
-      currentStep: Math.min(state.currentStep + 1, 5) as WizardStep,
+      currentStep: Math.min(state.currentStep + 1, 4) as WizardStep,
     })),
 
   prevStep: () =>
@@ -53,89 +73,103 @@ export const useWizardStore = create<WizardState>()((set) => ({
       currentStep: Math.max(state.currentStep - 1, 1) as WizardStep,
     })),
 
-  setPhase: (phase) =>
+  setExtensionType: (type) =>
     set((state) => ({
-      formData: { ...state.formData, phase },
+      formData: { ...state.formData, extensionType: type },
     })),
 
-  setField: (field) =>
+  setTemplateId: (id) =>
     set((state) => ({
-      formData: { ...state.formData, field },
+      formData: { ...state.formData, templateId: id },
     })),
 
-  addKeyword: (value) =>
-    set((state) => {
-      if (state.formData.keywords.length >= 10) return state;
-      if (state.formData.keywords.some((k) => k.value === value)) return state;
-      return {
-        formData: {
-          ...state.formData,
-          keywords: [...state.formData.keywords, { id: nanoid(), value }],
-        },
-      };
-    }),
-
-  removeKeyword: (id) =>
+  setName: (name) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
-        keywords: state.formData.keywords.filter((k) => k.id !== id),
-      },
+      formData: { ...state.formData, name },
     })),
 
-  setPurpose: (purpose) =>
+  setDescription: (description) =>
     set((state) => ({
-      formData: { ...state.formData, purpose },
-    })),
-
-  setComparisonItems: (items) =>
-    set((state) => ({
-      formData: { ...state.formData, comparisonItems: items },
-    })),
-
-  setComparisonAxes: (axes) =>
-    set((state) => ({
-      formData: { ...state.formData, comparisonAxes: axes },
+      formData: { ...state.formData, description },
     })),
 
   setOutputLanguage: (lang) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
-        conditions: { ...state.formData.conditions, outputLanguage: lang },
-      },
+      formData: { ...state.formData, outputLanguage: lang },
     })),
 
-  setYearRange: (from, to) =>
+  setSkillArgumentHint: (hint) =>
     set((state) => ({
       formData: {
         ...state.formData,
-        conditions: {
-          ...state.formData.conditions,
-          yearRange: { from, to },
-        },
+        skillConfig: { ...state.formData.skillConfig, argumentHint: hint },
       },
     })),
 
-  toggleDatabase: (dbId) =>
-    set((state) => {
-      const ids = state.formData.conditions.enabledDatabaseIds;
-      const next = ids.includes(dbId)
-        ? ids.filter((id) => id !== dbId)
-        : [...ids, dbId];
-      return {
-        formData: {
-          ...state.formData,
-          conditions: { ...state.formData.conditions, enabledDatabaseIds: next },
-        },
-      };
-    }),
-
-  setAllDatabases: (ids) =>
+  setSkillAllowedTools: (tools) =>
     set((state) => ({
       formData: {
         ...state.formData,
-        conditions: { ...state.formData.conditions, enabledDatabaseIds: ids },
+        skillConfig: { ...state.formData.skillConfig, allowedTools: tools },
+      },
+    })),
+
+  setSkillModel: (model) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        skillConfig: { ...state.formData.skillConfig, model },
+      },
+    })),
+
+  setSkillUserInvocable: (v) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        skillConfig: { ...state.formData.skillConfig, userInvocable: v },
+      },
+    })),
+
+  setAgentTools: (tools) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        agentConfig: { ...state.formData.agentConfig, tools },
+      },
+    })),
+
+  setAgentModel: (model) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        agentConfig: { ...state.formData.agentConfig, model },
+      },
+    })),
+
+  setAgentMaxTurns: (turns) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        agentConfig: { ...state.formData.agentConfig, maxTurns: turns },
+      },
+    })),
+
+  setAgentResearchField: (field) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        agentConfig: { ...state.formData.agentConfig, researchField: field },
+      },
+    })),
+
+  togglePluginComponent: (key) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        pluginConfig: {
+          ...state.formData.pluginConfig,
+          [key]: !state.formData.pluginConfig[key],
+        },
       },
     })),
 

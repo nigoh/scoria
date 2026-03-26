@@ -2,7 +2,7 @@
   "name": "scoria",
   "version": "1.0.0",
   "private": true,
-  "description": "研究テーマや目的を入力すると、学術検索や文献レビューに最適なAIプロンプトを自動生成するツール",
+  "description": "学術研究に特化したClaude Codeのスキル・エージェント・プラグインを自動生成するツール",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -46,6 +46,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "jszip": "^3.10.1",
     "nanoid": "^5.1.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
