@@ -121,6 +121,103 @@ export const EFFORT_OPTIONS = [
 
 export const AGENT_TYPES = ["general-purpose", "Explore", "Plan"] as const;
 
+// ─── フックイベント ─────────────────────────────────────────
+
+export const HOOK_EVENTS = [
+  "SessionStart",
+  "SessionEnd",
+  "UserPromptSubmit",
+  "Stop",
+  "PreToolUse",
+  "PostToolUse",
+  "PostToolUseFailure",
+  "SubagentStart",
+  "SubagentStop",
+  "FileChanged",
+  "CwdChanged",
+  "PreCompact",
+  "PostCompact",
+] as const;
+
+export const HOOK_TYPES = ["command", "http", "prompt", "agent"] as const;
+
+export interface HookPreset {
+  labelJa: string;
+  labelEn: string;
+  event: string;
+  matcher: string;
+  hookType: "command" | "http" | "prompt" | "agent";
+  command: string;
+}
+
+export const HOOK_PRESETS: HookPreset[] = [
+  {
+    labelJa: "ファイル変更時バリデーション",
+    labelEn: "Validate on file change",
+    event: "PostToolUse",
+    matcher: "Edit|Write",
+    hookType: "command",
+    command: "./scripts/validate.sh",
+  },
+  {
+    labelJa: "セッション開始セットアップ",
+    labelEn: "Setup on session start",
+    event: "SessionStart",
+    matcher: "*",
+    hookType: "command",
+    command: "./scripts/setup.sh",
+  },
+  {
+    labelJa: "Bash コマンド監査",
+    labelEn: "Audit Bash commands",
+    event: "PreToolUse",
+    matcher: "Bash",
+    hookType: "command",
+    command: "echo \"Bash command intercepted\"",
+  },
+];
+
+// ─── MCP テンプレート ───────────────────────────────────────
+
+export interface McpTemplate {
+  labelJa: string;
+  labelEn: string;
+  name: string;
+  command: string;
+  args: string;
+}
+
+export const MCP_TEMPLATES: McpTemplate[] = [
+  {
+    labelJa: "PubMed API",
+    labelEn: "PubMed API",
+    name: "pubmed-api",
+    command: "npx",
+    args: "@anthropic/mcp-pubmed",
+  },
+  {
+    labelJa: "Semantic Scholar",
+    labelEn: "Semantic Scholar",
+    name: "semantic-scholar",
+    command: "npx",
+    args: "@anthropic/mcp-semantic-scholar",
+  },
+  {
+    labelJa: "ファイルシステム",
+    labelEn: "Filesystem",
+    name: "filesystem",
+    command: "npx",
+    args: "@modelcontextprotocol/server-filesystem /path/to/dir",
+  },
+  {
+    labelJa: "カスタム",
+    labelEn: "Custom",
+    name: "my-server",
+    command: "",
+    args: "",
+  },
+];
+
 // ─── モデル選択肢 ───────────────────────────────────────────
 
 export interface ModelOption {

@@ -241,26 +241,49 @@ function buildPluginFiles(
   }
 
   if (pluginConfig.includeHooks) {
-    const hooks = {
-      hooks: {
-        PostToolUse: [
-          {
-            matcher: "Edit|Write",
-            hooks: [
-              {
-                type: "command",
-                command: `echo "File modified by ${name} plugin"`,
-              },
-            ],
-          },
-        ],
-      },
-    };
-    files.push({
-      path: "hooks/hooks.json",
-      content: JSON.stringify(hooks, null, 2) + "\n",
-      language: "json",
-    });
+    const { hookEntries } = formData;
+    if (hookEntries.length > 0) {
+      const hooksObj: Record<string, Array<{ matcher: string; hooks: unknown[] }>> = {};
+      for (const entry of hookEntries) {
+        if (!hooksObj[entry.event]) hooksObj[entry.event] = [];
+
+        const hookDef: Record<string, unknown> = { type: entry.hookType };
+        if (entry.hookType === "command") hookDef.command = entry.command;
+        if (entry.hookType === "http") hookDef.url = entry.url;
+        if (entry.hookType === "prompt" || entry.hookType === "agent") {
+          hookDef.prompt = entry.prompt;
+        }
+        if (entry.timeout !== 10000) hookDef.timeout = entry.timeout;
+
+        const existing = hooksObj[entry.event].find((g) => g.matcher === entry.matcher);
+        if (existing) {
+          existing.hooks.push(hookDef);
+        } else {
+          hooksObj[entry.event].push({ matcher: entry.matcher, hooks: [hookDef] });
+        }
+      }
+      files.push({
+        path: "hooks/hooks.json",
+        content: JSON.stringify({ hooks: hooksObj }, null, 2) + "\n",
+        language: "json",
+      });
+    } else {
+      const defaultHooks = {
+        hooks: {
+          PostToolUse: [
+            {
+              matcher: "Edit|Write",
+              hooks: [{ type: "command", command: `echo "File modified by ${name} plugin"` }],
+            },
+          ],
+        },
+      };
+      files.push({
+        path: "hooks/hooks.json",
+        content: JSON.stringify(defaultHooks, null, 2) + "\n",
+        language: "json",
+      });
+    }
   }
 
   if (pluginConfig.includeClaudeMd) {
@@ -274,12 +297,28 @@ function buildPluginFiles(
   }
 
   if (pluginConfig.includeMcp) {
-    const mcp = {
-      mcpServers: {},
-    };
+    const { mcpEntries } = formData;
+    const mcpServers: Record<string, unknown> = {};
+    if (mcpEntries.length > 0) {
+      for (const entry of mcpEntries) {
+        const server: Record<string, unknown> = {
+          command: entry.command,
+          args: entry.args.split(/\s+/).filter(Boolean),
+        };
+        if (entry.env) {
+          const env: Record<string, string> = {};
+          for (const line of entry.env.split("\n")) {
+            const idx = line.indexOf("=");
+            if (idx > 0) env[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+          }
+          server.env = env;
+        }
+        mcpServers[entry.name] = server;
+      }
+    }
     files.push({
       path: ".mcp.json",
-      content: JSON.stringify(mcp, null, 2) + "\n",
+      content: JSON.stringify({ mcpServers }, null, 2) + "\n",
       language: "json",
     });
   }

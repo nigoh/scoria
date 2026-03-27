@@ -75,6 +75,33 @@ export interface ExtensionFormData {
   skillConfig: SkillConfig;
   agentConfig: AgentConfig;
   pluginConfig: PluginConfig;
+  hookEntries: HookEntry[];
+  mcpEntries: McpServerEntry[];
+}
+
+// ─── フック ──────────────────────────────────────────────────
+
+export type HookType = "command" | "http" | "prompt" | "agent";
+
+export interface HookEntry {
+  id: string;
+  event: string;
+  matcher: string;
+  hookType: HookType;
+  command: string;
+  url: string;
+  prompt: string;
+  timeout: number;
+}
+
+// ─── MCP サーバー ────────────────────────────────────────────
+
+export interface McpServerEntry {
+  id: string;
+  name: string;
+  command: string;
+  args: string;
+  env: string;
 }
 
 // ─── 生成ファイル ────────────────────────────────────────────

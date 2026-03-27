@@ -17,6 +17,8 @@ import {
   EFFORT_OPTIONS,
   AGENT_TYPES,
 } from "@/lib/constants";
+import { HooksEditor } from "../HooksEditor";
+import { McpEditor } from "../McpEditor";
 import type { ModelChoice, EffortLevel } from "@/types";
 
 export function Step3Config() {
@@ -598,6 +600,18 @@ function PluginConfig() {
             />
             <p className="mt-1 text-xs text-muted-foreground">カンマ区切り</p>
           </div>
+        </div>
+      )}
+
+      {pluginConfig.includeHooks && (
+        <div className="rounded-lg border border-dashed p-3">
+          <HooksEditor />
+        </div>
+      )}
+
+      {pluginConfig.includeMcp && (
+        <div className="rounded-lg border border-dashed p-3">
+          <McpEditor />
         </div>
       )}
     </div>

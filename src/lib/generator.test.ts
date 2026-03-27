@@ -42,6 +42,8 @@ const baseFormData: ExtensionFormData = {
     pluginAuthor: "",
     pluginKeywords: "",
   },
+  hookEntries: [],
+  mcpEntries: [],
 };
 
 describe("generateExtension", () => {
@@ -298,6 +300,93 @@ describe("generateExtension (English)", () => {
 
     const claudeFile = result.files.find((f) => f.path === "CLAUDE.md");
     expect(claudeFile?.content).toBeTruthy();
+  });
+});
+
+describe("hooks/MCP dynamic generation", () => {
+  it("hookEntriesからhooks.jsonを動的生成する", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "plugin",
+      templateId: "citation_check",
+      name: "test-plugin",
+      description: "test",
+      pluginConfig: {
+        ...baseFormData.pluginConfig,
+        includeHooks: true,
+        includePluginJson: false,
+        includeReadme: false,
+      },
+      hookEntries: [
+        {
+          id: "h1",
+          event: "PreToolUse",
+          matcher: "Bash",
+          hookType: "command",
+          command: "./audit.sh",
+          url: "",
+          prompt: "",
+          timeout: 5000,
+        },
+        {
+          id: "h2",
+          event: "PreToolUse",
+          matcher: "Bash",
+          hookType: "http",
+          command: "",
+          url: "https://example.com/hook",
+          prompt: "",
+          timeout: 10000,
+        },
+      ],
+    };
+
+    const result = generateExtension(formData);
+    const hooksFile = result.files.find((f) => f.path === "hooks/hooks.json");
+    expect(hooksFile).toBeTruthy();
+
+    const parsed = JSON.parse(hooksFile!.content);
+    expect(parsed.hooks.PreToolUse).toHaveLength(1);
+    expect(parsed.hooks.PreToolUse[0].matcher).toBe("Bash");
+    expect(parsed.hooks.PreToolUse[0].hooks).toHaveLength(2);
+    expect(parsed.hooks.PreToolUse[0].hooks[0].type).toBe("command");
+    expect(parsed.hooks.PreToolUse[0].hooks[0].timeout).toBe(5000);
+    expect(parsed.hooks.PreToolUse[0].hooks[1].type).toBe("http");
+  });
+
+  it("mcpEntriesから.mcp.jsonを動的生成する", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "plugin",
+      templateId: "citation_check",
+      name: "test-plugin",
+      description: "test",
+      pluginConfig: {
+        ...baseFormData.pluginConfig,
+        includeMcp: true,
+        includePluginJson: false,
+        includeReadme: false,
+      },
+      mcpEntries: [
+        {
+          id: "m1",
+          name: "pubmed",
+          command: "npx",
+          args: "@anthropic/mcp-pubmed",
+          env: "API_KEY=abc123\nBASE_URL=https://api.example.com",
+        },
+      ],
+    };
+
+    const result = generateExtension(formData);
+    const mcpFile = result.files.find((f) => f.path === ".mcp.json");
+    expect(mcpFile).toBeTruthy();
+
+    const parsed = JSON.parse(mcpFile!.content);
+    expect(parsed.mcpServers.pubmed.command).toBe("npx");
+    expect(parsed.mcpServers.pubmed.args).toEqual(["@anthropic/mcp-pubmed"]);
+    expect(parsed.mcpServers.pubmed.env.API_KEY).toBe("abc123");
+    expect(parsed.mcpServers.pubmed.env.BASE_URL).toBe("https://api.example.com");
   });
 });
 

@@ -7,6 +7,8 @@ import type {
   ModelChoice,
   EffortLevel,
   PluginConfig,
+  HookEntry,
+  McpServerEntry,
 } from "@/types";
 
 type BooleanPluginKey = {
@@ -53,6 +55,8 @@ const initialFormData: ExtensionFormData = {
     pluginAuthor: "",
     pluginKeywords: "",
   },
+  hookEntries: [],
+  mcpEntries: [],
 };
 
 interface WizardState {
@@ -88,6 +92,8 @@ interface WizardState {
   setPluginVersion: (version: string) => void;
   setPluginAuthor: (author: string) => void;
   setPluginKeywords: (keywords: string) => void;
+  setHookEntries: (entries: HookEntry[]) => void;
+  setMcpEntries: (entries: McpServerEntry[]) => void;
   setFormData: (data: ExtensionFormData) => void;
   reset: () => void;
 }
@@ -310,6 +316,16 @@ export const useWizardStore = create<WizardState>()((set) => ({
         ...state.formData,
         pluginConfig: { ...state.formData.pluginConfig, pluginKeywords: keywords },
       },
+    })),
+
+  setHookEntries: (entries) =>
+    set((state) => ({
+      formData: { ...state.formData, hookEntries: entries },
+    })),
+
+  setMcpEntries: (entries) =>
+    set((state) => ({
+      formData: { ...state.formData, mcpEntries: entries },
     })),
 
   setFormData: (data) => set({ formData: { ...data } }),
