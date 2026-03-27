@@ -6,7 +6,12 @@ import type {
   ExtensionFormData,
   ModelChoice,
   EffortLevel,
+  PluginConfig,
 } from "@/types";
+
+type BooleanPluginKey = {
+  [K in keyof PluginConfig]: PluginConfig[K] extends boolean ? K : never;
+}[keyof PluginConfig];
 
 const initialFormData: ExtensionFormData = {
   extensionType: null,
@@ -42,6 +47,11 @@ const initialFormData: ExtensionFormData = {
     includeHooks: false,
     includeClaudeMd: true,
     includeMcp: false,
+    includePluginJson: true,
+    includeReadme: true,
+    pluginVersion: "1.0.0",
+    pluginAuthor: "",
+    pluginKeywords: "",
   },
 };
 
@@ -74,7 +84,10 @@ interface WizardState {
   setAgentDisallowedTools: (tools: string[]) => void;
   setAgentSkills: (skills: string) => void;
   setAgentIsolation: (isolation: "none" | "worktree") => void;
-  togglePluginComponent: (key: keyof ExtensionFormData["pluginConfig"]) => void;
+  togglePluginComponent: (key: BooleanPluginKey) => void;
+  setPluginVersion: (version: string) => void;
+  setPluginAuthor: (author: string) => void;
+  setPluginKeywords: (keywords: string) => void;
   setFormData: (data: ExtensionFormData) => void;
   reset: () => void;
 }
@@ -272,6 +285,30 @@ export const useWizardStore = create<WizardState>()((set) => ({
           ...state.formData.pluginConfig,
           [key]: !state.formData.pluginConfig[key],
         },
+      },
+    })),
+
+  setPluginVersion: (version) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        pluginConfig: { ...state.formData.pluginConfig, pluginVersion: version },
+      },
+    })),
+
+  setPluginAuthor: (author) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        pluginConfig: { ...state.formData.pluginConfig, pluginAuthor: author },
+      },
+    })),
+
+  setPluginKeywords: (keywords) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        pluginConfig: { ...state.formData.pluginConfig, pluginKeywords: keywords },
       },
     })),
 

@@ -36,6 +36,11 @@ const baseFormData: ExtensionFormData = {
     includeHooks: false,
     includeClaudeMd: true,
     includeMcp: false,
+    includePluginJson: true,
+    includeReadme: true,
+    pluginVersion: "1.0.0",
+    pluginAuthor: "",
+    pluginKeywords: "",
   },
 };
 
@@ -85,6 +90,7 @@ describe("generateExtension", () => {
       name: "citation-check",
       description: "引用チェックプラグイン",
       pluginConfig: {
+        ...baseFormData.pluginConfig,
         includeSkills: true,
         includeAgents: true,
         includeHooks: true,
@@ -101,6 +107,57 @@ describe("generateExtension", () => {
     expect(paths).toContain("hooks/hooks.json");
     expect(paths).toContain("CLAUDE.md");
     expect(paths).not.toContain(".mcp.json");
+    expect(paths).toContain("plugin.json");
+    expect(paths).toContain("README.md");
+  });
+
+  it("plugin.jsonにメタデータが含まれる", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "plugin",
+      templateId: "citation_check",
+      name: "citation-check",
+      description: "引用チェックプラグイン",
+      pluginConfig: {
+        ...baseFormData.pluginConfig,
+        includePluginJson: true,
+        pluginVersion: "2.0.0",
+        pluginAuthor: "Test Author",
+        pluginKeywords: "academic, citation",
+      },
+    };
+
+    const result = generateExtension(formData);
+    const pluginFile = result.files.find((f) => f.path === "plugin.json");
+    expect(pluginFile).toBeTruthy();
+
+    const parsed = JSON.parse(pluginFile!.content);
+    expect(parsed.name).toBe("citation-check");
+    expect(parsed.version).toBe("2.0.0");
+    expect(parsed.author.name).toBe("Test Author");
+    expect(parsed.keywords).toEqual(["academic", "citation"]);
+    expect(parsed.skills).toBe("./skills/");
+  });
+
+  it("README.mdが生成される", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "plugin",
+      templateId: "citation_check",
+      name: "citation-check",
+      description: "引用チェックプラグイン",
+      pluginConfig: {
+        ...baseFormData.pluginConfig,
+        includeReadme: true,
+      },
+    };
+
+    const result = generateExtension(formData);
+    const readme = result.files.find((f) => f.path === "README.md");
+    expect(readme).toBeTruthy();
+    expect(readme!.content).toContain("# citation-check");
+    expect(readme!.content).toContain("引用チェックプラグイン");
+    expect(readme!.content).toContain("claude plugin install");
   });
 
   it("拡張タイプ未選択の場合はエラーを投げる", () => {
@@ -225,6 +282,7 @@ describe("generateExtension (English)", () => {
       description: "Citation check plugin",
       outputLanguage: "en",
       pluginConfig: {
+        ...baseFormData.pluginConfig,
         includeSkills: true,
         includeAgents: true,
         includeHooks: false,

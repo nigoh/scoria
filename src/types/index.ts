@@ -57,6 +57,11 @@ export interface PluginConfig {
   includeHooks: boolean;
   includeClaudeMd: boolean;
   includeMcp: boolean;
+  includePluginJson: boolean;
+  includeReadme: boolean;
+  pluginVersion: string;
+  pluginAuthor: string;
+  pluginKeywords: string;
 }
 
 export type ModelChoice = "sonnet" | "opus" | "haiku" | "inherit";

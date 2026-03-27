@@ -284,5 +284,61 @@ function buildPluginFiles(
     });
   }
 
+  if (pluginConfig.includePluginJson) {
+    const pluginJson: Record<string, unknown> = {
+      name,
+      version: pluginConfig.pluginVersion || "1.0.0",
+      description,
+    };
+    if (pluginConfig.pluginAuthor) {
+      pluginJson.author = { name: pluginConfig.pluginAuthor };
+    }
+    if (pluginConfig.pluginKeywords) {
+      pluginJson.keywords = pluginConfig.pluginKeywords
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean);
+    }
+    if (pluginConfig.includeSkills) pluginJson.skills = "./skills/";
+    if (pluginConfig.includeAgents) pluginJson.agents = "./agents/";
+    if (pluginConfig.includeHooks) pluginJson.hooks = "./hooks/hooks.json";
+    if (pluginConfig.includeMcp) pluginJson.mcpServers = "./.mcp.json";
+
+    files.push({
+      path: "plugin.json",
+      content: JSON.stringify(pluginJson, null, 2) + "\n",
+      language: "json",
+    });
+  }
+
+  if (pluginConfig.includeReadme) {
+    const isEn = formData.outputLanguage === "en";
+    const sections: string[] = [`# ${name}`, "", description, ""];
+
+    sections.push(isEn ? "## Installation" : "## インストール");
+    sections.push("```bash");
+    sections.push(`claude plugin install ./${name}`);
+    sections.push("```", "");
+
+    sections.push(isEn ? "## Components" : "## コンポーネント");
+    if (pluginConfig.includeSkills) sections.push(`- Skills: \`skills/\``);
+    if (pluginConfig.includeAgents) sections.push(`- Agents: \`agents/\``);
+    if (pluginConfig.includeHooks) sections.push(`- Hooks: \`hooks/\``);
+    if (pluginConfig.includeClaudeMd) sections.push(`- CLAUDE.md`);
+    if (pluginConfig.includeMcp) sections.push(`- MCP: \`.mcp.json\``);
+    sections.push("");
+
+    sections.push(isEn ? "## Usage" : "## 使い方");
+    sections.push("```");
+    sections.push(`/${name} ${formData.skillConfig.argumentHint || "[arguments]"}`);
+    sections.push("```", "");
+
+    files.push({
+      path: "README.md",
+      content: sections.join("\n"),
+      language: "markdown",
+    });
+  }
+
   return files;
 }

@@ -492,11 +492,23 @@ function AgentAdvancedConfig() {
 
 // ─── プラグイン設定 ─────────────────────────────────────────
 
+type BooleanPluginKeys = {
+  [K in keyof import("@/types").PluginConfig]: import("@/types").PluginConfig[K] extends boolean
+    ? K
+    : never;
+}[keyof import("@/types").PluginConfig];
+
 function PluginConfig() {
-  const { formData, togglePluginComponent } = useWizardStore();
+  const {
+    formData,
+    togglePluginComponent,
+    setPluginVersion,
+    setPluginAuthor,
+    setPluginKeywords,
+  } = useWizardStore();
   const { pluginConfig } = formData;
 
-  const components: { key: keyof typeof pluginConfig; label: string; desc: string }[] = [
+  const components: { key: BooleanPluginKeys; label: string; desc: string }[] = [
     {
       key: "includeSkills",
       label: "スキル（SKILL.md）",
@@ -522,6 +534,16 @@ function PluginConfig() {
       label: "MCP設定（.mcp.json）",
       desc: "外部ツール連携の設定",
     },
+    {
+      key: "includePluginJson",
+      label: "plugin.json",
+      desc: "プラグインのマニフェストファイル",
+    },
+    {
+      key: "includeReadme",
+      label: "README.md",
+      desc: "プラグインの説明・使い方ドキュメント",
+    },
   ];
 
   return (
@@ -536,11 +558,48 @@ function PluginConfig() {
             <div className="text-xs text-muted-foreground">{desc}</div>
           </div>
           <Switch
-            checked={pluginConfig[key]}
+            checked={pluginConfig[key] as boolean}
             onCheckedChange={() => togglePluginComponent(key)}
           />
         </div>
       ))}
+
+      {pluginConfig.includePluginJson && (
+        <div className="space-y-3 rounded-lg border border-dashed p-3">
+          <p className="text-xs font-medium text-muted-foreground">plugin.json メタデータ</p>
+          <div>
+            <Label htmlFor="plugin-version">バージョン</Label>
+            <Input
+              id="plugin-version"
+              value={pluginConfig.pluginVersion}
+              onChange={(e) => setPluginVersion(e.target.value)}
+              placeholder="1.0.0"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="plugin-author">作成者</Label>
+            <Input
+              id="plugin-author"
+              value={pluginConfig.pluginAuthor}
+              onChange={(e) => setPluginAuthor(e.target.value)}
+              placeholder="Your Name"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="plugin-keywords">キーワード</Label>
+            <Input
+              id="plugin-keywords"
+              value={pluginConfig.pluginKeywords}
+              onChange={(e) => setPluginKeywords(e.target.value)}
+              placeholder="academic, research, review"
+              className="mt-1"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">カンマ区切り</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
