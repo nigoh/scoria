@@ -1,19 +1,34 @@
 import { useState } from "react";
+import { FloppyDisk, Check } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { EmptyStateIllustration } from "@/components/illustrations/EmptyStateIllustration";
 import { CopyButton } from "./CopyButton";
 import { DownloadButton } from "./DownloadButton";
+import { CliDialog } from "./CliDialog";
 import { FileTreeView } from "./FileTreeView";
 import { FilePreview } from "./FilePreview";
 import { PromptBlockList } from "./PromptBlockList";
 import { useExtensionStore } from "@/stores/extensionStore";
+import { useWizardStore } from "@/stores/wizardStore";
+import { useHistoryStore } from "@/stores/historyStore";
 
 type PreviewTab = "files" | "preview" | "blocks";
 
 export function PreviewPanel() {
   const { generatedExtension, selectedFilePath } = useExtensionStore();
+  const { formData } = useWizardStore();
+  const { saveEntry } = useHistoryStore();
   const [activeTab, setActiveTab] = useState<PreviewTab>("files");
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    if (!generatedExtension) return;
+    saveEntry(formData, generatedExtension.blocks, generatedExtension.generatedAt);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   const copyText = (() => {
     if (!generatedExtension) return "";
@@ -73,6 +88,17 @@ export function PreviewPanel() {
 
       <div className="flex items-center gap-2 border-t border-border px-4 py-3">
         <CopyButton text={copyText} />
+        <CliDialog />
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          disabled={!generatedExtension}
+          onClick={handleSave}
+        >
+          {saved ? <Check size={14} /> : <FloppyDisk size={14} />}
+          {saved ? "保存済み" : "保存"}
+        </Button>
         <DownloadButton />
       </div>
     </div>

@@ -114,6 +114,51 @@ describe("generateExtension", () => {
   });
 });
 
+describe("generateExtension (English)", () => {
+  it("英語出力の場合、英語テンプレートが使用される", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "skill",
+      templateId: "systematic_review",
+      name: "systematic-review",
+      description: "Conduct PRISMA-compliant reviews",
+      outputLanguage: "en",
+    };
+
+    const result = generateExtension(formData);
+
+    expect(result.files[0].content).toContain("name: systematic-review");
+    expect(result.blocks[0].label).toBe("Role Definition");
+    expect(result.blocks[0].content).toContain("PRISMA 2020");
+  });
+
+  it("英語プラグインのラベルマッチングが動作する", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "plugin",
+      templateId: "citation_check",
+      name: "citation-check",
+      description: "Citation check plugin",
+      outputLanguage: "en",
+      pluginConfig: {
+        includeSkills: true,
+        includeAgents: true,
+        includeHooks: false,
+        includeClaudeMd: true,
+        includeMcp: false,
+      },
+    };
+
+    const result = generateExtension(formData);
+
+    const skillFile = result.files.find((f) => f.path.includes("SKILL.md"));
+    expect(skillFile?.content).toContain("citation");
+
+    const claudeFile = result.files.find((f) => f.path === "CLAUDE.md");
+    expect(claudeFile?.content).toBeTruthy();
+  });
+});
+
 describe("regenerateFiles", () => {
   it("ブロック内容の変更がファイルに反映される", () => {
     const formData: ExtensionFormData = {

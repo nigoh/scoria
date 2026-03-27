@@ -5,7 +5,11 @@ import type {
   GeneratedFile,
   ContentBlock,
 } from "@/types";
-import { TEMPLATE_CONTENTS } from "./templates";
+import { TEMPLATE_CONTENTS, TEMPLATE_CONTENTS_EN } from "./templates";
+
+function getTemplateMap(lang: "ja" | "en") {
+  return lang === "en" ? TEMPLATE_CONTENTS_EN : TEMPLATE_CONTENTS;
+}
 
 export function generateExtension(formData: ExtensionFormData): GeneratedExtension {
   const { extensionType, templateId } = formData;
@@ -13,7 +17,8 @@ export function generateExtension(formData: ExtensionFormData): GeneratedExtensi
     throw new Error("拡張タイプとテンプレートを選択してください");
   }
 
-  const template = TEMPLATE_CONTENTS[templateId][extensionType];
+  const templateMap = getTemplateMap(formData.outputLanguage);
+  const template = templateMap[templateId][extensionType];
   const name = formData.name || template.defaultName;
   const description = formData.description || template.defaultDescription;
 
@@ -40,7 +45,8 @@ export function regenerateFiles(
   const { extensionType, templateId } = formData;
   if (!extensionType || !templateId) return [];
 
-  const template = TEMPLATE_CONTENTS[templateId][extensionType];
+  const templateMap = getTemplateMap(formData.outputLanguage);
+  const template = templateMap[templateId][extensionType];
   const name = formData.name || template.defaultName;
   const description = formData.description || template.defaultDescription;
 
@@ -150,9 +156,12 @@ function buildPluginFiles(
   const files: GeneratedFile[] = [];
 
   const enabledBlocks = blocks.filter((b) => b.enabled);
+  const SKILL_BODY_LABELS = ["スキル本文", "Skill Body"];
+  const AGENT_BODY_LABELS = ["エージェント本文", "Agent Body"];
+  const CLAUDE_MD_LABELS = ["CLAUDE.md ガイド", "CLAUDE.md Guide"];
 
   if (pluginConfig.includeSkills) {
-    const skillBlock = enabledBlocks.find((b) => b.label === "スキル本文");
+    const skillBlock = enabledBlocks.find((b) => SKILL_BODY_LABELS.includes(b.label));
     const skillBody = skillBlock ? `## 指示内容\n${skillBlock.content}` : "";
 
     const frontmatter = [
@@ -177,7 +186,7 @@ function buildPluginFiles(
   }
 
   if (pluginConfig.includeAgents) {
-    const agentBlock = enabledBlocks.find((b) => b.label === "エージェント本文");
+    const agentBlock = enabledBlocks.find((b) => AGENT_BODY_LABELS.includes(b.label));
     const agentBody = agentBlock ? agentBlock.content : "";
 
     const frontmatter = [
@@ -225,7 +234,7 @@ function buildPluginFiles(
   }
 
   if (pluginConfig.includeClaudeMd) {
-    const claudeBlock = enabledBlocks.find((b) => b.label === "CLAUDE.md ガイド");
+    const claudeBlock = enabledBlocks.find((b) => CLAUDE_MD_LABELS.includes(b.label));
     const claudeContent = claudeBlock ? claudeBlock.content : `# ${name}\n\n${description}`;
     files.push({
       path: "CLAUDE.md",

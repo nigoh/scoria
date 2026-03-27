@@ -80,3 +80,16 @@ export interface GeneratedExtension {
   blocks: ContentBlock[];
   generatedAt: string;
 }
+
+// ─── 履歴 ─────────────────────────────────────────────────
+
+export interface HistoryEntry {
+  id: string;
+  name: string;
+  extensionType: ExtensionType;
+  templateId: TemplateId;
+  formData: ExtensionFormData;
+  blocks: ContentBlock[];
+  generatedAt: string;
+  savedAt: string;
+}

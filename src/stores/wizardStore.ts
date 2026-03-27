@@ -54,6 +54,7 @@ interface WizardState {
   setAgentMaxTurns: (turns: number) => void;
   setAgentResearchField: (field: string | null) => void;
   togglePluginComponent: (key: keyof ExtensionFormData["pluginConfig"]) => void;
+  setFormData: (data: ExtensionFormData) => void;
   reset: () => void;
 }
 
@@ -172,6 +173,8 @@ export const useWizardStore = create<WizardState>()((set) => ({
         },
       },
     })),
+
+  setFormData: (data) => set({ formData: { ...data } }),
 
   reset: () => set({ currentStep: 1, formData: { ...initialFormData } }),
 }));

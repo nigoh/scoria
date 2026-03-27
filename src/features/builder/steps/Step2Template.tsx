@@ -2,25 +2,40 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { useWizardStore } from "@/stores/wizardStore";
 import { TEMPLATES } from "@/lib/constants";
-import { TEMPLATE_CONTENTS } from "@/lib/templates";
+import { TEMPLATE_CONTENTS, TEMPLATE_CONTENTS_EN } from "@/lib/templates";
 import type { TemplateId } from "@/types";
 
 export function Step2Template() {
-  const { formData, setTemplateId, setName, setDescription } = useWizardStore();
-  const { extensionType } = formData;
+  const { formData, setTemplateId, setName, setDescription, setOutputLanguage } =
+    useWizardStore();
+  const { extensionType, outputLanguage } = formData;
 
   const filteredTemplates = TEMPLATES.filter(
     (t) => !extensionType || t.supportedTypes.includes(extensionType),
   );
 
+  const getTemplateMap = (lang: "ja" | "en") =>
+    lang === "en" ? TEMPLATE_CONTENTS_EN : TEMPLATE_CONTENTS;
+
   const handleTemplateSelect = (id: TemplateId) => {
     setTemplateId(id);
     if (extensionType) {
-      const content = TEMPLATE_CONTENTS[id][extensionType];
+      const content = getTemplateMap(outputLanguage)[id][extensionType];
       if (content) {
         setName(content.defaultName);
+        setDescription(content.defaultDescription);
+      }
+    }
+  };
+
+  const handleLanguageChange = (lang: "ja" | "en") => {
+    setOutputLanguage(lang);
+    if (formData.templateId && extensionType) {
+      const content = getTemplateMap(lang)[formData.templateId][extensionType];
+      if (content) {
         setDescription(content.defaultDescription);
       }
     }
@@ -59,6 +74,31 @@ export function Step2Template() {
       </div>
 
       <div className="space-y-3">
+        <div>
+          <Label>出力言語</Label>
+          <div className="mt-1 flex gap-1">
+            <Button
+              type="button"
+              size="sm"
+              variant={outputLanguage === "ja" ? "default" : "outline"}
+              onClick={() => handleLanguageChange("ja")}
+            >
+              日本語
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={outputLanguage === "en" ? "default" : "outline"}
+              onClick={() => handleLanguageChange("en")}
+            >
+              English
+            </Button>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            生成されるファイルの内容の言語を選択します
+          </p>
+        </div>
+
         <div>
           <Label htmlFor="ext-name">名前（slug）</Label>
           <Input

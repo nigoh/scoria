@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, Lightning } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { WizardProgress } from "./WizardProgress";
+import { HistoryDialog } from "./HistoryDialog";
 import { Step1ExtensionType } from "./steps/Step1ExtensionType";
 import { Step2Template } from "./steps/Step2Template";
 import { Step3Config } from "./steps/Step3Config";
@@ -60,8 +61,9 @@ export function WizardPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-border px-4 py-3">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <WizardProgress currentStep={currentStep} />
+        <HistoryDialog />
       </div>
       <div className="flex-1 overflow-y-auto p-4">{stepComponent}</div>
       <div className="flex items-center justify-between border-t border-border px-4 py-3">

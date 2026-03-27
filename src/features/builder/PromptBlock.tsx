@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { DotsSixVertical } from "@phosphor-icons/react";
+import { DotsSixVertical, Trash } from "@phosphor-icons/react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,9 +11,10 @@ interface PromptBlockProps {
   block: ContentBlock;
   onToggle: () => void;
   onContentChange: (content: string) => void;
+  onDelete?: () => void;
 }
 
-export function PromptBlock({ block, onToggle, onContentChange }: PromptBlockProps) {
+export function PromptBlock({ block, onToggle, onContentChange, onDelete }: PromptBlockProps) {
   const {
     attributes,
     listeners,
@@ -52,7 +53,19 @@ export function PromptBlock({ block, onToggle, onContentChange }: PromptBlockPro
             <Badge variant="outline" className="text-[10px]">
               {block.label}
             </Badge>
-            <Switch checked={block.enabled} onCheckedChange={onToggle} />
+            <div className="flex items-center gap-1.5">
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="text-muted-foreground hover:text-destructive"
+                  title="ブロックを削除"
+                >
+                  <Trash size={14} />
+                </button>
+              )}
+              <Switch checked={block.enabled} onCheckedChange={onToggle} />
+            </div>
           </div>
           <Textarea
             value={block.content}

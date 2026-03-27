@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { arrayMove } from "@dnd-kit/sortable";
+import { nanoid } from "nanoid";
 import type { GeneratedExtension, GeneratedFile } from "@/types";
 
 interface ExtensionState {
@@ -12,6 +13,8 @@ interface ExtensionState {
   reorderBlocks: (activeId: string, overId: string) => void;
   toggleBlock: (blockId: string) => void;
   updateBlockContent: (blockId: string, content: string) => void;
+  addBlock: (label: string, content: string) => void;
+  removeBlock: (blockId: string) => void;
   reset: () => void;
 }
 
@@ -73,6 +76,33 @@ export const useExtensionStore = create<ExtensionState>()(
               ...state.generatedExtension,
               blocks: state.generatedExtension.blocks.map((b) =>
                 b.id === blockId ? { ...b, content } : b,
+              ),
+            },
+          };
+        }),
+
+      addBlock: (label, content) =>
+        set((state) => {
+          if (!state.generatedExtension) return state;
+          return {
+            generatedExtension: {
+              ...state.generatedExtension,
+              blocks: [
+                ...state.generatedExtension.blocks,
+                { id: nanoid(), label, content, enabled: true },
+              ],
+            },
+          };
+        }),
+
+      removeBlock: (blockId) =>
+        set((state) => {
+          if (!state.generatedExtension) return state;
+          return {
+            generatedExtension: {
+              ...state.generatedExtension,
+              blocks: state.generatedExtension.blocks.filter(
+                (b) => b.id !== blockId,
               ),
             },
           };
