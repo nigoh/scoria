@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -9,8 +10,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useWizardStore } from "@/stores/wizardStore";
-import { CLAUDE_TOOLS, MODEL_OPTIONS, RESEARCH_FIELDS } from "@/lib/constants";
-import type { ModelChoice } from "@/types";
+import {
+  CLAUDE_TOOLS,
+  MODEL_OPTIONS,
+  RESEARCH_FIELDS,
+  EFFORT_OPTIONS,
+  AGENT_TYPES,
+} from "@/lib/constants";
+import type { ModelChoice, EffortLevel } from "@/types";
 
 export function Step3Config() {
   const { formData } = useWizardStore();
@@ -24,14 +31,33 @@ export function Step3Config() {
         </p>
       </div>
 
-      {formData.extensionType === "skill" && <SkillConfig />}
-      {formData.extensionType === "agent" && <AgentConfig />}
+      {formData.extensionType === "skill" && <SkillConfigTabs />}
+      {formData.extensionType === "agent" && <AgentConfigTabs />}
       {formData.extensionType === "plugin" && <PluginConfig />}
     </div>
   );
 }
 
-function SkillConfig() {
+// ─── スキル設定（タブ） ─────────────────────────────────────
+
+function SkillConfigTabs() {
+  return (
+    <Tabs defaultValue="basic">
+      <TabsList>
+        <TabsTrigger value="basic">基本</TabsTrigger>
+        <TabsTrigger value="advanced">詳細</TabsTrigger>
+      </TabsList>
+      <TabsContent value="basic">
+        <SkillBasicConfig />
+      </TabsContent>
+      <TabsContent value="advanced">
+        <SkillAdvancedConfig />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+function SkillBasicConfig() {
   const {
     formData,
     setSkillArgumentHint,
@@ -42,7 +68,7 @@ function SkillConfig() {
   const { skillConfig } = formData;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-4">
       <div>
         <Label htmlFor="arg-hint">引数ヒント</Label>
         <Input
@@ -119,13 +145,165 @@ function SkillConfig() {
   );
 }
 
-function AgentConfig() {
+function SkillAdvancedConfig() {
+  const {
+    formData,
+    setSkillEffort,
+    setSkillContext,
+    setSkillAgent,
+    setSkillDisableModelInvocation,
+    setSkillPaths,
+    setSkillShell,
+  } = useWizardStore();
+  const { skillConfig } = formData;
+
+  return (
+    <div className="space-y-4 pt-4">
+      <div>
+        <Label>Effort（推論レベル）</Label>
+        <Select
+          value={skillConfig.effort ?? "none"}
+          onValueChange={(v) => setSkillEffort(v === "none" ? null : (v as EffortLevel))}
+        >
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="未設定" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">未設定</SelectItem>
+            {EFFORT_OPTIONS.map((o) => (
+              <SelectItem key={o.id} value={o.id}>
+                {o.labelJa}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="mt-1 text-xs text-muted-foreground">
+          モデルの推論の深さを制御します
+        </p>
+      </div>
+
+      <div>
+        <Label>コンテキスト</Label>
+        <div className="mt-2 flex gap-2">
+          {(["inline", "fork"] as const).map((ctx) => (
+            <button
+              key={ctx}
+              onClick={() => setSkillContext(ctx)}
+              className={`rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                skillConfig.context === ctx
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              {ctx === "inline" ? "Inline（同一セッション）" : "Fork（新しいセッション）"}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          inline: 現在のセッション内で実行 / fork: 独立したセッションで実行
+        </p>
+      </div>
+
+      {skillConfig.context === "fork" && (
+        <div>
+          <Label>エージェントタイプ</Label>
+          <Select
+            value={skillConfig.agent ?? "none"}
+            onValueChange={(v) => setSkillAgent(v === "none" ? null : v)}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="未設定" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">未設定</SelectItem>
+              {AGENT_TYPES.map((a) => (
+                <SelectItem key={a} value={a}>
+                  {a}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="mt-1 text-xs text-muted-foreground">
+            fork 実行時に使用するエージェントタイプ
+          </p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <div>
+          <Label>自動実行無効化</Label>
+          <p className="text-xs text-muted-foreground">
+            モデルによる自動実行を禁止し、ユーザー起動のみに制限する
+          </p>
+        </div>
+        <Switch
+          checked={skillConfig.disableModelInvocation}
+          onCheckedChange={setSkillDisableModelInvocation}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="skill-paths">Paths（ファイルパターン）</Label>
+        <Input
+          id="skill-paths"
+          value={skillConfig.paths}
+          onChange={(e) => setSkillPaths(e.target.value)}
+          placeholder="src/**/*.ts, docs/**/*.md"
+          className="mt-1"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          スキルのコンテキストに含めるファイルの glob パターン
+        </p>
+      </div>
+
+      <div>
+        <Label>Shell</Label>
+        <div className="mt-2 flex gap-2">
+          {(["bash", "powershell"] as const).map((sh) => (
+            <button
+              key={sh}
+              onClick={() => setSkillShell(sh)}
+              className={`rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                skillConfig.shell === sh
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              {sh}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── エージェント設定（タブ） ───────────────────────────────
+
+function AgentConfigTabs() {
+  return (
+    <Tabs defaultValue="basic">
+      <TabsList>
+        <TabsTrigger value="basic">基本</TabsTrigger>
+        <TabsTrigger value="advanced">詳細</TabsTrigger>
+      </TabsList>
+      <TabsContent value="basic">
+        <AgentBasicConfig />
+      </TabsContent>
+      <TabsContent value="advanced">
+        <AgentAdvancedConfig />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+function AgentBasicConfig() {
   const { formData, setAgentTools, setAgentModel, setAgentMaxTurns, setAgentResearchField } =
     useWizardStore();
   const { agentConfig } = formData;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-4">
       <div>
         <Label>許可ツール</Label>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -207,6 +385,112 @@ function AgentConfig() {
     </div>
   );
 }
+
+function AgentAdvancedConfig() {
+  const {
+    formData,
+    setAgentEffort,
+    setAgentDisallowedTools,
+    setAgentSkills,
+    setAgentIsolation,
+  } = useWizardStore();
+  const { agentConfig } = formData;
+
+  return (
+    <div className="space-y-4 pt-4">
+      <div>
+        <Label>Effort（推論レベル）</Label>
+        <Select
+          value={agentConfig.effort ?? "none"}
+          onValueChange={(v) => setAgentEffort(v === "none" ? null : (v as EffortLevel))}
+        >
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="未設定" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">未設定</SelectItem>
+            {EFFORT_OPTIONS.map((o) => (
+              <SelectItem key={o.id} value={o.id}>
+                {o.labelJa}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="mt-1 text-xs text-muted-foreground">
+          モデルの推論の深さを制御します
+        </p>
+      </div>
+
+      <div>
+        <Label>禁止ツール</Label>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {CLAUDE_TOOLS.map((tool) => {
+            const isDisallowed = agentConfig.disallowedTools.includes(tool);
+            return (
+              <button
+                key={tool}
+                onClick={() => {
+                  const next = isDisallowed
+                    ? agentConfig.disallowedTools.filter((t) => t !== tool)
+                    : [...agentConfig.disallowedTools, tool];
+                  setAgentDisallowedTools(next);
+                }}
+                className={`rounded-md border px-2.5 py-1 text-xs transition-colors ${
+                  isDisallowed
+                    ? "border-destructive bg-destructive/10 text-destructive"
+                    : "border-border text-muted-foreground hover:border-destructive/50"
+                }`}
+              >
+                {tool}
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          エージェントが使用できないツールを選択
+        </p>
+      </div>
+
+      <div>
+        <Label htmlFor="agent-skills">プリロードスキル</Label>
+        <Input
+          id="agent-skills"
+          value={agentConfig.skills}
+          onChange={(e) => setAgentSkills(e.target.value)}
+          placeholder="my-skill, another-skill"
+          className="mt-1"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          エージェントに事前読み込みするスキル名（カンマ区切り）
+        </p>
+      </div>
+
+      <div>
+        <Label>Isolation</Label>
+        <div className="mt-2 flex gap-2">
+          {(["none", "worktree"] as const).map((iso) => (
+            <button
+              key={iso}
+              onClick={() => setAgentIsolation(iso)}
+              className={`rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                agentConfig.isolation === iso
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              {iso === "none" ? "なし" : "Worktree（独立コピー）"}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          worktree: リポジトリの独立コピーでエージェントを実行
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── プラグイン設定 ─────────────────────────────────────────
 
 function PluginConfig() {
   const { formData, togglePluginComponent } = useWizardStore();

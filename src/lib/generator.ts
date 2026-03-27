@@ -100,6 +100,24 @@ function buildSkillFiles(
     frontmatter.push(`model: ${skillConfig.model}`);
   }
   frontmatter.push(`user-invocable: ${skillConfig.userInvocable}`);
+  if (skillConfig.effort) {
+    frontmatter.push(`effort: ${skillConfig.effort}`);
+  }
+  if (skillConfig.context !== "inline") {
+    frontmatter.push(`context: ${skillConfig.context}`);
+  }
+  if (skillConfig.agent) {
+    frontmatter.push(`agent: ${skillConfig.agent}`);
+  }
+  if (skillConfig.disableModelInvocation) {
+    frontmatter.push("disable-model-invocation: true");
+  }
+  if (skillConfig.paths) {
+    frontmatter.push(`paths: ${skillConfig.paths}`);
+  }
+  if (skillConfig.shell !== "bash") {
+    frontmatter.push(`shell: ${skillConfig.shell}`);
+  }
   frontmatter.push("---");
 
   const content = `${frontmatter.join("\n")}\n\n${body}\n`;
@@ -133,6 +151,18 @@ function buildAgentFiles(
     frontmatter.push(`model: ${agentConfig.model}`);
   }
   frontmatter.push(`maxTurns: ${agentConfig.maxTurns}`);
+  if (agentConfig.effort) {
+    frontmatter.push(`effort: ${agentConfig.effort}`);
+  }
+  if (agentConfig.disallowedTools.length > 0) {
+    frontmatter.push(`disallowedTools: ${agentConfig.disallowedTools.join(", ")}`);
+  }
+  if (agentConfig.skills) {
+    frontmatter.push(`skills: ${agentConfig.skills}`);
+  }
+  if (agentConfig.isolation !== "none") {
+    frontmatter.push(`isolation: ${agentConfig.isolation}`);
+  }
   frontmatter.push("---");
 
   const content = `${frontmatter.join("\n")}\n\n${body}\n`;
@@ -192,7 +222,7 @@ function buildPluginFiles(
     const frontmatter = [
       "---",
       `name: ${name}-agent`,
-      `description: ${description}（エージェント）`,
+      `description: ${description}${formData.outputLanguage === "en" ? " (Agent)" : "（エージェント）"}`,
     ];
     if (agentConfig.tools.length > 0) {
       frontmatter.push(`tools: ${agentConfig.tools.join(", ")}`);

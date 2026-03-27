@@ -104,7 +104,22 @@ export const CLAUDE_TOOLS = [
   "WebSearch",
   "WebFetch",
   "NotebookEdit",
+  "TodoWrite",
+  "AskUserQuestion",
 ] as const;
+
+// ─── Effort レベル ──────────────────────────────────────────
+
+export const EFFORT_OPTIONS = [
+  { id: "low", labelJa: "低", labelEn: "Low" },
+  { id: "medium", labelJa: "中", labelEn: "Medium" },
+  { id: "high", labelJa: "高", labelEn: "High" },
+  { id: "max", labelJa: "最大（Opus 4.6のみ）", labelEn: "Max (Opus 4.6 only)" },
+] as const;
+
+// ─── エージェントタイプ ─────────────────────────────────────
+
+export const AGENT_TYPES = ["general-purpose", "Explore", "Plan"] as const;
 
 // ─── モデル選択肢 ───────────────────────────────────────────
 

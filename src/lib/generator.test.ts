@@ -13,12 +13,22 @@ const baseFormData: ExtensionFormData = {
     allowedTools: ["Read", "Grep", "Glob"],
     model: "sonnet",
     userInvocable: true,
+    effort: null,
+    context: "inline",
+    agent: null,
+    disableModelInvocation: false,
+    paths: "",
+    shell: "bash",
   },
   agentConfig: {
     tools: ["Read", "Edit", "Write", "Bash", "Grep", "Glob"],
     model: "sonnet",
     maxTurns: 30,
     researchField: null,
+    effort: null,
+    disallowedTools: [],
+    skills: "",
+    isolation: "none",
   },
   pluginConfig: {
     includeSkills: true,
@@ -97,6 +107,80 @@ describe("generateExtension", () => {
     expect(() => generateExtension(baseFormData)).toThrow(
       "拡張タイプとテンプレートを選択してください",
     );
+  });
+
+  it("スキルの詳細frontmatterフィールドが出力される", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "skill",
+      templateId: "systematic_review",
+      name: "my-skill",
+      description: "テスト",
+      skillConfig: {
+        ...baseFormData.skillConfig,
+        effort: "high",
+        context: "fork",
+        agent: "Explore",
+        disableModelInvocation: true,
+        paths: "src/**/*.ts",
+        shell: "powershell",
+      },
+    };
+
+    const result = generateExtension(formData);
+    const content = result.files[0].content;
+
+    expect(content).toContain("effort: high");
+    expect(content).toContain("context: fork");
+    expect(content).toContain("agent: Explore");
+    expect(content).toContain("disable-model-invocation: true");
+    expect(content).toContain("paths: src/**/*.ts");
+    expect(content).toContain("shell: powershell");
+  });
+
+  it("エージェントの詳細frontmatterフィールドが出力される", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "agent",
+      templateId: "meta_analysis",
+      name: "my-agent",
+      description: "テスト",
+      agentConfig: {
+        ...baseFormData.agentConfig,
+        effort: "medium",
+        disallowedTools: ["Write", "Edit"],
+        skills: "my-skill",
+        isolation: "worktree",
+      },
+    };
+
+    const result = generateExtension(formData);
+    const content = result.files[0].content;
+
+    expect(content).toContain("effort: medium");
+    expect(content).toContain("disallowedTools: Write, Edit");
+    expect(content).toContain("skills: my-skill");
+    expect(content).toContain("isolation: worktree");
+  });
+
+  it("デフォルト値の場合、詳細フィールドは出力されない", () => {
+    const formData: ExtensionFormData = {
+      ...baseFormData,
+      extensionType: "skill",
+      templateId: "systematic_review",
+      name: "my-skill",
+      description: "テスト",
+    };
+
+    const result = generateExtension(formData);
+    const content = result.files[0].content;
+
+    expect(content).not.toContain("effort:");
+    expect(content).not.toContain("context:");
+    expect(content).not.toContain("agent:");
+    expect(content).not.toContain("disable-model-invocation:");
+    expect(content).not.toContain("paths:");
+    expect(content).not.toContain("shell:");
   });
 
   it("テンプレート未選択時にデフォルト名を使用する", () => {

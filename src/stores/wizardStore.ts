@@ -5,6 +5,7 @@ import type {
   WizardStep,
   ExtensionFormData,
   ModelChoice,
+  EffortLevel,
 } from "@/types";
 
 const initialFormData: ExtensionFormData = {
@@ -18,12 +19,22 @@ const initialFormData: ExtensionFormData = {
     allowedTools: ["Read", "Grep", "Glob"],
     model: "sonnet",
     userInvocable: true,
+    effort: null,
+    context: "inline",
+    agent: null,
+    disableModelInvocation: false,
+    paths: "",
+    shell: "bash",
   },
   agentConfig: {
     tools: ["Read", "Edit", "Write", "Bash", "Grep", "Glob"],
     model: "sonnet",
     maxTurns: 30,
     researchField: null,
+    effort: null,
+    disallowedTools: [],
+    skills: "",
+    isolation: "none",
   },
   pluginConfig: {
     includeSkills: true,
@@ -49,10 +60,20 @@ interface WizardState {
   setSkillAllowedTools: (tools: string[]) => void;
   setSkillModel: (model: ModelChoice) => void;
   setSkillUserInvocable: (v: boolean) => void;
+  setSkillEffort: (effort: EffortLevel | null) => void;
+  setSkillContext: (context: "inline" | "fork") => void;
+  setSkillAgent: (agent: string | null) => void;
+  setSkillDisableModelInvocation: (v: boolean) => void;
+  setSkillPaths: (paths: string) => void;
+  setSkillShell: (shell: "bash" | "powershell") => void;
   setAgentTools: (tools: string[]) => void;
   setAgentModel: (model: ModelChoice) => void;
   setAgentMaxTurns: (turns: number) => void;
   setAgentResearchField: (field: string | null) => void;
+  setAgentEffort: (effort: EffortLevel | null) => void;
+  setAgentDisallowedTools: (tools: string[]) => void;
+  setAgentSkills: (skills: string) => void;
+  setAgentIsolation: (isolation: "none" | "worktree") => void;
   togglePluginComponent: (key: keyof ExtensionFormData["pluginConfig"]) => void;
   setFormData: (data: ExtensionFormData) => void;
   reset: () => void;
@@ -131,6 +152,54 @@ export const useWizardStore = create<WizardState>()((set) => ({
       },
     })),
 
+  setSkillEffort: (effort) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        skillConfig: { ...state.formData.skillConfig, effort },
+      },
+    })),
+
+  setSkillContext: (context) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        skillConfig: { ...state.formData.skillConfig, context },
+      },
+    })),
+
+  setSkillAgent: (agent) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        skillConfig: { ...state.formData.skillConfig, agent },
+      },
+    })),
+
+  setSkillDisableModelInvocation: (v) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        skillConfig: { ...state.formData.skillConfig, disableModelInvocation: v },
+      },
+    })),
+
+  setSkillPaths: (paths) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        skillConfig: { ...state.formData.skillConfig, paths },
+      },
+    })),
+
+  setSkillShell: (shell) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        skillConfig: { ...state.formData.skillConfig, shell },
+      },
+    })),
+
   setAgentTools: (tools) =>
     set((state) => ({
       formData: {
@@ -160,6 +229,38 @@ export const useWizardStore = create<WizardState>()((set) => ({
       formData: {
         ...state.formData,
         agentConfig: { ...state.formData.agentConfig, researchField: field },
+      },
+    })),
+
+  setAgentEffort: (effort) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        agentConfig: { ...state.formData.agentConfig, effort },
+      },
+    })),
+
+  setAgentDisallowedTools: (tools) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        agentConfig: { ...state.formData.agentConfig, disallowedTools: tools },
+      },
+    })),
+
+  setAgentSkills: (skills) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        agentConfig: { ...state.formData.agentConfig, skills },
+      },
+    })),
+
+  setAgentIsolation: (isolation) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        agentConfig: { ...state.formData.agentConfig, isolation },
       },
     })),
 

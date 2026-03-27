@@ -25,11 +25,19 @@ export interface TemplateDefinition {
 
 export type WizardStep = 1 | 2 | 3 | 4;
 
+export type EffortLevel = "low" | "medium" | "high" | "max";
+
 export interface SkillConfig {
   argumentHint: string;
   allowedTools: string[];
   model: ModelChoice;
   userInvocable: boolean;
+  effort: EffortLevel | null;
+  context: "inline" | "fork";
+  agent: string | null;
+  disableModelInvocation: boolean;
+  paths: string;
+  shell: "bash" | "powershell";
 }
 
 export interface AgentConfig {
@@ -37,6 +45,10 @@ export interface AgentConfig {
   model: ModelChoice;
   maxTurns: number;
   researchField: string | null;
+  effort: EffortLevel | null;
+  disallowedTools: string[];
+  skills: string;
+  isolation: "none" | "worktree";
 }
 
 export interface PluginConfig {
