@@ -1,36 +1,36 @@
 import {
-  Compass,
-  TextAlignLeft,
+  Command,
+  Sliders,
   Lightning,
-  CopySimple,
+  DownloadSimple,
 } from "@phosphor-icons/react";
 import { useInView } from "@/lib/useInView";
 import { cn } from "@/lib/utils";
 
 const steps = [
   {
-    Icon: Compass,
-    title: "テーマを設定",
+    Icon: Command,
+    title: "拡張タイプを選択",
     description:
-      "研究フェーズ（探索・深掘り・系統的レビューなど）と専門分野を選択します。",
+      "スキル（Slash Command）、エージェント、またはプラグインパッケージから選択します。",
   },
   {
-    Icon: TextAlignLeft,
-    title: "詳細を入力",
+    Icon: Sliders,
+    title: "テンプレート & 設定",
     description:
-      "キーワード・研究目的・対象データベースなどの条件をウィザード形式で入力します。",
+      "学術テンプレートを選び、名前・ツール・モデルなどの詳細を設定します。",
   },
   {
     Icon: Lightning,
-    title: "プロンプト生成",
+    title: "拡張を生成",
     description:
-      "入力内容をもとに、学術検索に最適化された構造的プロンプトを自動で組み立てます。",
+      "設定をもとに、SKILL.md・agent.md・CLAUDE.md などのファイルを自動生成します。",
   },
   {
-    Icon: CopySimple,
-    title: "コピーして活用",
+    Icon: DownloadSimple,
+    title: "ZIPでダウンロード",
     description:
-      "生成されたプロンプトをコピーし、ChatGPTやClaudeなどのAIに貼り付けて文献検索を開始できます。",
+      "生成ファイルをZIPでダウンロードし、.claude/ ディレクトリに配置するだけで利用開始できます。",
   },
 ];
 

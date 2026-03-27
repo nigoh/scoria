@@ -4,7 +4,7 @@
 
 ## プロジェクト概要
 
-**Scoria** — 研究テーマや目的を入力すると、学術検索や文献レビューに最適なAIプロンプトを自動生成するツール。
+**Scoria** — 学術研究に特化した Claude Code のスキル・エージェント・プラグインをウィザード形式で自動生成し、ZIPでダウンロードできるツール。
 
 ## 技術スタック
 
@@ -53,7 +53,10 @@ src/
   vite-env.d.ts       # Vite 型宣言
   lib/
     utils.ts          # cn() ユーティリティ
-    prompt.ts         # プロンプト生成ロジック
+    generator.ts      # Claude Code 拡張ファイル生成ロジック
+    templates.ts      # 学術テンプレート定義
+    constants.ts      # 定数（拡張タイプ、ツール一覧等）
+    zip.ts            # JSZip によるZIP生成
     *.test.ts         # テストファイル
   components/
     ui/               # shadcn/ui コンポーネント

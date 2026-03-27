@@ -1,44 +1,69 @@
-import { ArrowLeft, ArrowRight } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight, Lightning } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { WizardProgress } from "./WizardProgress";
-import { Step1ResearchPhase } from "./steps/Step1ResearchPhase";
-import { Step2Field } from "./steps/Step2Field";
-import { Step3Keywords } from "./steps/Step3Keywords";
-import { Step4Purpose } from "./steps/Step4Purpose";
-import { Step5Conditions } from "./steps/Step5Conditions";
+import { HistoryDialog } from "./HistoryDialog";
+import { Step1ExtensionType } from "./steps/Step1ExtensionType";
+import { Step2Template } from "./steps/Step2Template";
+import { Step3Config } from "./steps/Step3Config";
+import { Step4Content } from "./steps/Step4Content";
 import { useWizardStore } from "@/stores/wizardStore";
-import { usePromptStore } from "@/stores/promptStore";
-import { generateBlockedPrompt } from "@/lib/prompt";
+import { useExtensionStore } from "@/stores/extensionStore";
+import { generateExtension, regenerateFiles } from "@/lib/generator";
 
 export function WizardPanel() {
   const { currentStep, formData, nextStep, prevStep } = useWizardStore();
-  const { setGeneratedPrompt } = usePromptStore();
+  const { setGeneratedExtension, generatedExtension, updateFiles } = useExtensionStore();
 
   const handleGenerate = () => {
-    const result = generateBlockedPrompt(formData);
-    setGeneratedPrompt(result);
+    const result = generateExtension(formData);
+    setGeneratedExtension(result);
+  };
+
+  const handleRegenerate = () => {
+    if (generatedExtension) {
+      const files = regenerateFiles(formData, generatedExtension.blocks);
+      updateFiles(files);
+    }
   };
 
   const handleNext = () => {
-    if (currentStep === 5) {
+    if (currentStep === 3) {
       handleGenerate();
+      nextStep();
+    } else if (currentStep === 4) {
+      handleRegenerate();
     } else {
       nextStep();
     }
   };
 
+  const canProceed = (() => {
+    switch (currentStep) {
+      case 1:
+        return formData.extensionType !== null;
+      case 2:
+        return formData.templateId !== null && formData.name.trim() !== "";
+      case 3:
+        return true;
+      case 4:
+        return generatedExtension !== null;
+      default:
+        return false;
+    }
+  })();
+
   const stepComponent = {
-    1: <Step1ResearchPhase />,
-    2: <Step2Field />,
-    3: <Step3Keywords />,
-    4: <Step4Purpose />,
-    5: <Step5Conditions />,
+    1: <Step1ExtensionType />,
+    2: <Step2Template />,
+    3: <Step3Config />,
+    4: <Step4Content />,
   }[currentStep];
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-border px-4 py-3">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <WizardProgress currentStep={currentStep} />
+        <HistoryDialog />
       </div>
       <div className="flex-1 overflow-y-auto p-4">{stepComponent}</div>
       <div className="flex items-center justify-between border-t border-border px-4 py-3">
@@ -51,9 +76,23 @@ export function WizardPanel() {
           <ArrowLeft size={16} />
           戻る
         </Button>
-        <Button onClick={handleNext} className="gap-1">
-          {currentStep === 5 ? "プロンプト生成" : "次へ"}
-          {currentStep < 5 && <ArrowRight size={16} />}
+        <Button onClick={handleNext} disabled={!canProceed} className="gap-1">
+          {currentStep === 3 ? (
+            <>
+              <Lightning size={16} />
+              生成
+            </>
+          ) : currentStep === 4 ? (
+            <>
+              <Lightning size={16} />
+              再生成
+            </>
+          ) : (
+            <>
+              次へ
+              <ArrowRight size={16} />
+            </>
+          )}
         </Button>
       </div>
     </div>

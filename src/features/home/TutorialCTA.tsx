@@ -20,11 +20,11 @@ export function TutorialCTA() {
         はじめての Scoria
       </h2>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-        ビルダー画面で研究フェーズを選び、5ステップのウィザードに沿って入力するだけ。
-        初めてでも迷わずプロンプトを作成できます。
+        拡張タイプを選び、4ステップのウィザードに沿って設定するだけ。
+        学術研究に特化したClaude Code拡張を簡単に作成できます。
       </p>
       <Button asChild variant="outline" className="mt-6">
-        <Link to="/builder">使い方を試す</Link>
+        <Link to="/builder">拡張を作成する</Link>
       </Button>
     </section>
   );

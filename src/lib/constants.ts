@@ -1,128 +1,261 @@
-import type { ResearchPhase, ResearchField, PromptBlockType } from "@/types";
+import type { TemplateDefinition, ExtensionType, ModelChoice } from "@/types";
 
-export interface ResearchPhaseInfo {
-  id: ResearchPhase;
+// ─── 拡張タイプ ──────────────────────────────────────────────
+
+export interface ExtensionTypeInfo {
+  id: ExtensionType;
   labelJa: string;
   labelEn: string;
   descriptionJa: string;
   icon: string;
 }
 
-export const RESEARCH_PHASES: ResearchPhaseInfo[] = [
+export const EXTENSION_TYPES: ExtensionTypeInfo[] = [
   {
-    id: "theme_setting",
-    labelJa: "テーマ設定",
-    labelEn: "Theme Setting",
+    id: "skill",
+    labelJa: "スキル（Slash Command）",
+    labelEn: "Skill (Slash Command)",
     descriptionJa:
-      "研究テーマの探索・絞り込み。トレンド把握やギャップ発見に最適なプロンプトを生成します。",
-    icon: "Compass",
+      "/literature-review のようなスラッシュコマンドを作成します。繰り返し使うワークフローに最適です。",
+    icon: "Command",
   },
   {
-    id: "prior_research",
-    labelJa: "先行研究調査",
-    labelEn: "Prior Research",
+    id: "agent",
+    labelJa: "エージェント（Subagent）",
+    labelEn: "Agent (Subagent)",
     descriptionJa:
-      "既存研究の網羅的把握。系統的検索や包括的レビュー向けのプロンプトを生成します。",
-    icon: "Books",
+      "文献分析やデータ整理などの専門タスクを自律的に実行するサブエージェントを作成します。",
+    icon: "Robot",
   },
   {
-    id: "hypothesis_building",
-    labelJa: "仮説構築",
-    labelEn: "Hypothesis Building",
+    id: "plugin",
+    labelJa: "プラグインパッケージ",
+    labelEn: "Plugin Package",
     descriptionJa:
-      "リサーチクエスチョンの精緻化。変数関係の整理や理論的枠組みの構築を支援します。",
-    icon: "Lightbulb",
-  },
-  {
-    id: "methodology_design",
-    labelJa: "方法論設計",
-    labelEn: "Methodology Design",
-    descriptionJa:
-      "研究手法の選定・設計。方法論比較やサンプル設計に関するプロンプトを生成します。",
-    icon: "FlaskConical",
+      "スキル・エージェント・フック・CLAUDE.mdを含む完全なプラグインパッケージを作成します。",
+    icon: "Package",
   },
 ];
 
-export const RESEARCH_FIELDS: ResearchField[] = [
-  { id: "natural_science", labelJa: "自然科学", labelEn: "Natural Science" },
-  { id: "medicine", labelJa: "医学", labelEn: "Medicine" },
-  { id: "engineering", labelJa: "工学", labelEn: "Engineering" },
+// ─── テンプレート ────────────────────────────────────────────
+
+export const TEMPLATES: TemplateDefinition[] = [
   {
-    id: "computer_science",
-    labelJa: "情報科学",
-    labelEn: "Computer Science",
+    id: "systematic_review",
+    labelJa: "系統的文献レビュー",
+    labelEn: "Systematic Review",
+    descriptionJa: "PRISMA準拠の系統的レビューを支援するプロンプトを生成します。",
+    supportedTypes: ["skill", "agent", "plugin"],
   },
-  { id: "mathematics", labelJa: "数学", labelEn: "Mathematics" },
-  { id: "physics", labelJa: "物理学", labelEn: "Physics" },
-  { id: "chemistry", labelJa: "化学", labelEn: "Chemistry" },
-  { id: "biology", labelJa: "生物学", labelEn: "Biology" },
   {
-    id: "earth_science",
-    labelJa: "地球科学",
-    labelEn: "Earth Science",
+    id: "meta_analysis",
+    labelJa: "メタ分析支援",
+    labelEn: "Meta-Analysis",
+    descriptionJa: "効果量計算やフォレストプロット解釈を支援します。",
+    supportedTypes: ["skill", "agent", "plugin"],
   },
-  { id: "agriculture", labelJa: "農学", labelEn: "Agriculture" },
   {
-    id: "social_science",
-    labelJa: "社会科学",
-    labelEn: "Social Science",
+    id: "citation_check",
+    labelJa: "引用・参考文献チェック",
+    labelEn: "Citation Check",
+    descriptionJa: "論文の引用整合性や参考文献リストを検証します。",
+    supportedTypes: ["skill", "agent", "plugin"],
   },
-  { id: "economics", labelJa: "経済学", labelEn: "Economics" },
-  { id: "psychology", labelJa: "心理学", labelEn: "Psychology" },
-  { id: "education", labelJa: "教育学", labelEn: "Education" },
-  { id: "law", labelJa: "法学", labelEn: "Law" },
   {
-    id: "political_science",
-    labelJa: "政治学",
-    labelEn: "Political Science",
+    id: "methodology_advisor",
+    labelJa: "研究手法アドバイザー",
+    labelEn: "Methodology Advisor",
+    descriptionJa: "研究デザインや統計手法の選定をガイドします。",
+    supportedTypes: ["skill", "agent", "plugin"],
   },
-  { id: "sociology", labelJa: "社会学", labelEn: "Sociology" },
-  { id: "humanities", labelJa: "人文学", labelEn: "Humanities" },
-  { id: "philosophy", labelJa: "哲学", labelEn: "Philosophy" },
-  { id: "history", labelJa: "歴史学", labelEn: "History" },
-  { id: "literature", labelJa: "文学", labelEn: "Literature" },
-  { id: "linguistics", labelJa: "言語学", labelEn: "Linguistics" },
-  { id: "art", labelJa: "芸術学", labelEn: "Art Studies" },
   {
-    id: "interdisciplinary",
-    labelJa: "学際的",
-    labelEn: "Interdisciplinary",
+    id: "paper_structure",
+    labelJa: "論文構成支援",
+    labelEn: "Paper Structure",
+    descriptionJa: "IMRaD形式に沿った論文構成のアウトラインを生成します。",
+    supportedTypes: ["skill", "agent", "plugin"],
   },
-  { id: "other", labelJa: "その他", labelEn: "Other" },
+  {
+    id: "search_strategy",
+    labelJa: "データベース検索戦略",
+    labelEn: "Search Strategy",
+    descriptionJa: "学術データベース向けの検索クエリ・戦略を策定します。",
+    supportedTypes: ["skill", "agent", "plugin"],
+  },
+  {
+    id: "custom",
+    labelJa: "カスタム",
+    labelEn: "Custom",
+    descriptionJa: "テンプレートなしで自由に作成します。",
+    supportedTypes: ["skill", "agent", "plugin"],
+  },
 ];
 
-export interface PromptBlockLabel {
-  type: PromptBlockType;
+// ─── Claude Code ツール一覧 ─────────────────────────────────
+
+export const CLAUDE_TOOLS = [
+  "Read",
+  "Edit",
+  "Write",
+  "Bash",
+  "Glob",
+  "Grep",
+  "Agent",
+  "WebSearch",
+  "WebFetch",
+  "NotebookEdit",
+  "TodoWrite",
+  "AskUserQuestion",
+] as const;
+
+// ─── Effort レベル ──────────────────────────────────────────
+
+export const EFFORT_OPTIONS = [
+  { id: "low", labelJa: "低", labelEn: "Low" },
+  { id: "medium", labelJa: "中", labelEn: "Medium" },
+  { id: "high", labelJa: "高", labelEn: "High" },
+  { id: "max", labelJa: "最大（Opus 4.6のみ）", labelEn: "Max (Opus 4.6 only)" },
+] as const;
+
+// ─── エージェントタイプ ─────────────────────────────────────
+
+export const AGENT_TYPES = ["general-purpose", "Explore", "Plan"] as const;
+
+// ─── フックイベント ─────────────────────────────────────────
+
+export const HOOK_EVENTS = [
+  "SessionStart",
+  "SessionEnd",
+  "UserPromptSubmit",
+  "Stop",
+  "PreToolUse",
+  "PostToolUse",
+  "PostToolUseFailure",
+  "SubagentStart",
+  "SubagentStop",
+  "FileChanged",
+  "CwdChanged",
+  "PreCompact",
+  "PostCompact",
+] as const;
+
+export const HOOK_TYPES = ["command", "http", "prompt", "agent"] as const;
+
+export interface HookPreset {
+  labelJa: string;
+  labelEn: string;
+  event: string;
+  matcher: string;
+  hookType: "command" | "http" | "prompt" | "agent";
+  command: string;
+}
+
+export const HOOK_PRESETS: HookPreset[] = [
+  {
+    labelJa: "ファイル変更時バリデーション",
+    labelEn: "Validate on file change",
+    event: "PostToolUse",
+    matcher: "Edit|Write",
+    hookType: "command",
+    command: "./scripts/validate.sh",
+  },
+  {
+    labelJa: "セッション開始セットアップ",
+    labelEn: "Setup on session start",
+    event: "SessionStart",
+    matcher: "*",
+    hookType: "command",
+    command: "./scripts/setup.sh",
+  },
+  {
+    labelJa: "Bash コマンド監査",
+    labelEn: "Audit Bash commands",
+    event: "PreToolUse",
+    matcher: "Bash",
+    hookType: "command",
+    command: "echo \"Bash command intercepted\"",
+  },
+];
+
+// ─── MCP テンプレート ───────────────────────────────────────
+
+export interface McpTemplate {
+  labelJa: string;
+  labelEn: string;
+  name: string;
+  command: string;
+  args: string;
+}
+
+export const MCP_TEMPLATES: McpTemplate[] = [
+  {
+    labelJa: "PubMed API",
+    labelEn: "PubMed API",
+    name: "pubmed-api",
+    command: "npx",
+    args: "@anthropic/mcp-pubmed",
+  },
+  {
+    labelJa: "Semantic Scholar",
+    labelEn: "Semantic Scholar",
+    name: "semantic-scholar",
+    command: "npx",
+    args: "@anthropic/mcp-semantic-scholar",
+  },
+  {
+    labelJa: "ファイルシステム",
+    labelEn: "Filesystem",
+    name: "filesystem",
+    command: "npx",
+    args: "@modelcontextprotocol/server-filesystem /path/to/dir",
+  },
+  {
+    labelJa: "カスタム",
+    labelEn: "Custom",
+    name: "my-server",
+    command: "",
+    args: "",
+  },
+];
+
+// ─── モデル選択肢 ───────────────────────────────────────────
+
+export interface ModelOption {
+  id: ModelChoice;
   labelJa: string;
   labelEn: string;
 }
 
-export const PROMPT_BLOCK_LABELS: PromptBlockLabel[] = [
-  { type: "role", labelJa: "役割設定", labelEn: "Role" },
-  { type: "guardrails", labelJa: "品質ガードレール", labelEn: "Quality Guardrails" },
-  { type: "context", labelJa: "研究コンテキスト", labelEn: "Context" },
-  { type: "task", labelJa: "タスク指示", labelEn: "Task" },
-  { type: "format", labelJa: "出力フォーマット", labelEn: "Format" },
-  { type: "constraints", labelJa: "制約条件", labelEn: "Constraints" },
-  { type: "disclaimer", labelJa: "免責事項", labelEn: "Disclaimer" },
+export const MODEL_OPTIONS: ModelOption[] = [
+  { id: "sonnet", labelJa: "Sonnet（バランス型）", labelEn: "Sonnet (Balanced)" },
+  { id: "opus", labelJa: "Opus（高性能）", labelEn: "Opus (Most Capable)" },
+  { id: "haiku", labelJa: "Haiku（高速）", labelEn: "Haiku (Fast)" },
+  { id: "inherit", labelJa: "継承（親セッション）", labelEn: "Inherit (Parent)" },
 ];
 
-export const SYSTEM_BLOCK_TYPES: PromptBlockType[] = ["role", "guardrails", "disclaimer"];
-export const USER_BLOCK_TYPES: PromptBlockType[] = ["context", "task", "format", "constraints"];
+// ─── 研究分野（エージェント用） ─────────────────────────────
 
-export interface LLMModelInfo {
+export interface ResearchFieldInfo {
   id: string;
-  name: string;
+  labelJa: string;
+  labelEn: string;
 }
 
-export const ANTHROPIC_MODELS: LLMModelInfo[] = [
-  { id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6" },
-  { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
-  { id: "claude-opus-4-6", name: "Claude Opus 4.6" },
+export const RESEARCH_FIELDS: ResearchFieldInfo[] = [
+  { id: "natural_science", labelJa: "自然科学", labelEn: "Natural Science" },
+  { id: "medicine", labelJa: "医学", labelEn: "Medicine" },
+  { id: "engineering", labelJa: "工学", labelEn: "Engineering" },
+  { id: "computer_science", labelJa: "情報科学", labelEn: "Computer Science" },
+  { id: "social_science", labelJa: "社会科学", labelEn: "Social Science" },
+  { id: "humanities", labelJa: "人文学", labelEn: "Humanities" },
+  { id: "interdisciplinary", labelJa: "学際的", labelEn: "Interdisciplinary" },
 ];
 
-export const OPENAI_MODELS: LLMModelInfo[] = [
-  { id: "gpt-4o", name: "GPT-4o" },
-  { id: "gpt-4o-mini", name: "GPT-4o mini" },
-  { id: "gpt-4-turbo", name: "GPT-4 Turbo" },
-];
+// ─── ウィザードステップラベル ────────────────────────────────
+
+export const WIZARD_STEP_LABELS: Record<1 | 2 | 3 | 4, string> = {
+  1: "拡張タイプ",
+  2: "テンプレート",
+  3: "詳細設定",
+  4: "内容編集",
+};

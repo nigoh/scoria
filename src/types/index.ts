@@ -1,104 +1,139 @@
-// ─── 研究フェーズ（F-014） ───────────────────────────────────
+// ─── 拡張タイプ ──────────────────────────────────────────────
 
-export type ResearchPhase =
-  | "theme_setting"
-  | "prior_research"
-  | "hypothesis_building"
-  | "methodology_design";
+export type ExtensionType = "skill" | "agent" | "plugin";
 
-export interface ResearchField {
-  id: string;
+// ─── テンプレート ────────────────────────────────────────────
+
+export type TemplateId =
+  | "systematic_review"
+  | "meta_analysis"
+  | "citation_check"
+  | "methodology_advisor"
+  | "paper_structure"
+  | "search_strategy"
+  | "custom";
+
+export interface TemplateDefinition {
+  id: TemplateId;
   labelJa: string;
   labelEn: string;
+  descriptionJa: string;
+  supportedTypes: ExtensionType[];
 }
 
 // ─── ウィザード ──────────────────────────────────────────────
 
-export type WizardStep = 1 | 2 | 3 | 4 | 5;
+export type WizardStep = 1 | 2 | 3 | 4;
 
-export interface Keyword {
-  id: string;
-  value: string;
+export type EffortLevel = "low" | "medium" | "high" | "max";
+
+export interface SkillConfig {
+  argumentHint: string;
+  allowedTools: string[];
+  model: ModelChoice;
+  userInvocable: boolean;
+  effort: EffortLevel | null;
+  context: "inline" | "fork";
+  agent: string | null;
+  disableModelInvocation: boolean;
+  paths: string;
+  shell: "bash" | "powershell";
 }
 
-export interface WizardConditions {
-  enabledDatabaseIds: string[];
+export interface AgentConfig {
+  tools: string[];
+  model: ModelChoice;
+  maxTurns: number;
+  researchField: string | null;
+  effort: EffortLevel | null;
+  disallowedTools: string[];
+  skills: string;
+  isolation: "none" | "worktree";
+}
+
+export interface PluginConfig {
+  includeSkills: boolean;
+  includeAgents: boolean;
+  includeHooks: boolean;
+  includeClaudeMd: boolean;
+  includeMcp: boolean;
+  includePluginJson: boolean;
+  includeReadme: boolean;
+  pluginVersion: string;
+  pluginAuthor: string;
+  pluginKeywords: string;
+}
+
+export type ModelChoice = "sonnet" | "opus" | "haiku" | "inherit";
+
+export interface ExtensionFormData {
+  extensionType: ExtensionType | null;
+  templateId: TemplateId | null;
+  name: string;
+  description: string;
   outputLanguage: "ja" | "en";
-  yearRange: { from: number | null; to: number | null };
+  skillConfig: SkillConfig;
+  agentConfig: AgentConfig;
+  pluginConfig: PluginConfig;
+  hookEntries: HookEntry[];
+  mcpEntries: McpServerEntry[];
 }
 
-export interface WizardFormData {
-  phase: ResearchPhase | null;
-  field: string | null;
-  keywords: Keyword[];
-  purpose: string;
-  comparisonItems: string[];
-  comparisonAxes: string[];
-  conditions: WizardConditions;
-}
+// ─── フック ──────────────────────────────────────────────────
 
-// ─── プロンプトブロック ──────────────────────────────────────
+export type HookType = "command" | "http" | "prompt" | "agent";
 
-export type PromptBlockType =
-  | "role"
-  | "guardrails"
-  | "context"
-  | "task"
-  | "format"
-  | "constraints"
-  | "disclaimer";
-
-export interface PromptBlock {
+export interface HookEntry {
   id: string;
-  type: PromptBlockType;
-  labelJa: string;
+  event: string;
+  matcher: string;
+  hookType: HookType;
+  command: string;
+  url: string;
+  prompt: string;
+  timeout: number;
+}
+
+// ─── MCP サーバー ────────────────────────────────────────────
+
+export interface McpServerEntry {
+  id: string;
+  name: string;
+  command: string;
+  args: string;
+  env: string;
+}
+
+// ─── 生成ファイル ────────────────────────────────────────────
+
+export interface GeneratedFile {
+  path: string;
+  content: string;
+  language: string;
+}
+
+export interface ContentBlock {
+  id: string;
+  label: string;
   content: string;
   enabled: boolean;
 }
 
-export interface GeneratedPromptData {
-  blocks: PromptBlock[];
-  systemPrompt: string;
-  userPrompt: string;
-  fullText: string;
+export interface GeneratedExtension {
+  files: GeneratedFile[];
+  blocks: ContentBlock[];
   generatedAt: string;
 }
 
-// ─── 学術 DB ─────────────────────────────────────────────────
+// ─── 履歴 ─────────────────────────────────────────────────
 
-export type DatabaseCategory =
-  | "multidisciplinary_intl"
-  | "field_specific_intl"
-  | "tool"
-  | "domestic_jp"
-  | "patent";
-
-export interface AcademicDatabase {
+export interface HistoryEntry {
   id: string;
   name: string;
-  category: DatabaseCategory;
-  field: string;
-  access: "free" | "paid" | "oa";
-  url: string;
-}
-
-// ─── LLM ─────────────────────────────────────────────────────
-
-export type LLMProvider = "anthropic" | "openai";
-
-export interface LLMProviderConfig {
-  provider: LLMProvider;
-  model: string;
-  encryptedApiKey: string | null;
-}
-
-export interface AppSettings {
-  activeProvider: LLMProvider;
-  providers: Record<LLMProvider, LLMProviderConfig>;
-  enabledDatabaseIds: string[];
-}
-
-export interface LLMMessage {
-  role: "user" | "assistant" | "system";
-  content: string;
+  extensionType: ExtensionType;
+  templateId: TemplateId;
+  formData: ExtensionFormData;
+  blocks: ContentBlock[];
+  generatedAt: string;
+  savedAt: string;
 }
