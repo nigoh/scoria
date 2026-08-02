@@ -41,6 +41,8 @@ lib/                  # generator, templates, constants, cli, zip, utils
 
 - **ビルド:** Vite / **言語:** TypeScript（`strict: true`、パスエイリアス `@/` → `src/`）
 - **UI:** React 19 + shadcn/ui（Radix UI）+ Tailwind CSS v4 + Phosphor Icons
+- **デザイン:** コンソール方向（ADR-0026）。色は `src/index.css` のトークンが正本で、
+  個別コンポーネントに色を直書きしない。角丸 0・等幅が既定・琥珀は主アクション専用
 - **状態:** zustand / **ルーティング:** react-router-dom v7 / **ZIP:** JSZip / **DnD:** dnd-kit
 - **テスト:** Vitest（ユニット）+ Playwright（E2E）
 - **リンタ/フォーマッタ:** ESLint (flat config) / Prettier

@@ -23,7 +23,7 @@ export function Component() {
             利用規約
           </Link>
         </div>
-        <p>Scoria — 学術研究プロンプト生成ツール</p>
+        <p>Scoria — 学術研究のための Claude Code 拡張ジェネレータ</p>
         <p>
           Created by{" "}
           <a

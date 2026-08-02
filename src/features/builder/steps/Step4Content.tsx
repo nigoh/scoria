@@ -1,17 +1,16 @@
 import { PromptBlockList } from "../PromptBlockList";
 import { useExtensionStore } from "@/stores/extensionStore";
+import { StepHeading } from "../StepHeading";
 
 export function Step4Content() {
   const { generatedExtension } = useExtensionStore();
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold">内容を編集</h2>
-        <p className="text-sm text-muted-foreground">
-          生成されたブロックの内容を編集・並べ替え・トグルできます
-        </p>
-      </div>
+      <StepHeading
+        title="内容を編集"
+        hint="ブロックの本文を書き換え、並べ替え、不要なものを外せます。"
+      />
       {generatedExtension ? (
         <PromptBlockList />
       ) : (

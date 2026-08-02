@@ -10,9 +10,9 @@ test.describe("Scoria E2E - Claude Code Extension Generator", () => {
   test("ホームページが正しく表示される", async ({ page }) => {
     await goto(page, "/");
     await expect(
-      page.getByRole("heading", { name: /学術研究を加速する/ }),
+      page.getByRole("heading", { name: /学術研究のための/ }),
     ).toBeVisible();
-    await expect(page.getByText("拡張を作成する").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "拡張をつくる" })).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "拡張タイプを選択" }),
     ).toBeVisible();

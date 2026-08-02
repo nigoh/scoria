@@ -36,3 +36,4 @@
 | [0023](0023-stop-mape-nightly-cron.md) | MAPE-K の夜間 cron を止め、手動起動のみにする（0019 を supersede） | Proposed |
 | [0024](0024-adopt-deb-foundation-and-stack-gates.md) | deb の開発土台を移植し、Vite + React スタックを品質ゲートに配線する | Accepted |
 | [0025](0025-exclude-companion-plugin-and-retarget-doc-gates.md) | コンパニオンプラグインを移植対象から外し、ドキュメント系ゲートを Scoria 向けに向け直す | Accepted |
+| [0026](0026-console-design-direction.md) | 画面デザインの方向を「コンソール」に定め、デザイントークンを作り直す | Accepted |

@@ -11,7 +11,7 @@ export function TutorialCTA() {
     <section
       ref={ref}
       className={cn(
-        "rounded-xl border border-border bg-muted/30 px-8 py-12 text-center transition-all duration-700",
+        "border border-border bg-card px-8 py-12 text-center transition-all duration-700",
         inView ? "animate-fade-in-up" : "opacity-0",
       )}
     >
