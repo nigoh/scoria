@@ -61,12 +61,12 @@ export function WizardPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+      <div className="flex items-center gap-3 border-b border-border bg-card px-3 py-2">
         <WizardProgress currentStep={currentStep} />
         <HistoryDialog />
       </div>
       <div className="flex-1 overflow-y-auto p-4">{stepComponent}</div>
-      <div className="flex items-center justify-between border-t border-border px-4 py-3">
+      <div className="flex items-center justify-between border-t border-border bg-card px-3 py-2">
         <Button variant="ghost" onClick={prevStep} disabled={currentStep === 1} className="gap-1">
           <ArrowLeft size={16} />
           戻る

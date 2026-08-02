@@ -20,16 +20,14 @@ import {
 import { HooksEditor } from "../HooksEditor";
 import { McpEditor } from "../McpEditor";
 import type { ModelChoice, EffortLevel } from "@/types";
+import { StepHeading } from "../StepHeading";
 
 export function Step3Config() {
   const { formData } = useWizardStore();
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">詳細設定</h2>
-        <p className="text-sm text-muted-foreground">拡張の動作に関する詳細を設定してください</p>
-      </div>
+      <StepHeading title="詳細設定" hint="拡張の動作を決めます。既定のままでも生成できます。" />
 
       {formData.extensionType === "skill" && <SkillConfigTabs />}
       {formData.extensionType === "agent" && <AgentConfigTabs />}

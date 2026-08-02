@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: "Noto Sans JP", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  /* 等幅を既定に置く（ADR-0026）。和文等幅は同梱していないので、Latin=JetBrains Mono /
+     和文=システムのゴシックへフォールバックする混植を前提に組む。 */
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Hiragino Sans",
+    "Yu Gothic Medium", "Yu Gothic", "Noto Sans JP", monospace;
+  /* 長い日本語の説明文だけ明示的にこちらを使う（等幅の和文フォールバックは行長が伸びて読みにくい） */
+  --font-sans:
+    "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -23,6 +29,8 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  /* 識別子・パス・副次的な強調。shadcn の --accent はホバー面の色なので強調色を入れない（ADR-0026） */
+  --color-signal: hsl(var(--signal));
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -33,12 +41,8 @@
   --animate-accordion-close: accordion-up 0.2s ease-out;
   --animate-logo-in: logo-slide-in 0.5s ease-out both;
   --animate-fade-in-up: fade-in-up 0.6s ease-out both;
-  --animate-geo-float-1: geo-float-1 25s ease-in-out infinite;
-  --animate-geo-float-2: geo-float-2 32s ease-in-out infinite;
-  --animate-geo-float-3: geo-float-3 20s ease-in-out infinite;
-  --animate-geo-float-4: geo-float-4 38s ease-in-out infinite;
-  --animate-geo-float-5: geo-float-5 28s ease-in-out infinite;
   --animate-dash-flow: dash-flow 2s linear infinite;
+  --animate-caret: caret-blink 1.1s steps(1) infinite;
 }
 
 @keyframes logo-slide-in {
@@ -51,32 +55,9 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes geo-float-1 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(30px, -40px) rotate(120deg); }
-  66% { transform: translate(-20px, 20px) rotate(240deg); }
-}
-
-@keyframes geo-float-2 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(-40px, -30px) rotate(180deg); }
-}
-
-@keyframes geo-float-3 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  50% { transform: translate(20px, -50px) rotate(90deg) scale(1.1); }
-}
-
-@keyframes geo-float-4 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(-30px, -20px) rotate(90deg); }
-  50% { transform: translate(10px, -50px) rotate(180deg); }
-  75% { transform: translate(30px, -10px) rotate(270deg); }
-}
-
-@keyframes geo-float-5 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-15px, -35px) scale(0.9); }
+@keyframes caret-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
 }
 
 @keyframes dash-flow {
@@ -93,49 +74,57 @@
   to { height: 0; }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   コンソール（ADR-0026）
+   ライトは「印刷したリスト」として別に設計する。反転ではない。
+   琥珀 = 唯一の主アクション色 / シアン(--signal) = 識別子・パス
+   ───────────────────────────────────────────────────────────── */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  --background: 200 16% 96%;
+  --foreground: 205 37% 12%;
   --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
+  --card-foreground: 205 37% 12%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 217.2 91.2% 59.8%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 217.2 91.2% 59.8%;
-  --radius: 0.5rem;
+  --popover-foreground: 205 37% 12%;
+  --primary: 35 81% 36%;
+  --primary-foreground: 40 60% 97%;
+  --secondary: 200 12% 92%;
+  --secondary-foreground: 205 37% 12%;
+  --muted: 200 12% 92%;
+  --muted-foreground: 202 13% 41%;
+  /* ホバー面。強調色を入れない（入れるとホバーのたびに画面が光る） */
+  --accent: 200 14% 90%;
+  --accent-foreground: 205 37% 12%;
+  --signal: 190 62% 30%;
+  --destructive: 4 66% 42%;
+  --destructive-foreground: 40 60% 97%;
+  --border: 207 14% 85%;
+  --input: 207 14% 85%;
+  --ring: 35 81% 36%;
+  --radius: 0rem;
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 213.1 93.9% 67.8%;
-  --primary-foreground: 0 0% 0%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 213.1 93.9% 67.8%;
-  --accent-foreground: 0 0% 0%;
-  --destructive: 0 72.2% 70.6%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 240 3.7% 27.5%;
-  --input: 240 3.7% 27.5%;
-  --ring: 213.1 93.9% 67.8%;
+  --background: 204 26% 7%;
+  --foreground: 201 20% 81%;
+  --card: 206 27% 10%;
+  --card-foreground: 201 20% 81%;
+  --popover: 206 27% 10%;
+  --popover-foreground: 201 20% 81%;
+  --primary: 36 79% 57%;
+  --primary-foreground: 204 26% 7%;
+  --secondary: 207 27% 13%;
+  --secondary-foreground: 201 20% 81%;
+  --muted: 207 27% 13%;
+  --muted-foreground: 200 12% 48%;
+  --accent: 207 27% 15%;
+  --accent-foreground: 201 20% 81%;
+  --signal: 190 46% 57%;
+  --destructive: 4 70% 62%;
+  --destructive-foreground: 204 26% 7%;
+  --border: 205 25% 19%;
+  --input: 205 25% 19%;
+  --ring: 36 79% 57%;
 }
 
 @layer base {
@@ -143,7 +132,12 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    /* 既定を等幅にする。これがコンソール方向の土台（ADR-0026） */
+    @apply bg-background text-foreground font-mono antialiased;
+  }
+  /* 罫線でブロックを区切る方向なので、選択範囲も面ではなく信号色で示す */
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
   }
 }
 

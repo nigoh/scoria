@@ -7,6 +7,7 @@ import { useWizardStore } from "@/stores/wizardStore";
 import { TEMPLATES } from "@/lib/constants";
 import { TEMPLATE_CONTENTS, TEMPLATE_CONTENTS_EN } from "@/lib/templates";
 import type { TemplateId } from "@/types";
+import { StepHeading } from "../StepHeading";
 
 export function Step2Template() {
   const { formData, setTemplateId, setName, setDescription, setOutputLanguage } = useWizardStore();
@@ -42,12 +43,10 @@ export function Step2Template() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">テンプレート & 基本設定</h2>
-        <p className="text-sm text-muted-foreground">
-          学術テンプレートを選択し、基本情報を設定してください
-        </p>
-      </div>
+      <StepHeading
+        title="テンプレート & 基本設定"
+        hint="学術テンプレートを選び、名前と説明を決めてください。"
+      />
 
       <div className="grid grid-cols-2 gap-2">
         {filteredTemplates.map((tmpl) => {

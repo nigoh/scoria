@@ -3,14 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scoria — 学術検索プロンプト生成ツール</title>
+    <title>Scoria — 学術研究のための Claude Code 拡張ジェネレータ</title>
     <link rel="icon" type="image/svg+xml" href="/scoria-favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <!--
+      外部フォントは読み込まない（ADR-0026）。等幅の JetBrains Mono は同梱しており、
+      和文はシステムのゴシックにフォールバックする。第三者へのリクエストを持たないことは
+      「ブラウザ内で完結」という説明とも整合する。
+    -->
   </head>
   <body>
     <div id="root"></div>

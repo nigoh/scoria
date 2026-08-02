@@ -3,7 +3,6 @@ import { FloppyDisk, Check } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { EmptyStateIllustration } from "@/components/illustrations/EmptyStateIllustration";
 import { CopyButton } from "./CopyButton";
 import { DownloadButton } from "./DownloadButton";
 import { CliDialog } from "./CliDialog";
@@ -43,7 +42,7 @@ export function PreviewPanel() {
         onValueChange={(v) => setActiveTab(v as PreviewTab)}
         className="flex flex-1 flex-col"
       >
-        <div className="border-b border-border px-4">
+        <div className="border-b border-border bg-card px-3">
           <TabsList>
             <TabsTrigger value="files">ファイルツリー</TabsTrigger>
             <TabsTrigger value="preview">プレビュー</TabsTrigger>
@@ -78,7 +77,7 @@ export function PreviewPanel() {
         </TabsContent>
       </Tabs>
 
-      <div className="flex items-center gap-2 border-t border-border px-4 py-3">
+      <div className="flex items-center gap-2 border-t border-border bg-card px-3 py-2">
         <CopyButton text={copyText} />
         <CliDialog />
         <Button
@@ -97,14 +96,35 @@ export function PreviewPanel() {
   );
 }
 
+/**
+ * 生成前の状態（ADR-0026）。
+ * 中央にイラストを置くのはやめ、これから何が起きるかを左揃えの手順として示す。
+ * 空の広い面より、次に押す場所が分かることを優先する。
+ */
 function EmptyPlaceholder() {
+  const steps = [
+    "拡張タイプを選ぶ",
+    "テンプレートと名前を決める",
+    "詳細を設定する",
+    "生成して内容を整える",
+  ];
+
   return (
-    <div className="flex h-80 flex-col items-center justify-center gap-4 text-muted-foreground">
-      <EmptyStateIllustration className="h-48 w-auto" />
-      <p className="text-center text-sm">
-        ウィザードを完了すると
-        <br />
-        生成ファイルがここに表示されます
+    <div className="max-w-md space-y-3 text-sm">
+      <p className="text-muted-foreground">
+        <span className="text-primary">$</span> まだ生成していません
+        <span className="animate-caret ml-0.5 text-primary">▌</span>
+      </p>
+      <ol className="space-y-1 text-xs text-muted-foreground">
+        {steps.map((label, i) => (
+          <li key={label} className="flex gap-2">
+            <span className="tabular-nums text-signal">[{i + 1}/4]</span>
+            <span className="font-sans">{label}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="font-sans text-xs leading-relaxed text-muted-foreground">
+        4つ目まで進むと、生成されたファイルがここに並びます。
       </p>
     </div>
   );

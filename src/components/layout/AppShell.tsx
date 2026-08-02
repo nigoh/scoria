@@ -1,49 +1,40 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { Compass } from "@phosphor-icons/react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useTheme } from "@/components/theme-provider";
+import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 
 const navItems = [{ to: "/builder", label: "ビルダー", icon: Compass }];
 
-function getResolvedTheme(theme: string): "light" | "dark" {
-  if (theme === "system") {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-  return theme as "light" | "dark";
-}
-
 export function AppShell() {
-  const { theme } = useTheme();
-  const resolved = getResolvedTheme(theme);
-  const logoSrc = resolved === "dark" ? "/scoria-logo-dark.svg" : "/scoria-logo-light.svg";
-
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-6">
+      {/* コンソールのタイトルバー（ADR-0026）。角丸なし・罫線で区切る */}
+      <header className="sticky top-0 z-40 border-b border-border bg-card">
+        <div className="mx-auto flex h-12 max-w-6xl items-center justify-between pr-3">
+          <div className="flex h-full items-stretch">
             <NavLink
               to="/"
-              className="animate-logo-in transition-transform duration-200 hover:scale-[1.03]"
+              className="animate-logo-in flex items-center border-r border-border px-4 transition-opacity hover:opacity-80"
             >
-              <img src={logoSrc} alt="Scoria" className="h-7" />
+              <Logo />
             </NavLink>
-            <nav className="flex items-center gap-1">
+            <nav className="flex items-stretch">
               {navItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                      // 琥珀は主アクション専用（ADR-0026）。現在地は下線で示し、面を塗らない
+                      "flex items-center gap-1.5 border-r border-border px-4 text-sm transition-colors",
                       isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                        ? "text-foreground shadow-[inset_0_-2px_0_hsl(var(--primary))]"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground",
                     )
                   }
                 >
-                  <item.icon size={16} />
+                  <item.icon size={15} />
                   {item.label}
                 </NavLink>
               ))}
