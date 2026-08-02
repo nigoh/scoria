@@ -103,8 +103,12 @@ t "go.sum の編集をブロック"          "$P" '{"tool_input":{"file_path":"/
 # Accepted ADR の期待値は「その ADR が origin/main に在るか」で決まる（guard の契約そのもの。
 # マージ済み＝編集禁止 / 未マージ＝導入前なので訂正可）。ブロック固定にすると、ADR がまだ main に
 # 無いリポジトリで偽赤になる。マージ済み側は下の隔離 git リポジトリが決定論的に網羅している。
+# guard は3状態を持つ。許可になるのは真ん中だけで、origin/main を参照できない環境
+# （CI の浅い checkout など）は「未マージ」ではなく fail-closed でブロックに倒れる。
 A="docs/adr/0001-steering-placement-policy.md"
-if git rev-parse --verify -q origin/main >/dev/null 2>&1 && git cat-file -e "origin/main:$A" 2>/dev/null; then
+if ! git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+  AW=2; AS="origin/main 参照不能→fail-closed"
+elif git cat-file -e "origin/main:$A" 2>/dev/null; then
   AW=2; AS="main マージ済み→ブロック"
 else
   AW=0; AS="main 未マージ→訂正可"

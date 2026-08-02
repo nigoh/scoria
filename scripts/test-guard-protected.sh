@@ -559,9 +559,12 @@ fi
 # ADR がまだ main に無いリポジトリ（土台を移植した直後など）で偽赤になる。
 # マージ済み側の網羅は 6) の隔離 git リポジトリが決定論的に担保しており、ここは
 # 「実リポジトリの実状態に対して hook が契約どおり動くか」の確認に徹する。
+# guard は3状態を持つ。許可になるのは真ん中だけで、origin/main を参照できない環境
+# （CI の浅い checkout など）は「未マージ」ではなく fail-closed でブロックに倒れる。
 adr_rel="docs/adr/0001-steering-placement-policy.md"
-if git rev-parse --verify -q origin/main >/dev/null 2>&1 \
-   && git cat-file -e "origin/main:$adr_rel" 2>/dev/null; then
+if ! git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+  adr_want=2; adr_state="origin/main を参照できない→fail-closed でブロック"
+elif git cat-file -e "origin/main:$adr_rel" 2>/dev/null; then
   adr_want=2; adr_state="main マージ済み→ブロック"
 else
   adr_want=0; adr_state="main 未マージ→訂正可"
