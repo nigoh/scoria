@@ -28,9 +28,7 @@ export function Step3Config() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">詳細設定</h2>
-        <p className="text-sm text-muted-foreground">
-          拡張の動作に関する詳細を設定してください
-        </p>
+        <p className="text-sm text-muted-foreground">拡張の動作に関する詳細を設定してください</p>
       </div>
 
       {formData.extensionType === "skill" && <SkillConfigTabs />}
@@ -114,10 +112,7 @@ function SkillBasicConfig() {
 
       <div>
         <Label>モデル</Label>
-        <Select
-          value={skillConfig.model}
-          onValueChange={(v) => setSkillModel(v as ModelChoice)}
-        >
+        <Select value={skillConfig.model} onValueChange={(v) => setSkillModel(v as ModelChoice)}>
           <SelectTrigger className="mt-1">
             <SelectValue />
           </SelectTrigger>
@@ -138,10 +133,7 @@ function SkillBasicConfig() {
             ユーザーがスラッシュコマンドで直接実行できるようにする
           </p>
         </div>
-        <Switch
-          checked={skillConfig.userInvocable}
-          onCheckedChange={setSkillUserInvocable}
-        />
+        <Switch checked={skillConfig.userInvocable} onCheckedChange={setSkillUserInvocable} />
       </div>
     </div>
   );
@@ -179,9 +171,7 @@ function SkillAdvancedConfig() {
             ))}
           </SelectContent>
         </Select>
-        <p className="mt-1 text-xs text-muted-foreground">
-          モデルの推論の深さを制御します
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">モデルの推論の深さを制御します</p>
       </div>
 
       <div>
@@ -335,10 +325,7 @@ function AgentBasicConfig() {
 
       <div>
         <Label>モデル</Label>
-        <Select
-          value={agentConfig.model}
-          onValueChange={(v) => setAgentModel(v as ModelChoice)}
-        >
+        <Select value={agentConfig.model} onValueChange={(v) => setAgentModel(v as ModelChoice)}>
           <SelectTrigger className="mt-1">
             <SelectValue />
           </SelectTrigger>
@@ -389,13 +376,8 @@ function AgentBasicConfig() {
 }
 
 function AgentAdvancedConfig() {
-  const {
-    formData,
-    setAgentEffort,
-    setAgentDisallowedTools,
-    setAgentSkills,
-    setAgentIsolation,
-  } = useWizardStore();
+  const { formData, setAgentEffort, setAgentDisallowedTools, setAgentSkills, setAgentIsolation } =
+    useWizardStore();
   const { agentConfig } = formData;
 
   return (
@@ -418,9 +400,7 @@ function AgentAdvancedConfig() {
             ))}
           </SelectContent>
         </Select>
-        <p className="mt-1 text-xs text-muted-foreground">
-          モデルの推論の深さを制御します
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">モデルの推論の深さを制御します</p>
       </div>
 
       <div>
@@ -448,9 +428,7 @@ function AgentAdvancedConfig() {
             );
           })}
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          エージェントが使用できないツールを選択
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">エージェントが使用できないツールを選択</p>
       </div>
 
       <div>
@@ -501,13 +479,8 @@ type BooleanPluginKeys = {
 }[keyof import("@/types").PluginConfig];
 
 function PluginConfig() {
-  const {
-    formData,
-    togglePluginComponent,
-    setPluginVersion,
-    setPluginAuthor,
-    setPluginKeywords,
-  } = useWizardStore();
+  const { formData, togglePluginComponent, setPluginVersion, setPluginAuthor, setPluginKeywords } =
+    useWizardStore();
   const { pluginConfig } = formData;
 
   const components: { key: BooleanPluginKeys; label: string; desc: string }[] = [

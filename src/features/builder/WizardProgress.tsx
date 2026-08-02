@@ -15,14 +15,7 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
         const isCurrent = step === currentStep;
         return (
           <div key={step} className="flex items-center gap-1">
-            {i > 0 && (
-              <div
-                className={cn(
-                  "h-px w-6",
-                  isCompleted ? "bg-primary" : "bg-border",
-                )}
-              />
-            )}
+            {i > 0 && <div className={cn("h-px w-6", isCompleted ? "bg-primary" : "bg-border")} />}
             <div
               className={cn(
                 "flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors",

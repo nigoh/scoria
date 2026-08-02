@@ -7,11 +7,7 @@ const MAX_ENTRIES = 20;
 
 interface HistoryState {
   entries: HistoryEntry[];
-  saveEntry: (
-    formData: ExtensionFormData,
-    blocks: ContentBlock[],
-    generatedAt: string,
-  ) => void;
+  saveEntry: (formData: ExtensionFormData, blocks: ContentBlock[], generatedAt: string) => void;
   deleteEntry: (id: string) => void;
   clearAll: () => void;
 }

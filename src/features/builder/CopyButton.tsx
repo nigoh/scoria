@@ -16,13 +16,7 @@ export function CopyButton({ text }: CopyButtonProps) {
   };
 
   return (
-    <Button
-      variant="secondary"
-      size="sm"
-      onClick={handleCopy}
-      disabled={!text}
-      className="gap-1.5"
-    >
+    <Button variant="secondary" size="sm" onClick={handleCopy} disabled={!text} className="gap-1.5">
       {copied ? (
         <>
           <CheckCircle size={16} className="text-primary" />

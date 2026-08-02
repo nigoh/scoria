@@ -36,18 +36,15 @@ export type { TemplateMap };
 
 export const TEMPLATE_CONTENTS: TemplateMap = {
   systematic_review: {
-    skill: skillContent(
-      "systematic-review",
-      "PRISMA準拠の系統的文献レビューを実行する",
-      [
-        {
-          label: "役割設定",
-          content:
-            "あなたは系統的文献レビューの専門家です。PRISMA 2020ガイドラインに準拠し、エビデンスに基づいた包括的な文献レビューを支援します。",
-        },
-        {
-          label: "タスク指示",
-          content: `ユーザーが指定した研究テーマについて、以下の手順で系統的文献レビューを支援してください：
+    skill: skillContent("systematic-review", "PRISMA準拠の系統的文献レビューを実行する", [
+      {
+        label: "役割設定",
+        content:
+          "あなたは系統的文献レビューの専門家です。PRISMA 2020ガイドラインに準拠し、エビデンスに基づいた包括的な文献レビューを支援します。",
+      },
+      {
+        label: "タスク指示",
+        content: `ユーザーが指定した研究テーマについて、以下の手順で系統的文献レビューを支援してください：
 
 1. **研究課題の明確化**: PICO/PECOフレームワークで研究課題を構造化
 2. **検索戦略の策定**: 主要データベース（PubMed, Scopus, Web of Science等）向けの検索式を作成
@@ -56,25 +53,24 @@ export const TEMPLATE_CONTENTS: TemplateMap = {
 5. **バイアス評価**: 適切なバイアスリスク評価ツール（RoB 2, ROBINS-I等）を推奨
 
 $ARGUMENTS を研究テーマとして使用してください。`,
-        },
-        {
-          label: "出力フォーマット",
-          content: `以下の構造で出力してください：
+      },
+      {
+        label: "出力フォーマット",
+        content: `以下の構造で出力してください：
 - PICO/PECO分解表
 - データベースごとの検索式
 - 包含/除外基準リスト
 - PRISMAフローダイアグラムの各段階の説明
 - データ抽出テンプレート（表形式）`,
-        },
-        {
-          label: "品質ガードレール",
-          content: `- 検索式は再現可能性を確保してください
+      },
+      {
+        label: "品質ガードレール",
+        content: `- 検索式は再現可能性を確保してください
 - エビデンスレベルを明示してください
 - 未検証の主張にはその旨を注記してください
 - 実際のデータベース検索は研究者自身が行う必要がある点を明記してください`,
-        },
-      ],
-    ),
+      },
+    ]),
     agent: agentContent(
       "systematic-review-agent",
       "系統的文献レビューの各ステップを自律的に支援するエージェント",
@@ -213,18 +209,15 @@ $ARGUMENTS をテーマとして使用してください。`,
   },
 
   citation_check: {
-    skill: skillContent(
-      "citation-check",
-      "論文の引用整合性と参考文献リストを検証する",
-      [
-        {
-          label: "役割設定",
-          content:
-            "あなたは学術出版の品質管理専門家です。引用の正確性、参考文献リストの完全性、書式の一貫性を検証します。",
-        },
-        {
-          label: "タスク指示",
-          content: `論文ファイルを分析し、以下の観点で引用チェックを行ってください：
+    skill: skillContent("citation-check", "論文の引用整合性と参考文献リストを検証する", [
+      {
+        label: "役割設定",
+        content:
+          "あなたは学術出版の品質管理専門家です。引用の正確性、参考文献リストの完全性、書式の一貫性を検証します。",
+      },
+      {
+        label: "タスク指示",
+        content: `論文ファイルを分析し、以下の観点で引用チェックを行ってください：
 
 1. **本文中引用と参考文献リストの照合**: 未引用・未収録の不一致を検出
 2. **引用形式の一貫性**: APA/Vancouver/IEEE等の書式準拠を確認
@@ -233,77 +226,64 @@ $ARGUMENTS をテーマとして使用してください。`,
 5. **最新性**: 引用文献の年代分布を分析
 
 $ARGUMENTS を対象ファイルパスとして使用してください。`,
-        },
-        {
-          label: "出力フォーマット",
-          content: `- 不一致リスト（本文引用 vs 参考文献リスト）
+      },
+      {
+        label: "出力フォーマット",
+        content: `- 不一致リスト（本文引用 vs 参考文献リスト）
 - 書式エラーリスト
 - 引用統計サマリー（総数、年代分布、自己引用率）
 - 改善提案リスト`,
-        },
-      ],
-    ),
-    agent: agentContent(
-      "citation-check-agent",
-      "論文の引用を自動検証するエージェント",
-      [
-        {
-          label: "役割・専門性",
-          content:
-            "学術出版における引用検証を専門とするエージェントです。主要な引用スタイル（APA 7th, Vancouver, IEEE）に精通しています。",
-        },
-        {
-          label: "行動指針",
-          content: `1. 対象ファイルを読み込み、引用パターンを抽出
+      },
+    ]),
+    agent: agentContent("citation-check-agent", "論文の引用を自動検証するエージェント", [
+      {
+        label: "役割・専門性",
+        content:
+          "学術出版における引用検証を専門とするエージェントです。主要な引用スタイル（APA 7th, Vancouver, IEEE）に精通しています。",
+      },
+      {
+        label: "行動指針",
+        content: `1. 対象ファイルを読み込み、引用パターンを抽出
 2. 参考文献リストを解析
 3. 本文引用と参考文献の照合を実行
 4. レポートファイルを生成して保存`,
-        },
-        {
-          label: "制約事項",
-          content: `- ファイルの内容を変更せず、レポートのみ出力してください
+      },
+      {
+        label: "制約事項",
+        content: `- ファイルの内容を変更せず、レポートのみ出力してください
 - 不確実な指摘には信頼度を付記してください`,
-        },
-      ],
-    ),
-    plugin: pluginContent(
-      "citation-check",
-      "引用チェックを包括的に支援するプラグインパッケージ",
-      [
-        {
-          label: "スキル本文",
-          content:
-            "論文の引用整合性を検証し、参考文献リストの完全性・書式一貫性をチェックします。",
-        },
-        {
-          label: "エージェント本文",
-          content: "論文ファイルを読み込み、引用検証レポートを自動生成するエージェントです。",
-        },
-        {
-          label: "CLAUDE.md ガイド",
-          content: `## 引用チェックプロジェクト
+      },
+    ]),
+    plugin: pluginContent("citation-check", "引用チェックを包括的に支援するプラグインパッケージ", [
+      {
+        label: "スキル本文",
+        content: "論文の引用整合性を検証し、参考文献リストの完全性・書式一貫性をチェックします。",
+      },
+      {
+        label: "エージェント本文",
+        content: "論文ファイルを読み込み、引用検証レポートを自動生成するエージェントです。",
+      },
+      {
+        label: "CLAUDE.md ガイド",
+        content: `## 引用チェックプロジェクト
 
 ### 使い方
 1. /citation-check [ファイルパス] で検証開始
 2. レポートを確認して修正`,
-        },
-      ],
-    ),
+      },
+    ]),
   },
 
   methodology_advisor: {
-    skill: skillContent(
-      "methodology-advisor",
-      "研究デザインと統計手法の選定をガイドする",
-      [
-        {
-          label: "役割設定",
-          content:
-            "あなたは研究方法論の専門家です。定量・定性・混合研究法に精通し、適切な研究デザインの選定を支援します。",
-        },
-        {
-          label: "タスク指示",
-          content: `ユーザーの研究目的に基づいて、最適な研究手法を提案してください：
+    skill: skillContent("methodology-advisor", "研究デザインと統計手法の選定をガイドする", [
+      {
+        label: "役割設定",
+        content:
+          "あなたは研究方法論の専門家です。定量・定性・混合研究法に精通し、適切な研究デザインの選定を支援します。",
+      },
+      {
+        label: "タスク指示",
+        content: `ユーザーの研究目的に基づいて、最適な研究手法を提案してください：
 
 1. **研究デザインの推奨**: RCT、コホート、ケーススタディ等から最適な選択肢を提示
 2. **サンプルサイズ計算**: 検出力分析に基づくサンプルサイズの目安
@@ -312,16 +292,15 @@ $ARGUMENTS を対象ファイルパスとして使用してください。`,
 5. **妥当性・信頼性**: 内的・外的妥当性の確保方法
 
 $ARGUMENTS を研究テーマとして使用してください。`,
-        },
-        {
-          label: "出力フォーマット",
-          content: `- 推奨研究デザイン（理由付き）
+      },
+      {
+        label: "出力フォーマット",
+        content: `- 推奨研究デザイン（理由付き）
 - 手法比較表
 - サンプルサイズの目安
 - 分析計画のアウトライン`,
-        },
-      ],
-    ),
+      },
+    ]),
     agent: agentContent(
       "methodology-advisor-agent",
       "研究方法論の選定を対話的に支援するエージェント",
@@ -344,45 +323,38 @@ $ARGUMENTS を研究テーマとして使用してください。`,
         },
       ],
     ),
-    plugin: pluginContent(
-      "methodology-advisor",
-      "研究手法の選定を支援するプラグインパッケージ",
-      [
-        {
-          label: "スキル本文",
-          content: "研究デザインと統計手法の選定をガイドし、研究計画の立案を支援します。",
-        },
-        {
-          label: "エージェント本文",
-          content:
-            "研究方法論の専門家として、研究デザインの選定から分析計画の策定までを対話的に支援します。",
-        },
-        {
-          label: "CLAUDE.md ガイド",
-          content: `## 研究手法アドバイザー
+    plugin: pluginContent("methodology-advisor", "研究手法の選定を支援するプラグインパッケージ", [
+      {
+        label: "スキル本文",
+        content: "研究デザインと統計手法の選定をガイドし、研究計画の立案を支援します。",
+      },
+      {
+        label: "エージェント本文",
+        content:
+          "研究方法論の専門家として、研究デザインの選定から分析計画の策定までを対話的に支援します。",
+      },
+      {
+        label: "CLAUDE.md ガイド",
+        content: `## 研究手法アドバイザー
 
 ### ワークフロー
 1. /methodology-advisor で手法選定を開始
 2. 研究デザインの比較検討
 3. 分析計画の策定`,
-        },
-      ],
-    ),
+      },
+    ]),
   },
 
   paper_structure: {
-    skill: skillContent(
-      "paper-structure",
-      "IMRaD形式に沿った論文構成のアウトラインを生成する",
-      [
-        {
-          label: "役割設定",
-          content:
-            "あなたは学術論文執筆の専門家です。IMRaD形式やジャーナルの投稿規程に精通し、論文構成の最適化を支援します。",
-        },
-        {
-          label: "タスク指示",
-          content: `研究内容に基づいて論文のアウトラインを生成してください：
+    skill: skillContent("paper-structure", "IMRaD形式に沿った論文構成のアウトラインを生成する", [
+      {
+        label: "役割設定",
+        content:
+          "あなたは学術論文執筆の専門家です。IMRaD形式やジャーナルの投稿規程に精通し、論文構成の最適化を支援します。",
+      },
+      {
+        label: "タスク指示",
+        content: `研究内容に基づいて論文のアウトラインを生成してください：
 
 1. **タイトル候補**: 3つの候補を提案
 2. **アブストラクト構成**: 構造化アブストラクトのテンプレート
@@ -392,37 +364,32 @@ $ARGUMENTS を研究テーマとして使用してください。`,
 6. **Discussion**: 主要所見→先行研究との比較→限界→意義
 
 $ARGUMENTS を研究テーマとして使用してください。`,
-        },
-        {
-          label: "出力フォーマット",
-          content: `- 各セクションの構成案（箇条書き）
+      },
+      {
+        label: "出力フォーマット",
+        content: `- 各セクションの構成案（箇条書き）
 - 推奨図表リスト
 - パラグラフの流れの概要`,
-        },
-      ],
-    ),
-    agent: agentContent(
-      "paper-structure-agent",
-      "論文構成の策定と執筆支援を行うエージェント",
-      [
-        {
-          label: "役割・専門性",
-          content: "学術論文の構成・執筆支援を専門とするエージェントです。",
-        },
-        {
-          label: "行動指針",
-          content: `1. 既存のドラフトや研究メモを読み込む
+      },
+    ]),
+    agent: agentContent("paper-structure-agent", "論文構成の策定と執筆支援を行うエージェント", [
+      {
+        label: "役割・専門性",
+        content: "学術論文の構成・執筆支援を専門とするエージェントです。",
+      },
+      {
+        label: "行動指針",
+        content: `1. 既存のドラフトや研究メモを読み込む
 2. 論文のアウトラインを生成してファイルに保存
 3. 各セクションの詳細構成を提案
 4. ドラフトへのフィードバックを提供`,
-        },
-        {
-          label: "制約事項",
-          content: `- 論文の内容を捏造しないでください
+      },
+      {
+        label: "制約事項",
+        content: `- 論文の内容を捏造しないでください
 - フィードバックは建設的で具体的にしてください`,
-        },
-      ],
-    ),
+      },
+    ]),
     plugin: pluginContent(
       "paper-structure",
       "論文構成の策定を包括的に支援するプラグインパッケージ",
@@ -450,18 +417,15 @@ $ARGUMENTS を研究テーマとして使用してください。`,
   },
 
   search_strategy: {
-    skill: skillContent(
-      "search-strategy",
-      "学術データベース向けの検索クエリ・戦略を策定する",
-      [
-        {
-          label: "役割設定",
-          content:
-            "あなたは学術情報検索の専門家です。PubMed, Scopus, Web of Science等の検索構文に精通し、再現可能な検索戦略を策定します。",
-        },
-        {
-          label: "タスク指示",
-          content: `研究テーマに基づいて、学術データベース向けの検索戦略を策定してください：
+    skill: skillContent("search-strategy", "学術データベース向けの検索クエリ・戦略を策定する", [
+      {
+        label: "役割設定",
+        content:
+          "あなたは学術情報検索の専門家です。PubMed, Scopus, Web of Science等の検索構文に精通し、再現可能な検索戦略を策定します。",
+      },
+      {
+        label: "タスク指示",
+        content: `研究テーマに基づいて、学術データベース向けの検索戦略を策定してください：
 
 1. **概念分解**: 研究テーマをキーコンセプトに分解
 2. **シソーラス/MeSH**: 統制語彙の特定
@@ -470,63 +434,54 @@ $ARGUMENTS を研究テーマとして使用してください。`,
 5. **検索フィルター**: 年代、言語、文献種別のフィルター提案
 
 $ARGUMENTS を研究テーマとして使用してください。`,
-        },
-        {
-          label: "出力フォーマット",
-          content: `- コンセプトマップ（表形式）
+      },
+      {
+        label: "出力フォーマット",
+        content: `- コンセプトマップ（表形式）
 - データベース別検索式（コピペ可能）
 - 推奨フィルター設定
 - 検索戦略の文書化テンプレート`,
-        },
-      ],
-    ),
-    agent: agentContent(
-      "search-strategy-agent",
-      "学術検索戦略を自律的に策定するエージェント",
-      [
-        {
-          label: "役割・専門性",
-          content: "学術情報検索戦略の策定を専門とするエージェントです。",
-        },
-        {
-          label: "行動指針",
-          content: `1. 研究テーマを分析してキーコンセプトを抽出
+      },
+    ]),
+    agent: agentContent("search-strategy-agent", "学術検索戦略を自律的に策定するエージェント", [
+      {
+        label: "役割・専門性",
+        content: "学術情報検索戦略の策定を専門とするエージェントです。",
+      },
+      {
+        label: "行動指針",
+        content: `1. 研究テーマを分析してキーコンセプトを抽出
 2. 各データベース向けの検索式を生成
 3. 検索戦略ファイルを作成して保存
 4. 検索結果の評価基準を提案`,
-        },
-        {
-          label: "制約事項",
-          content: `- 検索式は実際に使用可能な構文にしてください
+      },
+      {
+        label: "制約事項",
+        content: `- 検索式は実際に使用可能な構文にしてください
 - 各データベースの構文の違いを正確に反映してください`,
-        },
-      ],
-    ),
-    plugin: pluginContent(
-      "search-strategy",
-      "学術検索戦略を包括的に支援するプラグインパッケージ",
-      [
-        {
-          label: "スキル本文",
-          content:
-            "PubMed, Scopus, Web of Science等の主要学術データベース向けに最適化された検索式と検索戦略を生成します。",
-        },
-        {
-          label: "エージェント本文",
-          content:
-            "研究テーマを分析し、複数の学術データベース向けの検索戦略を自律的に策定するエージェントです。",
-        },
-        {
-          label: "CLAUDE.md ガイド",
-          content: `## 検索戦略プロジェクト
+      },
+    ]),
+    plugin: pluginContent("search-strategy", "学術検索戦略を包括的に支援するプラグインパッケージ", [
+      {
+        label: "スキル本文",
+        content:
+          "PubMed, Scopus, Web of Science等の主要学術データベース向けに最適化された検索式と検索戦略を生成します。",
+      },
+      {
+        label: "エージェント本文",
+        content:
+          "研究テーマを分析し、複数の学術データベース向けの検索戦略を自律的に策定するエージェントです。",
+      },
+      {
+        label: "CLAUDE.md ガイド",
+        content: `## 検索戦略プロジェクト
 
 ### ワークフロー
 1. /search-strategy で検索戦略を生成
 2. データベース別に検索式を調整
 3. 検索結果の評価と戦略の改善`,
-        },
-      ],
-    ),
+      },
+    ]),
   },
 
   custom: {
@@ -537,7 +492,8 @@ $ARGUMENTS を研究テーマとして使用してください。`,
       },
       {
         label: "タスク指示",
-        content: "実行するタスクの指示を記述してください。\n\n$ARGUMENTS を入力として使用できます。",
+        content:
+          "実行するタスクの指示を記述してください。\n\n$ARGUMENTS を入力として使用できます。",
       },
       {
         label: "出力フォーマット",
@@ -923,18 +879,15 @@ Use $ARGUMENTS as the research topic.`,
   },
 
   paper_structure: {
-    skill: skillContent(
-      "paper-structure",
-      "Generate paper outlines following IMRaD format",
-      [
-        {
-          label: "Role Definition",
-          content:
-            "You are an academic paper writing expert. You are well-versed in IMRaD format and journal submission guidelines, and support paper structure optimization.",
-        },
-        {
-          label: "Task Instructions",
-          content: `Generate a paper outline based on the research content:
+    skill: skillContent("paper-structure", "Generate paper outlines following IMRaD format", [
+      {
+        label: "Role Definition",
+        content:
+          "You are an academic paper writing expert. You are well-versed in IMRaD format and journal submission guidelines, and support paper structure optimization.",
+      },
+      {
+        label: "Task Instructions",
+        content: `Generate a paper outline based on the research content:
 
 1. **Title candidates**: Propose 3 candidates
 2. **Abstract structure**: Structured abstract template
@@ -944,23 +897,21 @@ Use $ARGUMENTS as the research topic.`,
 6. **Discussion**: Key findings → comparison with prior research → limitations → significance
 
 Use $ARGUMENTS as the research topic.`,
-        },
-        {
-          label: "Output Format",
-          content: `- Structure proposal for each section (bullet points)
+      },
+      {
+        label: "Output Format",
+        content: `- Structure proposal for each section (bullet points)
 - Recommended figure and table list
 - Paragraph flow overview`,
-        },
-      ],
-    ),
+      },
+    ]),
     agent: agentContent(
       "paper-structure-agent",
       "An agent for paper structure development and writing support",
       [
         {
           label: "Role & Expertise",
-          content:
-            "An agent specializing in academic paper structure and writing support.",
+          content: "An agent specializing in academic paper structure and writing support.",
         },
         {
           label: "Behavior Guidelines",
@@ -982,8 +933,7 @@ Use $ARGUMENTS as the research topic.`,
       [
         {
           label: "Skill Body",
-          content:
-            "Generates paper outlines and section structures following IMRaD format.",
+          content: "Generates paper outlines and section structures following IMRaD format.",
         },
         {
           label: "Agent Body",
@@ -1040,8 +990,7 @@ Use $ARGUMENTS as the research topic.`,
       [
         {
           label: "Role & Expertise",
-          content:
-            "An agent specializing in academic information search strategy development.",
+          content: "An agent specializing in academic information search strategy development.",
         },
         {
           label: "Behavior Guidelines",
@@ -1092,8 +1041,7 @@ Use $ARGUMENTS as the research topic.`,
       },
       {
         label: "Task Instructions",
-        content:
-          "Describe the task instructions here.\n\nYou can use $ARGUMENTS as input.",
+        content: "Describe the task instructions here.\n\nYou can use $ARGUMENTS as input.",
       },
       {
         label: "Output Format",

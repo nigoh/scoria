@@ -15,14 +15,9 @@ interface PromptBlockProps {
 }
 
 export function PromptBlock({ block, onToggle, onContentChange, onDelete }: PromptBlockProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: block.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: block.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),

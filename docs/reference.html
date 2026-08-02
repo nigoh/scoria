@@ -1,0 +1,2875 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ソースリファレンス — Scoria</title>
+<meta name="description" content="Scoria の開発基盤スクリプト（scripts / mape / .claude/hooks）のリファレンス。役割別の索引・1行説明・検索つき。ソースのコメントから自動生成。">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%230a0a0a'/%3E%3Ctext x='12' y='17' font-size='15' font-family='monospace' font-weight='800' fill='%23fff' text-anchor='middle'%3Ed%3C/text%3E%3C/svg%3E">
+<script>
+  /* 描画前にテーマを確定して切替時のちらつきを防ぐ（保存があればそれを優先。無ければ OS 設定に従う） */
+  (function () {
+    try {
+      var t = localStorage.getItem('scoria-docs-theme');
+      if (t === 'light' || t === 'dark') { document.documentElement.setAttribute('data-theme', t); }
+    } catch (e) {}
+  })();
+</script>
+<style>
+:root{--bg:#ffffff;--bg-soft:#fafafa;--panel:#ffffff;--line:#eaeaea;--line-strong:#d4d4d4;
+  --fg:#0a0a0a;--fg-soft:#555555;--fg-mute:#8a8a8a;--inv:#ffffff;--maxw:1080px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#000000;--bg-soft:#0a0a0a;--panel:#0c0c0c;--line:#1e1e1e;--line-strong:#333333;--fg:#ededed;--fg-soft:#a1a1a1;--fg-mute:#707070;--inv:#000000}}
+:root[data-theme="light"]{--bg:#ffffff;--bg-soft:#fafafa;--panel:#ffffff;--line:#eaeaea;--line-strong:#d4d4d4;--fg:#0a0a0a;--fg-soft:#555555;--fg-mute:#8a8a8a;--inv:#ffffff}
+:root[data-theme="dark"]{--bg:#000000;--bg-soft:#0a0a0a;--panel:#0c0c0c;--line:#1e1e1e;--line-strong:#333333;--fg:#ededed;--fg-soft:#a1a1a1;--fg-mute:#707070;--inv:#000000}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased;letter-spacing:-.003em}
+a{color:inherit}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+@media (max-width:600px){.wrap{padding:0 16px}}
+
+/* ---------- Header ---------- */
+header{position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid var(--line)}
+@supports (backdrop-filter:blur(8px)){header{background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(8px)}}
+.nav{display:flex;align-items:center;height:56px;gap:24px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.02em;font-size:16px;text-decoration:none}
+.mark{width:22px;height:22px;border:1.5px solid var(--fg);display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:800}
+.links{margin-left:auto;display:flex;align-items:center;gap:2px}
+.links a{text-decoration:none;color:var(--fg-soft);font-size:13.5px;padding:6px 11px;transition:color .12s}
+.links a:hover{color:var(--fg)}
+.links a[aria-current="page"]{color:var(--fg);font-weight:650}
+.links a.gh{border:1px solid var(--line-strong);color:var(--fg);margin-left:6px}
+.links a.gh:hover{background:var(--fg);color:var(--inv)}
+.tt{margin-left:4px;width:30px;height:30px;border:1px solid var(--line-strong);background:transparent;color:var(--fg-soft);cursor:pointer;font-size:13px;display:grid;place-items:center;font-family:var(--font)}
+.tt:hover{color:var(--fg)}
+.tt svg{width:15px;height:15px;display:block}
+@media (max-width:760px){.links a.hide-sm{display:none}.links a{padding:6px 7px;font-size:12.5px}.links a.gh{margin-left:4px}.nav{gap:12px}}
+@media (max-width:460px){.links a.hide-xs{display:none}}
+
+/* ---------- Page head ---------- */
+.phead{border-bottom:1px solid var(--line);padding:44px 0 34px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--fg-soft);border:1px solid var(--line-strong);padding:4px 10px}
+.kicker b{color:var(--fg);font-weight:700}
+h1{font-size:clamp(26px,4vw,38px);line-height:1.15;margin:20px 0 0;font-weight:800;letter-spacing:-.035em}
+.lead{margin:16px 0 0;font-size:16px;color:var(--fg-soft);max-width:46em;line-height:1.65}
+.crumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--fg-mute)}
+.crumbs a{color:var(--fg-soft);text-decoration:none;border-bottom:1px solid var(--line-strong)}
+.crumbs a:hover{color:var(--fg)}
+.stats{display:flex;flex-wrap:wrap;margin-top:28px;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.stat{flex:1 1 150px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:13px 17px}
+.stat b{display:block;font-family:var(--mono);font-size:18px;font-weight:800;letter-spacing:-.02em}
+.stat span{font-size:11.5px;color:var(--fg-mute)}
+
+/* 本文の折り返し。注釈には MAPE_HEALTH/MAPE_POLICY/MAPE_BACKLOG/... のような空白を含まない
+   長い連結トークンが現れうる。個別クラスにだけ overflow-wrap を当てると取りこぼして
+   狭い画面で本文がはみ出す（実測: 390px 幅で文書全体が 515px に膨らんでいた）ため、
+   散文要素にまとめて当てる。code/pre 側は別途 overflow-x で扱う。 */
+p, li, dd, dt, td, th, figcaption{overflow-wrap:anywhere}
+
+/* 用語の初出。点線下線＋ホバーで1行の意味が出る */
+abbr[title]{text-decoration:none;-webkit-text-decoration:none;border-bottom:1px dotted var(--line-strong);
+  cursor:help;font-weight:700;color:var(--fg)}
+abbr[title]:hover{border-bottom-color:var(--fg)}
+
+/* ---------- 読み方 ---------- */
+.howto{border:1px solid var(--line);border-left:2px solid var(--fg);background:var(--bg-soft);padding:16px 20px;margin:32px 0 8px}
+.howto b{display:block;font-family:var(--mono);font-size:13px;letter-spacing:.03em;margin-bottom:6px}
+.howto ul{margin:0;padding-left:20px;color:var(--fg-soft);font-size:13.5px}
+.howto li{margin:4px 0}
+.howto code{overflow-wrap:anywhere}
+
+/* ---------- 索引 ---------- */
+.toc{margin:32px 0 8px}
+.find{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);background:var(--bg-soft);padding:12px 16px;margin-bottom:28px}
+.find label{font-size:12.5px;color:var(--fg-mute);font-family:var(--mono)}
+.find input{flex:1 1 260px;min-width:0;background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);padding:7px 10px;font-family:var(--font);font-size:14px}
+.find input:focus{outline:1px solid var(--fg);outline-offset:-1px}
+.find .qn{font-family:var(--mono);font-size:12px;color:var(--fg-mute)}
+.grp{margin:0 0 30px}
+.ghead{font-size:16px;font-weight:800;letter-spacing:-.02em;margin:0;padding-top:14px;border-top:1px solid var(--line)}
+.ghead a{text-decoration:none}
+.grp .gd{margin:4px 0 10px;font-size:13px;color:var(--fg-soft);max-width:60em}
+.mods{list-style:none;margin:0;padding:0}
+.mod-item{border-top:1px solid var(--line);padding:9px 0}
+.mod-line{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.mod-line a{font-family:var(--mono);font-size:13.5px;font-weight:700;text-decoration:none;border-bottom:1px solid var(--line-strong);overflow-wrap:anywhere}
+.mod-line a:hover{border-bottom-color:var(--fg)}
+.d{color:var(--fg-soft);font-size:12.8px;min-width:0;overflow-wrap:anywhere}
+.fns{margin:6px 0 0}
+.fns summary{cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--fg-mute);list-style:none;display:inline-block;border:1px solid var(--line);padding:1px 8px}
+.fns summary::-webkit-details-marker{display:none}
+.fns summary::before{content:"▸ "}
+.fns[open]>summary::before{content:"▾ "}
+.fns summary:hover{color:var(--fg)}
+.fns ul{list-style:none;margin:6px 0 2px;padding:0 0 0 14px;border-left:1px solid var(--line)}
+.fn-item{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;padding:2px 0}
+.fn-item a{text-decoration:none}
+.fn-item code{font-family:var(--mono);font-size:12.5px;background:none;border:0;padding:0;border-bottom:1px solid var(--line-strong)}
+.fn-item a:hover code{border-bottom-color:var(--fg)}
+
+/* ---------- 本文 ---------- */
+.body{padding:8px 0 96px}
+.body h2.g{font-size:clamp(19px,3vw,24px);font-weight:800;letter-spacing:-.03em;margin:64px 0 4px;padding-top:26px;border-top:2px solid var(--fg);scroll-margin-top:70px}
+.body p.g{margin:0 0 8px;color:var(--fg-soft);font-size:13.5px;max-width:60em}
+.mod{scroll-margin-top:70px;border-top:1px solid var(--line);padding:22px 0 8px;margin-top:22px}
+.mod-h{font-size:16px;margin:0 0 6px;font-family:var(--mono);letter-spacing:-.01em;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline}
+.mod-h .mp{overflow-wrap:anywhere}
+.mod>p{margin:8px 0;color:var(--fg-soft);max-width:62em}
+.mod>p.sum{color:var(--fg)}
+.mod>ul{margin:8px 0;padding-left:20px;color:var(--fg-soft);max-width:62em}
+.src{font-family:var(--mono);font-size:11.5px;font-weight:400;color:var(--fg-mute);text-decoration:none;border-bottom:1px solid var(--line);white-space:nowrap}
+.src:hover{color:var(--fg);border-bottom-color:var(--line-strong)}
+/* 極端に狭い画面では定義元リンクも折り返す（本文を横スクロールさせない） */
+@media (max-width:420px){.src{white-space:normal;overflow-wrap:anywhere}}
+.note{color:var(--fg-mute);font-size:12.5px;margin:6px 0}
+.fn{border:1px solid var(--line);background:var(--panel);padding:14px 18px;margin:14px 0;scroll-margin-top:70px}
+.fn-h{font-size:15px;margin:0;font-family:var(--mono);letter-spacing:-.01em;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.fn-h .anch{text-decoration:none;font-weight:700;overflow-wrap:anywhere}
+.fn-h .anch:hover{border-bottom:1px solid var(--fg)}
+.fn p{margin:6px 0;color:var(--fg-soft);max-width:62em}
+.fn p.sum{color:var(--fg);margin:4px 0 8px}
+.fn p.noargs{font-size:12.5px;color:var(--fg-mute)}
+.fn h5{font-size:11.5px;font-family:var(--mono);letter-spacing:.05em;color:var(--fg-mute);font-weight:600;margin:12px 0 2px;text-transform:none}
+.fn h5+ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.fn h5+ul li{padding:2px 0 2px 12px;font-size:13.5px;color:var(--fg-soft)}
+.fn h5+ul li strong{color:var(--fg);font-family:var(--mono);font-weight:700}
+ul{margin:8px 0;padding-left:20px}
+li{margin:3px 0}
+code{font-family:var(--mono);font-size:.9em;background:var(--bg-soft);border:1px solid var(--line);padding:1px 4px;overflow-wrap:anywhere}
+pre{background:var(--bg-soft);border:1px solid var(--line);padding:12px;overflow-x:auto;margin:8px 0;font-family:var(--mono);font-size:12.6px;line-height:1.8}
+pre code{border:0;background:none;padding:0}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;font-family:var(--mono);color:var(--fg-mute);background:var(--bg-soft);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+
+/* ---------- Footer ---------- */
+footer{border-top:1px solid var(--line);padding:30px 0}
+.foot{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12.5px;color:var(--fg-mute)}
+.foot a{color:var(--fg-soft);text-decoration:none}
+.foot a:hover{color:var(--fg)}
+.top-link{position:fixed;right:20px;bottom:20px;width:38px;height:38px;border:1px solid var(--line-strong);background:var(--bg);display:grid;place-items:center;text-decoration:none;color:var(--fg-soft);font-size:14px;z-index:20}
+.top-link:hover{color:var(--fg);border-color:var(--fg)}
+@media (max-width:1000px){.top-link{display:none}}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="reference.html"><span class="mark">s</span> Scoria</a>
+    <nav class="links">
+      <a href="reference.html" aria-current="page">ソースリファレンス</a>
+      <a class="gh" href="https://github.com/nigoh/scoria">GitHub ↗</a>
+      <button class="tt" id="tt" aria-label="テーマ切替" title="テーマ切替">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5a8.5 8.5 0 000 17z" fill="currentColor"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="phead">
+  <div class="wrap">
+    <span class="kicker"><b>ソースリファレンス</b> — スクリプトを直接触る人へ</span>
+    <h1>この関数は何をして、どこで止まるのか。</h1>
+    <p class="answer lead">Scoria の開発基盤スクリプト（<code>scripts/</code> / <code>mape/</code> / <code>.claude/hooks/</code>）を、役割ごとに並べたリファレンスです。</p>
+    <p class="lead">索引には各関数の1行説明が付いています。目的の関数は検索で絞り込めます。これらのスクリプトは土台リポジトリ <abbr title="Dev environment base。Claude Code で開発するときの進め方とルールを一式そろえた土台リポジトリ">deb</abbr> から移植したものです。</p>
+    <div class="crumbs">
+      <span>関連:</span>
+      <a href="../CLAUDE.md">CLAUDE.md</a><span>·</span><a href="adr/README.md">意思決定記録</a><span>·</span><a href="process/README.md">開発プロセス</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>26</b><span>モジュール</span></div>
+      <div class="stat"><b>176</b><span>公開関数</span></div>
+      <div class="stat"><b>5</b><span>役割グループ</span></div>
+      <div class="stat"><b>108</b><span>@internal（非公開・非表示）</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+
+<section class="howto">
+  <b>このページの読み方</b>
+  <ul>
+    <li><strong>載っているもの</strong>: 各スクリプトのファイル説明と、<abbr title="シェルスクリプトのコメントから API リファレンスを生成するツール（MIT）">shdoc</abbr> 注記が付いた<strong>公開関数</strong>（176 件）。引数・終了コード・出力・使用例が関数ごとに並びます。</li>
+    <li><strong>載っていないもの</strong>: <code>@internal</code> を付けた内部ヘルパー（108 件）。実装の詳細なので索引を汚さないよう伏せています。読むならソース本体へ。</li>
+    <li><strong>探し方</strong>: 索引は<strong>役割ごと</strong>（<abbr title="作業を終える前に必ず通す検査の集合。入口は scripts/check.sh の1つだけ">品質ゲート</abbr> / <abbr title="Claude Code がツールを実行する直前などに自動で走る小さなスクリプト">フック</abbr> / <abbr title="夜間に自分を点検して改善案を出す仕組み。Monitor→Analyze→Plan→Execute と共有知識 Knowledge">MAPE-K</abbr> / ツール / テスト）に並んでいます。関数名でも説明文でも絞り込めます。関数見出しの右のリンクは GitHub 上の定義行へ飛びます。</li>
+    <li><strong>何を守るコードか</strong>: ここに並ぶのは、<abbr title="Claude Code への指示書を「いつ読ませたいか」で置き分ける仕組み">steering</abbr> に書いた規約を実際に効かせる<abbr title="ルールを実際に効かせる仕掛けのこと（文書・フック・CI など）">機構</abbr>の本体です。<abbr title="Claude がターンを終えようとした時に走るフック。品質ゲートが赤なら終了を止める">Stop フック</abbr>が作業の終了を止め、<abbr title="要件・設計・テストを ID で結び、どのテストがどの要件を守るかを追えるようにすること">トレーサビリティ</abbr>検査が要件とテストの結び付きを確かめ、決定は <abbr title="Architecture Decision Record。決定を1件1枚・連番で残す記録。結論だけでなく選ばなかった案と理由も書く">ADR</abbr> に残させます。</li>
+    <li><strong>安全側に倒す</strong>: 判定に必要な情報が欠けたときは <abbr title="判断に必要な情報が欠けたとき、許可ではなく停止の側に倒す設計">fail-closed</abbr>（許可ではなく停止）に倒します。夜間の自動改善は <abbr title="失敗が続いたときに自動処理を止める安全装置">サーキットブレーカー</abbr>と <abbr title="自動処理を進めてよい安全な状態かどうかの判定。危険なら実行を抑止する">safe-state</abbr> 判定で止まり、成果は<abbr title="まだレビュー前の下書き状態の Pull Request。自動化された経路はここまでしか進まない">ドラフト PR</abbr> までしか進みません。</li>
+    <li><strong>正本はソース</strong>: このページは <code>bash scripts/build-docs.sh</code> がソースのコメントから生成します（手で編集しない）。ソースとの乖離は <code>bash scripts/build-docs.sh --check</code> が CI で検出します。</li>
+  </ul>
+</section>
+<nav class="toc" id="toc" aria-label="関数索引">
+<div class="find" id="find" hidden>
+<label for="q">索引を絞り込む</label>
+<input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="関数名・説明で絞り込む（例: push / 判定 / quarantine）">
+<span class="qn" id="qn" role="status" aria-live="polite"></span>
+</div>
+<section class="grp" id="grp-gate">
+<h2 class="ghead"><a href="#g-gate">品質ゲート — CI と Stop フックが走らせる検査</a></h2>
+<p class="gd answer">scripts/check.sh が唯一の入口。</p>
+<p class="gd">土台の自己検証・一覧の同期・トレーサビリティを機械検証し、1つでも落ちれば作業を終えられない。ゲートを足すときはここに足す。</p>
+<ul class="mods">
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-check-docs-structure-sh">scripts/check-docs-structure.sh</a> <span class="d">サイト HTML の構成（ピラミッド原則）を構造マーカーで機械検証する。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-check-skill-sync-sh">scripts/check-skill-sync.sh</a> <span class="d">CLAUDE.md の一覧表（スキル / エージェント）と .claude/ の実体の同期検証。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-check-traceability-sh">scripts/check-traceability.sh</a> <span class="d">要件トレーサビリティ（要件 ID ⇄ <code>Verifies:</code> 参照）の機械検証。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-check-sh">scripts/check.sh</a> <span class="d">品質ゲートの唯一の入口（Stop フックと CI が同じこれを実行する）。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-validate-foundation-sh">scripts/validate-foundation.sh</a> <span class="d">土台（.claude/ の steering 構成とドキュメント規約）の自己検証。</span></div>
+</li>
+</ul>
+</section>
+<section class="grp" id="grp-hook">
+<h2 class="ghead"><a href="#g-hook">フック — 実行時に割り込んで止める</a></h2>
+<p class="gd answer">Claude Code のツール実行や停止に割り込む。</p>
+<p class="gd">guard-* は保護ブランチへの push や保護ファイルの編集を exit 2 でブロックし、quality-gate は停止時に品質ゲートを走らせる。判定できないときは止める側に倒す。</p>
+<ul class="mods">
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-claude-hooks-guard-git-sh">.claude/hooks/guard-git.sh</a> <span class="d">PreToolUse(Bash) hook: 保護ブランチへの push と force push を決定論的にブロックする。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-claude-hooks-guard-protected-sh">.claude/hooks/guard-protected.sh</a> <span class="d">PreToolUse(Edit|Write) hook: 保護ファイルへの直接編集を決定論的にブロックする。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-claude-hooks-quality-gate-sh">.claude/hooks/quality-gate.sh</a> <span class="d">Stop hook: ターン終了前の品質ゲート。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-claude-hooks-session-start-sh">.claude/hooks/session-start.sh</a> <span class="d">SessionStart hook: セッション開始時に現在地を要約して additionalContext として渡す。</span></div>
+</li>
+</ul>
+</section>
+<section class="grp" id="grp-mape">
+<h2 class="ghead"><a href="#g-mape">MAPE-K — 夜間セルフ改善</a></h2>
+<p class="gd answer">Monitor → Analyze → Plan の決定論スクリプトと安全機構（サーキットブレーカー・隔離・safe-state）。</p>
+<p class="gd">既定は読み取り専用で、書き込みは状態ディレクトリ配下だけ。</p>
+<ul class="mods">
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-mape-analyze-sh">mape/analyze.sh</a> <span class="d">A — Analyze（分析）。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-mape-circuit-breaker-sh">mape/circuit-breaker.sh</a> <span class="d">ガードレール — サーキットブレーカー ＆ 実行台帳（ledger）。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-mape-efficacy-sh">mape/efficacy.sh</a> <span class="d">効き目感知（self-optimization） — 委託台帳から重点テーマごとの「効き目」を学習する。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-mape-lib-sh">mape/lib.sh</a> <span class="d">MAPE-K 共有ライブラリ。</span></div>
+<details class="fns" open>
+<summary>関数 24 件</summary>
+<ul>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_log"><code>mape_log</code></a> <span class="d">進行状況を stderr へ出す（stdout は成果物用に空けておくため）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_die"><code>mape_die</code></a> <span class="d">致命的エラーを stderr へ出してプロセスを終了する。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_now"><code>mape_now</code></a> <span class="d">決定論的な UTC タイムスタンプ（ワークフロー JS の Date 制限は bash には無い）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_ensure_state"><code>mape_ensure_state</code></a> <span class="d">中間成果物ディレクトリ（$MAPE_STATE_DIR）を作る。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_load_env"><code>mape_load_env</code></a> <span class="d">monitor.env を安全に読み込む（ADR-0010。セキュリティ: <code>. file</code> で source しない）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_policy_keywords"><code>mape_policy_keywords</code></a> <span class="d">POLICY.md の「### &lt;tier&gt;」見出し直後の <code></code><code> フェンス内キーワードを1行ずつ出力する。</code></span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_themes"><code>mape_themes</code></a> <span class="d">自己設定（ADR-0014 §27）: POLICY「## 今月の重点テーマ」直下の箇条書きを1行1テーマで出力する（mape_setpoints と同型の見出し→行抽出。（…）注釈は落とす）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_theme_of"><code>mape_theme_of</code></a> <span class="d">text が能動テーマに一致すればそのテーマ文字列を返す（無ければ空）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_theme_boost"><code>mape_theme_boost</code></a> <span class="d">能動テーマ一致なら有界な加点(+3)、非該当なら0。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_effectiveness_factor"><code>mape_effectiveness_factor</code></a> <span class="d">効き目に基づく有界な可変係数（ADR-0014 §30。÷10 して使う）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_trend"><code>mape_trend</code></a> <span class="d">HEALTH の時系列から指標の微分（連続増減の向きと連長）を読む。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_classify"><code>mape_classify</code></a> <span class="d">提案テキストをリスク分類する（consult &gt; approve &gt; auto の危険側優先。既定 approve）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_is_rejected"><code>mape_is_rejected</code></a> <span class="d">POLICY.md「## 却下ログ」の &quot;- pattern: &lt;正規表現&gt; — &lt;理由&gt;&quot; にマッチするか（マッチ=却下）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_score"><code>mape_score</code></a> <span class="d">インパクト(1-5) と 労力(1-5) からスコアを出す（高インパクト・低労力ほど高い。範囲 1-25）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_sanitize_signal"><code>mape_sanitize_signal</code></a> <span class="d">外部制御データ（churn 由来のファイル名など、ブランチに commit した者が中身を決められる値）を、人間が読む monitor.md／計画イシュー（issue-body.md）／<strong>無人 Execute LLM</strong> の文脈へ入れる前に</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_ledger_status"><code>mape_ledger_status</code></a> <span class="d">実行台帳(ledger.jsonl)で指定 item（＝提案テキスト。Execute が record する文字列と厳密一致）の過去の結果を要約する（K→A フィードバック弧を閉じる。ADR-0014 の「生きた核」）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_setpoints"><code>mape_setpoints</code></a> <span class="d">恒常性（homeostasis）: POLICY「### 健全性バンド（setpoints）」fence 内の行（<code>metric warn crit</code>）を出力する。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_band_status"><code>mape_band_status</code></a> <span class="d">指標 value がバンドのどこか（ok|warn|crit）を返す。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_verify_knowledge"><code>mape_verify_knowledge</code></a> <span class="d">DNA 完全性（ADR-0014）: ライブ知識ファイルの機械可読な不変条件を検査する（fail-closed）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_epoch_utc"><code>mape_epoch_utc</code></a> <span class="d">UTC タイムスタンプ 'YYYY-MM-DDTHH:MMZ'（mape_now と同形式）を epoch 秒へ。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_quarantined_items"><code>mape_quarantined_items</code></a> <span class="d">隔離リスト（## ブロック中）の各エントリ本文を出力する（先頭 '- ' を除く。次の見出し/EOF で区切る）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_is_quarantined"><code>mape_is_quarantined</code></a> <span class="d">提案テキストが隔離済みか。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_quarantine_add"><code>mape_quarantine_add</code></a> <span class="d">項目を「## ブロック中」へ追記（冪等・無毒化・ファイル末尾にセクション生成）。</span></li>
+<li class="fn-item"><a href="#mod-mape-lib-sh-mape_cooldown_elapsed"><code>mape_cooldown_elapsed</code></a> <span class="d">隔離クリアの最小 dwell が経過したか（MAPE_CB_COOLDOWN_H 時間）。</span></li>
+</ul>
+</details>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-mape-monitor-sh">mape/monitor.sh</a> <span class="d">M — Monitor（監視）。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-mape-plan-sh">mape/plan.sh</a> <span class="d">P — Plan（計画）。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-mape-run-sh">mape/run.sh</a> <span class="d">MAPE-K の M→A→P を1周まわす統合ランナー。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-mape-safe-state-sh">mape/safe-state.sh</a> <span class="d">安全状態（safe-state）判定。</span></div>
+</li>
+</ul>
+</section>
+<section class="grp" id="grp-tool">
+<h2 class="ghead"><a href="#g-tool">ツール — 生成物のビルド</a></h2>
+<p class="gd answer">プラグイン配布物とこのリファレンスを生成する。</p>
+<p class="gd">生成物は手で編集せず、--check で正本（ソース）との乖離を検知する。</p>
+<ul class="mods">
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-build-docs-sh">scripts/build-docs.sh</a> <span class="d">シェルスクリプトのリファレンス（docs/reference.html）生成器</span></div>
+<details class="fns" open>
+<summary>関数 9 件</summary>
+<ul>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-list_targets"><code>list_targets</code></a> <span class="d">対象スクリプトを決定論的な順序で列挙する。</span></li>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-slugify"><code>slugify</code></a> <span class="d">パスやラベルからアンカー用の slug を作る。</span></li>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-mod_id"><code>mod_id</code></a> <span class="d">パスからアンカー ID を作る（HTML の id と目次リンクで共有する）。</span></li>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-group_of"><code>group_of</code></a> <span class="d">モジュールを読者にとっての役割で分類する（GROUP_DEFS のキーを返す）。</span></li>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-fallback_md"><code>fallback_md</code></a> <span class="d">shdoc 注記が無いファイル向けのフォールバック。</span></li>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-line_map"><code>line_map</code></a> <span class="d">関数名 → 定義行番号の対応表を作る（定義元リンクの #L に使う）。</span></li>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-internal_count"><code>internal_count</code></a> <span class="d">ファイル中の @internal 注記（＝非公開ヘルパー）の件数を数える。</span></li>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-split_group"><code>split_group</code></a> <span class="d">GROUP_DEFS の1行を key / 見出し / 説明に分解して大域変数へ入れる。</span></li>
+<li class="fn-item"><a href="#mod-scripts-build-docs-sh-split_sentence"><code>split_sentence</code></a> <span class="d">説明文を「結論の1文」と「残り」に割る（ピラミッド原則: 見出しの直後は1文の結論）。</span></li>
+</ul>
+</details>
+</li>
+</ul>
+</section>
+<section class="grp" id="grp-test">
+<h2 class="ghead"><a href="#g-test">テスト — ゲートとフック自身の自己検証</a></h2>
+<p class="gd answer">一時フィクスチャで正常系と異常系を作り、「落ちるべきときに落ちる」ことを確かめる。</p>
+<p class="gd">実ツリーは書き換えない。関数はテストケースそのもの。</p>
+<ul class="mods">
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-test-build-docs-sh">scripts/test-build-docs.sh</a> <span class="d">が無いモジュール（結論段落を欠いたまま出さないための保険を確かめる検体）</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-test-docs-structure-sh">scripts/test-docs-structure.sh</a> <span class="d">check-docs-structure.sh の動作テスト（一時フィクスチャで正常系・異常系を検証）。</span></div>
+<details class="fns">
+<summary>関数 55 件</summary>
+<ul>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casea"><code>caseA</code></a> <span class="d">ケースA: 規約を満たすページ → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseb"><code>caseB</code></a> <span class="d">ケースB: 対象 HTML が1つも無い → 合格（黙って通さず明示する）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casec"><code>caseC</code></a> <span class="d">ケースC: 合格メッセージに検査件数が出る</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-cased"><code>caseD</code></a> <span class="d">ケースD: 引数を渡すと使い方の誤り（未知引数を検査に倒さない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casef"><code>caseF</code></a> <span class="d">ケースF: 見出しの直後がただの &lt;p&gt; → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseg"><code>caseG</code></a> <span class="d">ケースG: 見出しの直後が &lt;div&gt; → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseh"><code>caseH</code></a> <span class="d">ケースH: 見出しの直後に地の文がある → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casei"><code>caseI</code></a> <span class="d">ケースI: 見出しが &lt;header&gt; に包まれ、結論がその外でも合格（閉じタグは読み飛ばす）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casej"><code>caseJ</code></a> <span class="d">ケースJ: 見出しを持たない構造用 section は対象外 → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casek"><code>caseK</code></a> <span class="d">ケースK: 入れ子 section の内側が違反 → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casel"><code>caseL</code></a> <span class="d">ケースL: 入れ子 section が両方とも規約どおり → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casem"><code>caseM</code></a> <span class="d">ケースM: 結論段落が無いまま section が閉じる → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casen"><code>caseN</code></a> <span class="d">ケースN: 結論に句点が2つ → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseo"><code>caseO</code></a> <span class="d">ケースO: 結論の句点が1つ → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casep"><code>caseP</code></a> <span class="d">ケースP: 結論段落が空 → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseq"><code>caseQ</code></a> <span class="d">ケースQ: 結論内のインライン要素を跨いだ2文も数える → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caser"><code>caseR</code></a> <span class="d">ケースR: 句点が無い体言止めの結論 → 合格（1文以内なので許す）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-cases"><code>caseS</code></a> <span class="d">ケースS: h2 の次に h4 → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caset"><code>caseT</code></a> <span class="d">ケースT: h2→h3→h2→h3 は合格（浅い階層へ戻るのは可）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseu"><code>caseU</code></a> <span class="d">ケースU: 本文段落の後に図がある → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casev"><code>caseV</code></a> <span class="d">ケースV: 結論の直後に図 → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casew"><code>caseW</code></a> <span class="d">ケースW: figcaption 内の &lt;p&gt; を本文段落と数えない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casex"><code>caseX</code></a> <span class="d">ケースX: 図が無ければ本文だけでも合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casey"><code>caseY</code></a> <span class="d">ケースY: 次節の eyebrow を前の見出しブロックの本文と誤認しない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casez"><code>caseZ</code></a> <span class="d">ケースZ: 見出しブロック単位で判定する（h3 ブロックの図が本文より後）→ 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseaa"><code>caseAA</code></a> <span class="d">ケースAA: 用語が注釈なしで本文に初出 → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseab"><code>caseAB</code></a> <span class="d">ケースAB: &lt;abbr title&gt; で注釈 → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseac"><code>caseAC</code></a> <span class="d">ケースAC: class=&quot;term&quot; で注釈 → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casead"><code>caseAD</code></a> <span class="d">ケースAD: title の無い &lt;abbr&gt; は注釈と数えない → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseae"><code>caseAE</code></a> <span class="d">ケースAE: &lt;code&gt; の中の用語は初出と数えない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseaf"><code>caseAF</code></a> <span class="d">ケースAF: 見出しの中の用語は初出と数えない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseag"><code>caseAG</code></a> <span class="d">ケースAG: &lt;svg&gt; の中のラベルは初出と数えない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseah"><code>caseAH</code></a> <span class="d">ケースAH: 用語集（class=&quot;glossary&quot;）の中の定義は初出と数えない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseai"><code>caseAI</code></a> <span class="d">ケースAI: 語の一部（debug）を用語 deb の初出と数えない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseaj"><code>caseAJ</code></a> <span class="d">ケースAJ: 注釈済みの後に同じ語が無注釈で再出現しても合格（初出だけ見る）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseak"><code>caseAK</code></a> <span class="d">ケースAK: 無注釈が先・注釈が後 → 失敗（初出で注釈する）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseal"><code>caseAL</code></a> <span class="d">ケースAL: 広い語（Stop フック）を注釈すれば、含まれる語（フック）も満たす → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseam"><code>caseAM</code></a> <span class="d">ケースAM: @keyframes があるのに prefers-reduced-motion が無い → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casean"><code>caseAN</code></a> <span class="d">ケースAN: @keyframes と prefers-reduced-motion が両方ある → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseao"><code>caseAO</code></a> <span class="d">ケースAO: アニメーションを使わないページは reduced-motion の指定が無くても合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseap"><code>caseAP</code></a> <span class="d">ケースAP: HTML コメント内の偽タグを構造と誤認しない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseaq"><code>caseAQ</code></a> <span class="d">ケースAQ: script 内の文字列を構造と誤認しない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casear"><code>caseAR</code></a> <span class="d">ケースAR: &lt;pre&gt; のコード例に含まれる用語を初出と数えない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseas"><code>caseAS</code></a> <span class="d">ケースAS: &lt;main&gt; が無いページは文書全体を検査する（違反を見逃さない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseat"><code>caseAT</code></a> <span class="d">ケースAT: guide.html も検査対象（reference.html だけ見ていない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseau"><code>caseAU</code></a> <span class="d">ケースAU: reference.html も検査対象</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseav"><code>caseAV</code></a> <span class="d">ケースAV: 違反は1件目で打ち切らず全件を報告する</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseaw"><code>caseAW</code></a> <span class="d">ケースAW: 違反の報告に「ファイル:行」が付く</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseax"><code>caseAX</code></a> <span class="d">ケースAX: 3ファイルすべて規約どおりなら合格（件数も合算される）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseay"><code>caseAY</code></a> <span class="d">ケースAY: 規約と検査スクリプトの用語集が一致していれば合格（正常系）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseaz"><code>caseAZ</code></a> <span class="d">ケースAZ: 規約側に語を足すと落ちる（検査されない語が生まれるのを防ぐ）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-caseba"><code>caseBA</code></a> <span class="d">ケースBA: 検査スクリプト側に語を足すと落ちる（規約に無い語で落とさない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casebb"><code>caseBB</code></a> <span class="d">ケースBB: 語の並び順が食い違うと落ちる（同じ集合でも順が違えば不一致）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casebc"><code>caseBC</code></a> <span class="d">ケースBC: 規約ファイルが無ければ落ちる（照合不能を合格に倒さない = fail-closed）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-docs-structure-sh-casebd"><code>caseBD</code></a> <span class="d">ケースBD: 規約から用語集を読み取れなければ落ちる（見出しを消しても素通りしない）</span></li>
+</ul>
+</details>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-test-guard-git-sh">scripts/test-guard-git.sh</a> <span class="d">guard-git.sh の敵対的テスト（表駆動・直交組み合わせ）。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-test-guard-protected-sh">scripts/test-guard-protected.sh</a> <span class="d">guard-protected.sh の敵対的テスト（表駆動）。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-test-hooks-sh">scripts/test-hooks.sh</a> <span class="d">hooks（guard-git / guard-protected / quality-gate / session-start）の動作テスト。</span></div>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-test-skill-sync-sh">scripts/test-skill-sync.sh</a> <span class="d">check-skill-sync.sh の動作テスト（一時フィクスチャで正常系・異常系を検証）。</span></div>
+<details class="fns">
+<summary>関数 33 件</summary>
+<ul>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-casea"><code>caseA</code></a> <span class="d">ケースA: スキル・エージェントとも一覧と実体が一致 → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-caseb"><code>caseB</code></a> <span class="d">ケースB: 実体スキルが CLAUDE.md 一覧に無い → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-casec"><code>caseC</code></a> <span class="d">ケースC: CLAUDE.md 一覧のスキルに実体が無い → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-cased"><code>caseD</code></a> <span class="d">ケースD: 実体エージェントが CLAUDE.md 一覧に無い → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-casee"><code>caseE</code></a> <span class="d">ケースE(回帰): 別セクションの表（例: ワークフロー）の名前をエージェントと誤認しない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-casef"><code>caseF</code></a> <span class="d">ケースF(回帰): 実体スキルの行が無いのに、別行の説明列に <code>/name</code> が混じると「宣言済み」と誤認してドリフトを見逃す（1列目のみ対象にする修正の回帰）→ 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_ws"><code>c_ws</code></a> <span class="d">セル前後に余分な空白・タブがあっても1列目を読める</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_noeolpipe"><code>c_noeolpipe</code></a> <span class="d">行末のパイプが無い表行でも1列目を読める</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_link"><code>c_link</code></a> <span class="d">1列目がリンク記法でもコマンド名を読める</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_sep_only"><code>c_sep_only</code></a> <span class="d">区切り行（|---|---|）を宣言と誤認しない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_fullwidth_pipe"><code>c_fullwidth_pipe</code></a> <span class="d">全角パイプの行は表行と認めない＝宣言漏れとして失敗する（判定不能は安全側）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_desc_mention_ok"><code>c_desc_mention_ok</code></a> <span class="d">説明列に他スキル名の <code>/name</code> があっても、正しく同期していれば合格（過剰検知しない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_agent_desc_mention"><code>c_agent_desc_mention</code></a> <span class="d">エージェント表の説明列に別エージェント名があっても宣言と誤認しない（実体漏れを見逃さない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_fence_skill"><code>c_fence_skill</code></a> <span class="d">(回帰) スキル節のコードブロック内の表を宣言と誤認しない（幽霊スキルで偽赤にしない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_fence_agent"><code>c_fence_agent</code></a> <span class="d">(回帰) エージェント節のコードブロック内の表も拾わない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_fence_hides"><code>c_fence_hides</code></a> <span class="d">フェンスで実在スキルの行を隠すと宣言0件になり失敗する（fail-closed は維持）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_partial_heading"><code>c_partial_heading</code></a> <span class="d">(回帰) 見出しの部分一致（## スキルの書き方）の表を宣言と誤認しない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_partial_heading_agent"><code>c_partial_heading_agent</code></a> <span class="d">エージェント側も同様（## エージェントの追加手順）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_order_swapped"><code>c_order_swapped</code></a> <span class="d">節の順序が逆（エージェントが先）でも判定できる</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_no_skill_section"><code>c_no_skill_section</code></a> <span class="d">スキル節そのものが無い＋実体あり → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_no_agent_section"><code>c_no_agent_section</code></a> <span class="d">エージェント節そのものが無い＋実体あり → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_other_section_cmd"><code>c_other_section_cmd</code></a> <span class="d">他セクションで <code>/name</code> が使われていてもスキル宣言に数えない（実体ありは失敗のまま）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_zero"><code>c_zero</code></a> <span class="d">スキルもエージェントも0件で表も空 → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_zero_but_listed"><code>c_zero_but_listed</code></a> <span class="d">実体0件なのに一覧にある → 幽霊として失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_many"><code>c_many</code></a> <span class="d">大量（30件）でも一致すれば合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_many_missing"><code>c_many_missing</code></a> <span class="d">大量のうち1件だけ一覧漏れ → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_jp_name"><code>c_jp_name</code></a> <span class="d">日本語名スキルは命名規約外＝宣言として読めず失敗する（黙って合格にしない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_upper_name"><code>c_upper_name</code></a> <span class="d">大文字を含むスキル名も規約外として失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_underscore_agent"><code>c_underscore_agent</code></a> <span class="d">アンダースコアを含むエージェント名も規約外として失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_dir_without_md"><code>c_dir_without_md</code></a> <span class="d">SKILL.md の無いディレクトリは実体に数えない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_agents_readme"><code>c_agents_readme</code></a> <span class="d">.claude/agents の非エージェント .md も実体として数える（見落とさない側に倒す）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_agent_only_drift"><code>c_agent_only_drift</code></a> <span class="d">スキルは一致・エージェントだけ不一致 → 失敗（両方検査される）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-skill-sync-sh-c_no_claude"><code>c_no_claude</code></a> <span class="d">CLAUDE.md が無い → 失敗</span></li>
+</ul>
+</details>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-test-traceability-sh">scripts/test-traceability.sh</a> <span class="d">check-traceability.sh の動作テスト（一時フィクスチャで正常系・異常系を検証）。</span></div>
+<details class="fns">
+<summary>関数 55 件</summary>
+<ul>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casea"><code>caseA</code></a> <span class="d">ケースA: 要件ディレクトリ自体が無い → 合格（対象なし）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-caseb"><code>caseB</code></a> <span class="d">ケースB: 要件宣言あり・対応テストなし → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casec"><code>caseC</code></a> <span class="d">ケースC: 要件宣言あり・対応テストは要件ツリー外・受入基準あり → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-cased"><code>caseD</code></a> <span class="d">ケースD: 受入基準セクションが無い → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casee"><code>caseE</code></a> <span class="d">ケースE(回帰): 散文中の ID 言及は「幻の要件」にしない（宣言でないので被覆不要）→ 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casef"><code>caseF</code></a> <span class="d">ケースF(回帰): 自己参照（要件ツリー内の Verifies）は被覆と見なさない → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-caseg"><code>caseG</code></a> <span class="d">ケースG(回帰): 要件宣言のない index/README は受入基準チェックの対象外 → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-caseh"><code>caseH</code></a> <span class="d">ケースH(回帰): 宣言行に別IDの Verifies が同居しても、宣言側IDが発行済みになる → 被覆なしで失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casei"><code>caseI</code></a> <span class="d">ケースI(回帰): 不正形式ID（4桁）は形式エラーで失敗する（黙って握り潰さない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casej"><code>caseJ</code></a> <span class="d">ケースJ(回帰): 4桁ID への Verifies は3桁要件の被覆にならない（右端非アンカーの誤カウント）→ 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casek"><code>caseK</code></a> <span class="d">ケースK(回帰): コードフェンス内の見出し ### REQ-...: は実在要件として発行しない → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casel"><code>caseL</code></a> <span class="d">ケースL(回帰): 複数ファイル一括処理でフェンス状態が漏れない（閉じ忘れが後続ファイルの要件を消さない）a.md に閉じ忘れフェンス、b.md に REQ-BBB-002(被覆なし)。</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casem"><code>caseM</code></a> <span class="d">ケースM(回帰): ~~~ フェンス内の要件見出しも無視する</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casen"><code>caseN</code></a> <span class="d">ケースN(回帰): 混在フェンス（<code></code><code> 外・~~~ 内）で早期クローズせず、内側の例示見出しを無視する</code></span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-caseo"><code>caseO</code></a> <span class="d">ケースO(回帰): ツリー外の <code>requirements</code> という名のディレクトリにある被覆も数える。</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-casep"><code>caseP</code></a> <span class="d">ケースP(回帰): $REQ_DIR 直下の自己参照は依然として被覆に数えない（パス接頭辞除外が効く）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_nospace"><code>c_nospace</code></a> <span class="d">空白なし（Verifies:REQ-…）でも被覆と認める</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_ws"><code>c_ws</code></a> <span class="d">前後に余分な空白・タブがあっても被覆と認める</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_fullwidth"><code>c_fullwidth</code></a> <span class="d">全角コロン（Verifies：）は被覆と認めない＝判定不能は fail-closed に倒す</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_lower"><code>c_lower</code></a> <span class="d">小文字 verifies: も被覆と認めない（表記を1つに固定する）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_comment"><code>c_comment</code></a> <span class="d">HTML コメント内の Verifies（要件ツリー外）は被覆</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_multi_inline"><code>c_multi_inline</code></a> <span class="d">1行に複数 ID を列挙</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_multi_line"><code>c_multi_line</code></a> <span class="d">複数行に分けた Verifies</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_partial"><code>c_partial</code></a> <span class="d">複数要件のうち1つだけ被覆 → 失敗（部分被覆を合格にしない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_tablecell"><code>c_tablecell</code></a> <span class="d">表セル内の Verifies も被覆</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_fenced_ref"><code>c_fenced_ref</code></a> <span class="d">ツリー外ファイルのコードフェンス内 Verifies は被覆に数える（除外はツリーのみ）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_suffix"><code>c_suffix</code></a> <span class="d">右端の部分一致（REQ-FIX-001X）は被覆にしない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_prefix"><code>c_prefix</code></a> <span class="d">左端の部分一致（XREQ-FIX-001）は被覆にしない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_gitdir"><code>c_gitdir</code></a> <span class="d">.git 配下の Verifies は被覆に数えない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_hidden"><code>c_hidden</code></a> <span class="d">隠しディレクトリ（.git 以外）の Verifies は被覆に数える</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_nfr_ok"><code>c_nfr_ok</code></a> <span class="d">NFR を表行で宣言し被覆あり</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_nfr_ng"><code>c_nfr_ng</code></a> <span class="d">NFR 被覆なし → 失敗</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_2digit"><code>c_2digit</code></a> <span class="d">連番2桁は形式エラー</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_lowerarea"><code>c_lowerarea</code></a> <span class="d">領域が小文字は形式エラー</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_unknown_prefix"><code>c_unknown_prefix</code></a> <span class="d">未知接頭辞（XYZ-/TEST-）は要件 ID として扱わない（過剰検知しない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_dup"><code>c_dup</code></a> <span class="d">同一 ID を2ファイルで重複宣言 → 被覆1つで合格（重複を二重要求しない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_des_only"><code>c_des_only</code></a> <span class="d">DES-&lt;3桁&gt; 参照だけでは REQ の被覆にならない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_h1"><code>c_h1</code></a> <span class="d">見出しレベル1でも宣言と見なす（被覆なし→失敗）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_indent"><code>c_indent</code></a> <span class="d">行頭インデントのある宣言行も見逃さない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_broken_table"><code>c_broken_table</code></a> <span class="d">ヘッダのない壊れた表行でも宣言として拾う（被覆なし→失敗）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_deep"><code>c_deep</code></a> <span class="d">深い階層の要件ファイルも走査対象</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_txt"><code>c_txt</code></a> <span class="d">.md 以外（.txt）は要件ファイルとして扱わない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_symlink"><code>c_symlink</code></a> <span class="d">symlink の要件ファイルも辿る（find -L）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_selfref_deep"><code>c_selfref_deep</code></a> <span class="d">要件ツリーのサブディレクトリでの自己参照も被覆に数えない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_acc_en"><code>c_acc_en</code></a> <span class="d">英語表記 Acceptance Criteria を認める</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_acc_lower"><code>c_acc_lower</code></a> <span class="d">小文字表記も認める（-i）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_acc_missing"><code>c_acc_missing</code></a> <span class="d">被覆はあるが受入基準が無い → 失敗（片方だけで合格にしない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_emptydir"><code>c_emptydir</code></a> <span class="d">要件ディレクトリが空 → 対象なしで合格（過剰検知しない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_emptyfile"><code>c_emptyfile</code></a> <span class="d">空ファイルのみ → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_prose_only"><code>c_prose_only</code></a> <span class="d">宣言のない散文だけ → 合格</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_nul_decl"><code>c_nul_decl</code></a> <span class="d">(回帰) NUL バイト混じりの要件ファイルでも宣言を見落とさない。</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_nul_covered"><code>c_nul_covered</code></a> <span class="d">NUL 混じりでも被覆があれば合格（-a 追加が正常系を壊していない）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_nul_ref"><code>c_nul_ref</code></a> <span class="d">バイナリファイル中の 'Verifies:' 文字列は被覆に数えない（安全側）</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_huge"><code>c_huge</code></a> <span class="d">巨大な要件ファイル（20万行）でも宣言・被覆判定が壊れない</span></li>
+<li class="fn-item"><a href="#mod-scripts-test-traceability-sh-c_space_path"><code>c_space_path</code></a> <span class="d">リポジトリのパス・ファイル名に空白があっても壊れない（被覆あり→合格）</span></li>
+</ul>
+</details>
+</li>
+<li class="mod-item">
+<div class="mod-line"><a href="#mod-scripts-test-validate-foundation-sh">scripts/test-validate-foundation.sh</a> <span class="d">validate-foundation.sh の網羅テスト（構造ルールごとに正常系/異常系を突く）。</span></div>
+</li>
+</ul>
+</section>
+</nav>
+<div class="body">
+<h2 class="g" id="g-gate">品質ゲート — CI と Stop フックが走らせる検査</h2>
+<p class="g answer">scripts/check.sh が唯一の入口。</p>
+<p class="g">土台の自己検証・一覧の同期・トレーサビリティを機械検証し、1つでも落ちれば作業を終えられない。ゲートを足すときはここに足す。</p>
+<section class="mod" id="mod-scripts-check-docs-structure-sh">
+<h3 class="mod-h"><span class="mp">scripts/check-docs-structure.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/check-docs-structure.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+サイト HTML の構成（ピラミッド原則）を構造マーカーで機械検証する。
+</p>
+<p class="note">内部ヘルパー 2 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+<code>.claude/rules/docs.md</code>（ピラミッド原則の執筆規約）のうち、<strong>構造マーカーで機械判定できる項目</strong>だけを
+<br>
+検査する。自然言語の意味解析はしない（誤検知が出ると規約が形骸化するため）。
+<br>
+scripts/check.sh から呼ばれる品質ゲート（ADR-0004。ゲートは check.sh 単一入口に足す）。
+</p>
+<p>
+検査対象: docs/reference.html / docs/guide.html のうち存在するもの。
+<br>
+リポジトリ直下の index.html は Vite のエントリーポイントであり文書ではないので対象外。
+<br>
+<code>&lt;main&gt;</code> があればその中だけを見る（無ければ文書全体）。<code>&lt;svg&gt;</code> / <code>&lt;code&gt;</code> / <code>&lt;pre&gt;</code> /
+<br>
+<code>&lt;template&gt;</code> の中身は構造として数えない（図中のラベルやコード例を markup と誤認しないため）。
+</p>
+<p>
+検査:
+<br>
+0) 用語集の正本が <code>.claude/rules/docs.md</code> と本スクリプトで一致する（規約と検査の乖離防止）
+<br>
+1) 見出しを持つ <code>&lt;section&gt;</code> は、見出しの直後が <code>&lt;p class=&quot;answer&quot;&gt;</code>（結論 → 根拠 → 詳細）
+<br>
+2) <code>&lt;p class=&quot;answer&quot;&gt;</code> は1文（句点 <code>。</code> は1つまで）かつ空でない
+<br>
+3) 見出し階層を飛ばさない（h2 の次に h4 を置かない）
+<br>
+4) 見出しブロックに <code>&lt;figure&gt;</code> があるなら、本文段落（<code>.answer</code> 以外の <code>&lt;p&gt;</code>）より前にある
+<br>
+5) 用語集の語の初出が <code>&lt;abbr title=&quot;…&quot;&gt;</code> か <code>class=&quot;term&quot;</code> の中にある（除外規則は rules/docs.md）
+<br>
+6) <code>@keyframes</code> を使うファイルには <code>prefers-reduced-motion</code> の指定がある
+</p>
+<p>
+判定に必要な gawk が無い環境では、判定不能を合格に倒さず明示メッセージで非ゼロ終了する（fail-closed）。
+</p>
+</section>
+<section class="mod" id="mod-scripts-check-skill-sync-sh">
+<h3 class="mod-h"><span class="mp">scripts/check-skill-sync.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/check-skill-sync.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+CLAUDE.md の一覧表（スキル / エージェント）と .claude/ の実体の同期検証。
+</p>
+<p class="note">内部ヘルパー 3 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+CLAUDE.md の一覧表（スキル / エージェント）と実体（.claude/skills, .claude/agents）の同期を機械検証する。
+<br>
+scripts/check.sh から呼ばれる品質ゲート（ADR-0004。ゲートは check.sh 単一入口に足す）。
+</p>
+<p>
+背景: 「スキル・エージェントを増減したら CLAUDE.md の一覧表と同期する」（.claude/rules/claude-config.md）は
+<br>
+これまで人手・doc-auditor 頼みだった。ここで機械検証し、乖離を PR 前に落とす。
+</p>
+<p>
+検査:
+<br>
+1) .claude/skills/&lt;name&gt;/SKILL.md がある各スキルが、CLAUDE.md「## スキル」表に <code>/&lt;name&gt;</code> として載っている（両方向）
+<br>
+2) .claude/agents/&lt;name&gt;.md がある各エージェントが、CLAUDE.md「## エージェント」表の1列目に載っている（両方向）
+</p>
+</section>
+<section class="mod" id="mod-scripts-check-traceability-sh">
+<h3 class="mod-h"><span class="mp">scripts/check-traceability.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/check-traceability.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+要件トレーサビリティ（要件 ID ⇄ <code>Verifies:</code> 参照）の機械検証。
+</p>
+<p class="note">内部ヘルパー 2 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+要件トレーサビリティの機械検証（ADR-0006 / docs/process/traceability.md）。
+<br>
+scripts/check.sh から呼ばれる品質ゲート。
+</p>
+<p>
+検査:
+<br>
+1) docs/requirements/ の全 REQ-*/NFR-* が、リポジトリ内で <code>Verifies: &lt;ID&gt;</code> として参照されている
+<br>
+2) 各要件ドキュメントに受入基準セクションがある
+<br>
+3) 発行 ID が規約の形式に沿う
+<br>
+要件ドキュメントが無い土台の初期状態では「対象なし＝合格」を返す。
+</p>
+</section>
+<section class="mod" id="mod-scripts-check-sh">
+<h3 class="mod-h"><span class="mp">scripts/check.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/check.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+品質ゲートの唯一の入口（Stop フックと CI が同じこれを実行する）。
+</p>
+<p class="note">内部ヘルパー 1 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+品質ゲートの唯一の入口。Stop フック（.claude/hooks/quality-gate.sh）と CI（.github/workflows/checks.yml）が
+<br>
+同じこのスクリプトを実行する。ゲートを追加するときは必ずここに足す（フックや CI に直書きしない）。
+</p>
+<p>
+スタック導入後（/stack-init）は、この下に typecheck / lint / test を追記していく。
+</p>
+</section>
+<section class="mod" id="mod-scripts-validate-foundation-sh">
+<h3 class="mod-h"><span class="mp">scripts/validate-foundation.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/validate-foundation.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+土台（.claude/ の steering 構成とドキュメント規約）の自己検証。
+</p>
+<p class="note">内部ヘルパー 7 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+土台の自己検証: .claude/ 配下の steering 構成（settings / hooks / rules / skills / agents / workflows）と
+<br>
+ドキュメント規約を機械検証する。「土台が自分自身をテストする」ための中核スクリプト。
+<br>
+CI と scripts/check.sh から呼ばれる。
+</p>
+</section>
+<h2 class="g" id="g-hook">フック — 実行時に割り込んで止める</h2>
+<p class="g answer">Claude Code のツール実行や停止に割り込む。</p>
+<p class="g">guard-* は保護ブランチへの push や保護ファイルの編集を exit 2 でブロックし、quality-gate は停止時に品質ゲートを走らせる。判定できないときは止める側に倒す。</p>
+<section class="mod" id="mod-claude-hooks-guard-git-sh">
+<h3 class="mod-h"><span class="mp">.claude/hooks/guard-git.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/.claude/hooks/guard-git.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+PreToolUse(Bash) hook: 保護ブランチへの push と force push を決定論的にブロックする。
+</p>
+<p class="note">内部ヘルパー 3 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+ルール本文: CLAUDE.md「絶対原則」/ ADR-0004。settings.json の permissions.deny と
+<br>
+GitHub ブランチ保護が最終防衛線。
+<br>
+exit 2 = ブロック（stderr が Claude に渡る）。
+</p>
+<p>
+ブロックする形（すべて実シェルで保護 ref に解決される）:
+<br>
+1) force push（--force / --force-with-lease / --force-if-includes / -f・束ねた短縮フラグ / +refspec）
+<br>
+1b) 全ブランチ push（--all / --mirror。main/master を巻き込むため）
+<br>
+2) push 先に保護ブランチを指定する形（main / feature:main / HEAD:main / :main /
+<br>
+refs/heads/main / heads/main）
+<br>
+3) push 先未指定 かつ カレントが保護ブランチ、または カレントが判定不能
+</p>
+<p>
+フェイルセーフの向き:
+</p>
+<ul>
+<li>JSON が壊れている / command キーが無い場合はフェイルオープン（判定対象が存在しない）。 ただし jq も python3 も無い環境では awk の簡易 JSON 抽出にフォールバックし、素通りさせない。</li>
+<li>カレントブランチが判定できない（detached HEAD / リポジトリ外 / git 不在）状態での push 先未指定 push は <strong>フェイルクローズ</strong>（ブロック）。情報欠落を許可に倒さない。</li>
+</ul>
+<p>
+既知の限界（意図的な設計。最終防衛線は permissions.deny と GitHub ブランチ保護）:
+</p>
+<ul>
+<li>スクリプト経由（bash -c '...' や sh ファイル実行、クォート内に隠した push）は素通りする</li>
+<li>コマンド文字列中の cd で別リポジトリへ移った場合、ブランチ判定は CLAUDE_PROJECT_DIR 基準のまま</li>
+<li>クォートは中身を残して剥がすため、echo 等の引数文字列内やコメント（#）内に push コマンド形が 完全一致で含まれると誤ブロックすることがある（フェイルクローズ＝安全側）</li>
+<li><code>-o main</code> のように push-option の分離値が保護名リテラルと一致すると誤ブロックする （フェイルクローズ＝安全側。オプション値の除去は逆に真のバイパスを生むため行わない）</li>
+</ul>
+</section>
+<section class="mod" id="mod-claude-hooks-guard-protected-sh">
+<h3 class="mod-h"><span class="mp">.claude/hooks/guard-protected.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/.claude/hooks/guard-protected.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+PreToolUse(Edit|Write) hook: 保護ファイルへの直接編集を決定論的にブロックする。
+</p>
+<p class="note">内部ヘルパー 4 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+ブロック時は「代わりに何をすべきか」を必ず案内する（exit 2 / stderr）。
+<br>
+対象を増やす場合はこのファイルの判定に追記し、CLAUDE.md 絶対原則・.claude/README.md の
+<br>
+hooks 表・scripts/test-hooks.sh / scripts/test-guard-protected.sh の再発防止ケースと同期する。
+<br>
+方針: 判定不能な状況（JSON パーサ不在・git 不在・origin/main 不在・パス相対化失敗）では
+<br>
+fail-closed（保護側＝ブロック）に倒す。fail-open は絶対原則の侵食になる。
+</p>
+<p>
+保護対象:
+<br>
+1) シークレット類（.env 系・.envrc・鍵/証明書・資格情報ストア）… basename を小文字化して判定
+<br>
+2) ロックファイル（主要エコシステム）… パッケージマネージャで再生成させる
+<br>
+3) マージ済みの Accepted な ADR … 例外は (a) Status 行だけの supersede 更新
+<br>
+(b) まだ origin/main に無い ADR（導入 PR がマージ前）
+</p>
+<p>
+迂回対策: <code>..</code>・<code>./</code>・重複スラッシュ・symlink を realpath で解決した実体パスでも判定し、
+<br>
+大小無視のファイルシステム（macOS/Windows）向けに小文字化して照合する。
+</p>
+</section>
+<section class="mod" id="mod-claude-hooks-quality-gate-sh">
+<h3 class="mod-h"><span class="mp">.claude/hooks/quality-gate.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/.claude/hooks/quality-gate.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+Stop hook: ターン終了前の品質ゲート。
+</p>
+<p>
+未コミット変更があるとき scripts/check.sh を実行し、
+<br>
+失敗したら exit 2 でターン終了をブロックする（＝「壊れたまま作業を終えない」）。
+</p>
+<ul>
+<li>CI と同じ入口 (scripts/check.sh) を呼ぶ。ゲートを増やすときは check.sh 側に足す</li>
+<li>変更状態の SHA-1 で合格をキャッシュし、無変更なら再実行しない</li>
+<li>stop_hook_active=true（前回もこのフックが失敗）なら警告のみに降格し、無限ループを防ぐ</li>
+</ul>
+<p>
+キャッシュの安全弁: state_hash が空（sha1sum 不在など）ならキャッシュを読み書きしない。
+<br>
+空のまま使うと「常に前回と一致」＝ゲートが恒久的に無効化されるため、必ず実行側へ倒す。
+<br>
+実行ビットの有無では check.sh の存在判定をしない（<code>bash scripts/check.sh</code> で呼ぶため
+<br>
+実行ビットは不要で、mode が落ちた環境でゲートが黙って無効化されるのを防ぐ）。
+</p>
+</section>
+<section class="mod" id="mod-claude-hooks-session-start-sh">
+<h3 class="mod-h"><span class="mp">.claude/hooks/session-start.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/.claude/hooks/session-start.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+SessionStart hook: セッション開始時に現在地を要約して additionalContext として渡す。
+</p>
+<p>
+常に exit 0（情報提供のみ。ブロックしない）。
+</p>
+<p>
+出力する現在地: ブランチ名（detached HEAD なら短 SHA）・未コミット変更（先頭10件）・
+<br>
+直近3件の ADR・品質ゲート（scripts/check.sh）の有無。
+<br>
+これは「ソフトな助言」なので hooks の強制（exit 2）は一切行わない（.claude/rules/claude-config.md）。
+</p>
+</section>
+<h2 class="g" id="g-mape">MAPE-K — 夜間セルフ改善</h2>
+<p class="g answer">Monitor → Analyze → Plan の決定論スクリプトと安全機構（サーキットブレーカー・隔離・safe-state）。</p>
+<p class="g">既定は読み取り専用で、書き込みは状態ディレクトリ配下だけ。</p>
+<section class="mod" id="mod-mape-analyze-sh">
+<h3 class="mod-h"><span class="mp">mape/analyze.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/analyze.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+A — Analyze（分析）。
+</p>
+<p class="sum">
+ADR-0010。
+</p>
+<p class="note">内部ヘルパー 3 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+monitor.env の生シグナルを「症状」に変換し、根拠とインパクト×労力スコア付きの改善案を作る。
+<br>
+POLICY.md の却下ログでフィルタし、リスク分類（consult 危険側優先）を付ける。
+<br>
+読み取り専用（--update-knowledge を渡したときだけ BACKLOG.md に新候補を追記する）。
+</p>
+<p>
+出力: $MAPE_STATE_DIR/proposals.tsv（tier\tpriority\timpact\teffort\tscore\ttext）
+<br>
+$MAPE_STATE_DIR/analysis.md（人が読む症状＋提案）
+</p>
+<p>
+処理の段: 1) シグナル由来の提案（一過性・BACKLOG へ焼き付けない）→ 2) BACKLOG「## 候補」の
+<br>
+取り込み（隔離済み・台帳 done は除外）→ 3) スコア降順で proposals.tsv 確定 → 4) analysis.md →
+<br>
+5) --update-knowledge のときだけ新候補を BACKLOG へ永続化。
+</p>
+</section>
+<section class="mod" id="mod-mape-circuit-breaker-sh">
+<h3 class="mod-h"><span class="mp">mape/circuit-breaker.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/circuit-breaker.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+ガードレール — サーキットブレーカー ＆ 実行台帳（ledger）。
+</p>
+<p class="sum">
+ADR-0010。
+</p>
+<p class="note">内部ヘルパー 1 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+Execute の各試行を $MAPE_STATE_DIR/ledger.jsonl に追記し、危険な連鎖を検知して停止させる。
+</p>
+<p>
+使い方:
+<br>
+bash mape/circuit-breaker.sh status                     # ok なら exit 0 / 停止条件なら exit 3
+<br>
+bash mape/circuit-breaker.sh record &lt;green|red&gt; &lt;item&gt; [pr] [branch]
+<br>
+bash mape/circuit-breaker.sh done &lt;item&gt;               # 実装済み(green)なら exit 0（冪等性クエリ）
+<br>
+bash mape/circuit-breaker.sh quarantine &lt;item&gt; [reason] # 毒項目を隔離（全停止回避。ADR-0015）
+<br>
+bash mape/circuit-breaker.sh reset                      # 台帳を退避してブレーカーを解除
+</p>
+<p>
+停止条件（POLICY 相当。環境変数で調整可能。lib.sh 参照）:
+</p>
+<ul>
+<li>末尾が連続 red で MAPE_CB_CONSECUTIVE_FAIL 件に達した</li>
+<li>同一 item の red が MAPE_CB_SAME_ITEM_FAIL 回に達した</li>
+<li>直近 MAPE_CB_REVERT_WINDOW 件のうち red が MAPE_CB_REVERT_MAX 件以上</li>
+</ul>
+<p>
+フェイルセーフの向き: 末尾連続 red と直近 window red は item 非依存の GLOBAL 暴走停止であり、
+<br>
+隔離（ADR-0015）でも cooldown でも決して解除しない。JSON パーサが皆無で暴走を検証できないときは
+<br>
+ok（exit 0）ではなく <strong>安全側の exit 4</strong>（状態不明）を返す。record だけは記録欠落＝ブレーカーの
+<br>
+盲目化を招くため、パーサ皆無でも手組み JSON で必ず追記する。
+</p>
+</section>
+<section class="mod" id="mod-mape-efficacy-sh">
+<h3 class="mod-h"><span class="mp">mape/efficacy.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/efficacy.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+効き目感知（self-optimization） — 委託台帳から重点テーマごとの「効き目」を学習する。
+</p>
+<p class="sum">
+ADR-0014 / ADR-0017。
+</p>
+<p class="note">内部ヘルパー 1 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+細胞は自分の行動が効いたかを覚えて次の優先度を調律する。ここでは Execute の実績（committed な
+<br>
+ledger.jsonl の green/red）を POLICY の重点テーマへ帰属させ、テーマ別の効き目 efficacy.tsv を書く。
+<br>
+Analyze の mape_effectiveness_factor がこれを読み、効いているテーマの提案を加点・効いていない
+<br>
+テーマを減点する（採点のみ・tier は不変。安全境界。NFR-OPT-001）。read-only・非破壊（台帳は読むだけ）。
+</p>
+<p>
+出力: $MAPE_STATE_DIR/efficacy.tsv（TSV: theme \t samples \t improved(green) \t worsened(red) \t status）
+<br>
+status: improved（red 皆無）/ worsened（red が green 以上）/ neutral（それ以外・またはサンプル&lt;3）
+<br>
+台帳は committed（夜をまたいで dur  な記憶）だが efficacy.tsv は台帳から再計算できる派生物＝gitignore。
+</p>
+<p>
+パーサ（python3→jq→無ければフェイルセーフで何も書かず終了＝中立）で <code>result\titem</code> を取り出し、
+<br>
+テーマ帰属（mape_theme_of。POLICY 依存）は bash 側で一元化してから awk で集計する。破損行は無視して継続。
+</p>
+</section>
+<section class="mod" id="mod-mape-lib-sh">
+<h3 class="mod-h"><span class="mp">mape/lib.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+MAPE-K 共有ライブラリ。
+</p>
+<p class="sum">
+すべての mape スクリプトが source して使い、単体では実行しない（ADR-0010）。
+</p>
+<p>
+すべての mape スクリプトが読み込む共通関数と設定。
+</p>
+<p>
+設計の約束:
+</p>
+<ul>
+<li>スクリプトは既定で「読み取り専用」= 書き込みは $MAPE_STATE_DIR 配下のみ。 knowledge/ を変更するのは --record / --update-knowledge を渡したときだけ。</li>
+<li>$MAPE_STATE_DIR は環境変数で差し替え可能（テストは一時ディレクトリを指す）。</li>
+</ul>
+<p>
+ここで定義する <code>mape_*</code> 関数は他の mape スクリプト・テストから使われる公開 API 相当。
+<br>
+安全機構（ブレーカー・隔離・整合性検査）に関わる関数は、情報が欠けたときの倒れる向き
+<br>
+（fail-closed か fail-safe か）を各関数の @description に明記してある。
+</p>
+<article class="fn" id="mod-mape-lib-sh-mape_log">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_log">mape_log</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L54">mape/lib.sh:54 ↗</a></h4>
+<p class="sum">
+進行状況を stderr へ出す（stdout は成果物用に空けておくため）。
+</p>
+<h5 id="mod-mape-lib-sh-mape_log-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>...</strong> (string): ログ本文</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_log-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_log-output-on-stderr" class="lbl">標準エラー出力</h5>
+<ul>
+<li><code>[mape] &lt;本文&gt;</code></li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_die">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_die">mape_die</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L60">mape/lib.sh:60 ↗</a></h4>
+<p class="sum">
+致命的エラーを stderr へ出してプロセスを終了する。
+</p>
+<h5 id="mod-mape-lib-sh-mape_die-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>...</strong> (string): エラー本文</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_die-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>1</strong>: 常に（呼び出し元スクリプトごと終了する）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_die-output-on-stderr" class="lbl">標準エラー出力</h5>
+<ul>
+<li><code>[mape] ERROR: &lt;本文&gt;</code></li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_now">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_now">mape_now</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L67">mape/lib.sh:67 ↗</a></h4>
+<p class="sum">
+決定論的な UTC タイムスタンプ（ワークフロー JS の Date 制限は bash には無い）。
+<br>
+形式は 'YYYY-MM-DDTHH:MMZ' で、mape_epoch_utc が解釈できる唯一の形式。
+</p>
+<p class="noargs">引数を取らない</p>
+<h5 id="mod-mape-lib-sh-mape_now-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_now-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>UTC タイムスタンプ（例 2026-07-30T02:15Z）</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_ensure_state">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_ensure_state">mape_ensure_state</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L73">mape/lib.sh:73 ↗</a></h4>
+<p class="sum">
+中間成果物ディレクトリ（$MAPE_STATE_DIR）を作る。書き込み前に必ず呼ぶ。
+</p>
+<p class="noargs">引数を取らない</p>
+<h5 id="mod-mape-lib-sh-mape_ensure_state-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 作成済み／作成成功</li>
+<li><strong>1</strong>: mkdir 失敗</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_load_env">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_load_env">mape_load_env</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L93">mape/lib.sh:93 ↗</a></h4>
+<p class="sum">
+monitor.env を安全に読み込む（ADR-0010。セキュリティ: <code>. file</code> で source しない）。
+<br>
+理由: 値（例 MAPE_CHURN_TOP）はリポジトリ内のファイル名など外部制御データ由来で、
+<br>
+source すると <code>名前;$(cmd)</code> のようなファイルで無人ループがコマンド実行し得る。
+<br>
+ここでは許可キーのみを「リテラル代入」する（コマンド置換・評価を一切行わない）。
+<br>
+未知キーは黙って無視する（許可リスト方式＝新キーは明示追加が必要）。
+</p>
+<h5 id="mod-mape-lib-sh-mape_load_env-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 読み込む env ファイルのパス（不在なら何もしない）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_load_env-variables-set" class="lbl">設定する変数</h5>
+<ul>
+<li><strong>MAPE_TS</strong> (string): monitor が記録した UTC タイムスタンプ</li>
+<li><strong>MAPE_CYCLE</strong> (string): 周回番号</li>
+<li><strong>MAPE_GATE</strong> (string): 品質ゲートの結果（pass|fail|skip）</li>
+<li><strong>MAPE_GATE_S</strong> (string): 品質ゲートの所要秒（未計測は '-'）</li>
+<li><strong>MAPE_TODO</strong> (string): TODO/FIXME マーカー件数</li>
+<li><strong>MAPE_SCRIPTS</strong> (string): シェルスクリプト数</li>
+<li><strong>MAPE_MAX_SKILL</strong> (string): 最長 SKILL.md の行数</li>
+<li><strong>MAPE_CLAUDE_MD</strong> (string): CLAUDE.md の行数</li>
+<li><strong>MAPE_ADR</strong> (string): ADR 数</li>
+<li><strong>MAPE_CHURN_TOP</strong> (string): churn 首位ファイル名（無毒化済み）</li>
+<li><strong>MAPE_STALE_H</strong> (string): 最終 HEALTH 追記からの経過時間(h)。判定不能は '-'</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_load_env-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功（ファイル不在も成功扱い）</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_policy_keywords">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_policy_keywords">mape_policy_keywords</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L110">mape/lib.sh:110 ↗</a></h4>
+<p class="sum">
+POLICY.md の「### &lt;tier&gt;」見出し直後の <code></code><code> フェンス内キーワードを1行ずつ出力する。</code>
+<br>
+人間が POLICY.md を編集するだけで、コードを触らずにリスク分類の語彙を調律できる。
+</p>
+<h5 id="mod-mape-lib-sh-mape_policy_keywords-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): tier 名（consult|approve|auto）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_policy_keywords-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_policy_keywords-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>キーワード（1行1件）。POLICY 不在／見出し不在なら無出力</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_themes">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_themes">mape_themes</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L126">mape/lib.sh:126 ↗</a></h4>
+<p class="sum">
+自己設定（ADR-0014 §27）: POLICY「## 今月の重点テーマ」直下の箇条書きを1行1テーマで出力する
+<br>
+（mape_setpoints と同型の見出し→行抽出。（…）注釈は落とす）。装飾だった重点テーマを analyze が読む。
+</p>
+<p class="noargs">引数を取らない</p>
+<h5 id="mod-mape-lib-sh-mape_themes-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_themes-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>重点テーマ（1行1件）。POLICY 不在／見出し不在なら無出力</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_themes-see-also" class="lbl">関連</h5>
+<ul>
+<li><a href="#mod-mape-lib-sh-mape_theme_of">mape_theme_of</a></li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_theme_of">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_theme_of">mape_theme_of</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L140">mape/lib.sh:140 ↗</a></h4>
+<p class="sum">
+text が能動テーマに一致すればそのテーマ文字列を返す（無ければ空）。substring 一致（grep -qiF＝
+<br>
+固定文字列・ロケール非依存。既存 mape_classify と同じ照合）。テーマ文は簡潔なキーワード前提。
+</p>
+<h5 id="mod-mape-lib-sh-mape_theme_of-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 照合する提案テキスト</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_theme_of-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功（一致有無は stdout で表す）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_theme_of-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>最初に一致した重点テーマ文字列。非該当／POLICY 不在は空</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_theme_boost">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_theme_boost">mape_theme_boost</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L154">mape/lib.sh:154 ↗</a></h4>
+<p class="sum">
+能動テーマ一致なら有界な加点(+3)、非該当なら0。フラット（複数テーマ一致でも積み増さない＝bounded）。
+</p>
+<h5 id="mod-mape-lib-sh-mape_theme_boost-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 照合する提案テキスト</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_theme_boost-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_theme_boost-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>3（テーマ該当）または 0（非該当）</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_effectiveness_factor">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_effectiveness_factor">mape_effectiveness_factor</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L164">mape/lib.sh:164 ↗</a></h4>
+<p class="sum">
+効き目に基づく有界な可変係数（ADR-0014 §30。÷10 して使う）。efficacy.tsv（§29 が生成）を読む。
+<br>
+improved→12 / neutral→10 / worsened→7。samples&lt;3（コールドスタート）は neutral(10)。行なし/空テーマも10。
+<br>
+係数は [7,12] にクランプ（壊れた status も安全側 10 経由でクランプ）。mape_score は変えない・並べ替えのみ。
+<br>
+有界にしてあるのは、学習が暴走して tier や Execute 条件を実質的に書き換えないようにするため。
+</p>
+<h5 id="mod-mape-lib-sh-mape_effectiveness_factor-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 重点テーマ文字列（空なら中立の 10）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_effectiveness_factor-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_effectiveness_factor-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>係数（7〜12 の整数。使う側で ÷10 する）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_effectiveness_factor-see-also" class="lbl">関連</h5>
+<ul>
+<li>mape/efficacy.sh</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_trend">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_trend">mape_trend</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L189">mape/lib.sh:189 ↗</a></h4>
+<p class="sum">
+HEALTH の時系列から指標の微分（連続増減の向きと連長）を読む。細胞の恒常性は「今の値」だけでなく
+<br>
+「動いている向き」で先回りする（絶対値が band 内でも上昇が続けば早期警告）。read-only・非破壊。
+<br>
+列は awk -F'|' で gate_s=5 todo=6 scripts=7 max_skill=8 claude_md=9 adr=10（HEALTH の固定11列）。
+</p>
+<h5 id="mod-mape-lib-sh-mape_trend-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 指標名（gate_s|todo|scripts|max_skill|claude_md|adr）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_trend-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功（HEALTH 不在・未知指標も &quot;unknown&quot; を返して継続）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_trend-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>&quot;rising N&quot; / &quot;falling N&quot; / &quot;flat 1&quot; / &quot;unknown&quot;（3行未満＝希薄でデータ不足）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_trend-see-also" class="lbl">関連</h5>
+<ul>
+<li><a href="#mod-mape-lib-sh-mape_band_status">mape_band_status</a></li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_classify">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_classify">mape_classify</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L222">mape/lib.sh:222 ↗</a></h4>
+<p class="sum">
+提案テキストをリスク分類する（consult &gt; approve &gt; auto の危険側優先。既定 approve）。
+<br>
+走査順を consult→approve→auto に固定しているのが安全境界: 複数 tier のキーワードに当たる
+<br>
+提案は必ず最も危険な側へ倒れる（無人 Execute の対象から外れる方向）。
+</p>
+<h5 id="mod-mape-lib-sh-mape_classify-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 分類する提案テキスト</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_classify-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_classify-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>tier 名（consult|approve|auto）。どれにも当たらなければ approve</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_is_rejected">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_is_rejected">mape_is_rejected</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L243">mape/lib.sh:243 ↗</a></h4>
+<p class="sum">
+POLICY.md「## 却下ログ」の &quot;- pattern: &lt;正規表現&gt; — &lt;理由&gt;&quot; にマッチするか（マッチ=却下）。
+<br>
+注意: 区切りの em-dash（—）は <code>[^—]</code> のような文字クラスで扱わない。C/POSIX ロケールでは
+<br>
+マルチバイト文字がバイト集合として解釈され、<code>…</code>/<code>→</code> 等を含むパターンが誤切り詰めされるため、
+<br>
+「<code> —</code> 以降を除く」リテラル置換で理由部を落とす（バイト列リテラルはロケール非依存）。
+</p>
+<h5 id="mod-mape-lib-sh-mape_is_rejected-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 判定する提案テキスト</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_is_rejected-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 却下パターンにマッチした（＝この提案は掲示しない）</li>
+<li><strong>1</strong>: マッチしない／POLICY 不在</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_is_rejected-see-also" class="lbl">関連</h5>
+<ul>
+<li>mape_verify_knowledge POLICY の pattern が有効な正規表現かを検査する</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_score">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_score">mape_score</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L264">mape/lib.sh:264 ↗</a></h4>
+<p class="sum">
+インパクト(1-5) と 労力(1-5) からスコアを出す（高インパクト・低労力ほど高い。範囲 1-25）。
+<br>
+非数値・範囲外（&lt;1 または &gt;5）は 3 に矯正する。上限を矯正しないと effort&gt;5 で負スコアになり
+<br>
+proposals の並び（sort -k5,5nr）が壊れるため、下限だけでなく上限も必ずクランプする。
+<br>
+純粋関数（外部状態を読まない）。テーマ加点・効き目係数は analyze 側で合成する。
+</p>
+<h5 id="mod-mape-lib-sh-mape_score-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (int): インパクト 1-5（不正値は 3 に矯正）</li>
+<li><strong>$2</strong> (int): 労力 1-5（不正値は 3 に矯正）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_score-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_score-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>スコア（1-25 の整数）</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_sanitize_signal">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_sanitize_signal">mape_sanitize_signal</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L282">mape/lib.sh:282 ↗</a></h4>
+<p class="sum">
+外部制御データ（churn 由来のファイル名など、ブランチに commit した者が中身を決められる値）を、
+<br>
+人間が読む monitor.md／計画イシュー（issue-body.md）／<strong>無人 Execute LLM</strong> の文脈へ入れる前に
+<br>
+無毒化する。狙い: (a) markdown/HTML メタ文字で計画イシューを壊さない (b) 計画を読み込んで
+<br>
+コードを書き PR を開く無人エージェントへのプロンプトインジェクションを断つ（ADR-0010 の膜を塞ぐ）。
+<br>
+除去: バッククォート・[ ]・&lt; &gt;・|・バックスラッシュ（md/html/表の構造メタ文字）と制御文字。
+<br>
+改行/タブは空白へ潰す（別行に見せかけた見出し・指示の注入を防ぐ）。最後に 80 字へ丸める。
+<br>
+ファイル名に多い英数・/・.・-・_・* は温存する（表示忠実性）。LC_ALL=C はマルチバイト誤爆回避。
+<br>
+多層防御なので、monitor で無毒化済みの値でも下流（analyze/run）で再度通してよい（冪等）。
+</p>
+<h5 id="mod-mape-lib-sh-mape_sanitize_signal-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 無毒化する外部制御文字列</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_sanitize_signal-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_sanitize_signal-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>無毒化した文字列（最大 80 <strong>バイト</strong>・有効 UTF-8）</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_ledger_status">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_ledger_status">mape_ledger_status</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L306">mape/lib.sh:306 ↗</a></h4>
+<p class="sum">
+実行台帳(ledger.jsonl)で指定 item（＝提案テキスト。Execute が record する文字列と厳密一致）の
+<br>
+過去の結果を要約する（K→A フィードバック弧を閉じる。ADR-0014 の「生きた核」）。
+<br>
+破損行は握り潰す（jq→python3 フォールバック。パーサ無しは無印＝memory 無効でフェイルセーフ）。
+<br>
+注意: これはシグナル由来提案には適用しない（呼び出し側 analyze が BACKLOG 取り込み時のみ使う）。
+<br>
+シグナルは現状のライブ値であり、過去 green で現在の赤ゲート等を抑制してはならないため。
+</p>
+<h5 id="mod-mape-lib-sh-mape_ledger_status-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 台帳の item 文字列（提案テキストと厳密一致）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_ledger_status-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功（判定不能でも呼び出し元を止めない）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_ledger_status-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li><code>done</code>（green が1件以上＝実装済み。再提案しない）/ <code>failing</code>（green 無し・red が MAPE_CB_SAME_ITEM_FAIL 回以上＝慢性失敗。降格して沈める）/ 空（履歴なし・閾値未満・パーサ無し）</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_setpoints">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_setpoints">mape_setpoints</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L350">mape/lib.sh:350 ↗</a></h4>
+<p class="sum">
+恒常性（homeostasis）: POLICY「### 健全性バンド（setpoints）」fence 内の行（<code>metric warn crit</code>）を
+<br>
+出力する。人間がここを編集すれば analyze の反応閾値を（コードでなく）POLICY で調律できる（ADR-0004/0014）。
+</p>
+<p class="noargs">引数を取らない</p>
+<h5 id="mod-mape-lib-sh-mape_setpoints-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_setpoints-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li><code>metric warn crit</code> の行（1行1指標）。POLICY 不在／見出し不在なら無出力</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_setpoints-see-also" class="lbl">関連</h5>
+<ul>
+<li><a href="#mod-mape-lib-sh-mape_band_status">mape_band_status</a></li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_band_status">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_band_status">mape_band_status</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L368">mape/lib.sh:368 ↗</a></h4>
+<p class="sum">
+指標 value がバンドのどこか（ok|warn|crit）を返す。POLICY の setpoint を優先し、無ければ
+<br>
+baked-in 既定（従来 analyze のしきい値を包含）。direction は lower（小さいほど良い）前提。
+<br>
+非数値（&quot;-&quot; 等）や warn/crit が壊れている場合は ok（判定せず・フェイルセーフ）。
+<br>
+ここでの ok は「提案を1件出さない」だけで安全境界には触れないため、fail-open ではなく
+<br>
+ノイズを出さない方向のフェイルセーフとして正しい。
+</p>
+<h5 id="mod-mape-lib-sh-mape_band_status-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 指標名（gate_s|todo|claude_md|max_skill …）</li>
+<li><strong>$2</strong> (string): 指標の現在値（非数値なら判定せず ok）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_band_status-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_band_status-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>ok|warn|crit</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_verify_knowledge">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_verify_knowledge">mape_verify_knowledge</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L406">mape/lib.sh:406 ↗</a></h4>
+<p class="sum">
+DNA 完全性（ADR-0014）: ライブ知識ファイルの機械可読な不変条件を検査する（fail-closed）。
+<br>
+壊れていたら壊れたファイルのパスを stderr に名指しして非0で返す。check.sh（単一ゲート・ADR-0004）が
+<br>
+実データに対して呼ぶ。テストは MAPE_HEALTH/MAPE_POLICY/MAPE_BACKLOG/MAPE_STATE_DIR を差し替えて個別に壊す。
+<br>
+各ファイルは「在れば整合、無ければ許容」（最小構成/CI での不在で壊れないため）。tier 判定・書き換えはしない。
+<br>
+JSON パーサ非在は ledger 検査スキップ＝フェイルセーフ（record/status と対称）。
+</p>
+<p>
+検査する不変条件:
+</p>
+<ul>
+<li>HEALTH: 推移表ヘッダ(ts(UTC))が在り、各データ行の列数がヘッダと一致する</li>
+<li>POLICY: consult/approve/auto 見出しが揃い、却下ログ pattern が有効な正規表現である</li>
+<li>BACKLOG: analyze の永続化挿入点「## アーカイブ」アンカーが在る</li>
+<li>ledger.jsonl: 非空行がすべて有効 JSON かつ ts/item/result を持つ（空白のみの行は許容）</li>
+</ul>
+<p class="noargs">引数を取らない</p>
+<h5 id="mod-mape-lib-sh-mape_verify_knowledge-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: すべて整合（またはファイル不在）</li>
+<li><strong>1</strong>: いずれかの不変条件が壊れている（safe-state はこれを unsafe に畳む）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_verify_knowledge-output-on-stderr" class="lbl">標準エラー出力</h5>
+<ul>
+<li><code>knowledge-integrity: &lt;内容&gt;: &lt;パス&gt;</code>（壊れた項目ごとに1行）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_verify_knowledge-see-also" class="lbl">関連</h5>
+<ul>
+<li>mape/safe-state.sh</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_epoch_utc">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_epoch_utc">mape_epoch_utc</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L485">mape/lib.sh:485 ↗</a></h4>
+<p class="sum">
+UTC タイムスタンプ 'YYYY-MM-DDTHH:MMZ'（mape_now と同形式）を epoch 秒へ。壊れた入力は空文字（フェイルセーフ）。
+<br>
+date -u -d は BSD 非対応のため使わず、days_from_civil（純整数演算）で決定論的に算出する（1970 以降専用）。
+<br>
+心拍/休眠自己検知（ADR-0014）が「最終 HEALTH 追記からの経過」を移植的に測るための土台。
+<br>
+呼び出し側は空文字を必ず「判定不能」として扱うこと（0 と混同すると 1970 起点の巨大な経過時間になる）。
+</p>
+<h5 id="mod-mape-lib-sh-mape_epoch_utc-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): UTC タイムスタンプ（'YYYY-MM-DDTHH:MMZ' 以外・範囲外は空文字を返す）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_epoch_utc-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功（判定不能は stdout の空文字で表す）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_epoch_utc-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>epoch 秒（整数）。形式不正・範囲外なら空文字</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_epoch_utc-see-also" class="lbl">関連</h5>
+<ul>
+<li><a href="#mod-mape-lib-sh-mape_now">mape_now</a></li>
+</ul>
+</article>
+<h3 id="mod-mape-lib-sh-quarantine">項目隔離（quarantine）</h3>
+<p>
+項目隔離（quarantine。自己修復。ADR-0015）: 毒項目1件で全 Execute を止めず、その項目だけを
+<br>
+BACKLOG.md「## ブロック中」へ隔離してループの生存を保つ。以下は隔離リストの読み書き。
+<br>
+隔離は同一項目ブレーカーだけを黙らせるもので、GLOBAL 暴走停止（末尾連続 red・直近 window red）は
+<br>
+隔離でも cooldown でも決して解除されない。
+</p>
+<article class="fn" id="mod-mape-lib-sh-mape_quarantined_items">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_quarantined_items">mape_quarantined_items</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L514">mape/lib.sh:514 ↗</a></h4>
+<p class="sum">
+隔離リスト（## ブロック中）の各エントリ本文を出力する（先頭 '- ' を除く。次の見出し/EOF で区切る）。
+</p>
+<p class="noargs">引数を取らない</p>
+<h5 id="mod-mape-lib-sh-mape_quarantined_items-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 常に成功</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_quarantined_items-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>隔離エントリ本文（1行1件。形式は &quot;&lt;item&gt; — reason (ts)&quot;）。BACKLOG 不在なら無出力</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_is_quarantined">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_is_quarantined">mape_is_quarantined</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L531">mape/lib.sh:531 ↗</a></h4>
+<p class="sum">
+提案テキストが隔離済みか。エントリは &quot;&lt;item&gt; — reason (ts)&quot;（quarantine_add が必ず <code> — </code> で
+<br>
+区切る）なので、item を <strong>境界一致</strong> で判定する: 行が <code>&lt;text&gt; — …</code> で始まる、または <code>&lt;text&gt;</code> に等しい。
+<br>
+旧実装の grep -qF は部分一致で、item の途中や reason 語に一致する別項目まで「隔離済み」と誤判定し、
+<br>
+その別項目の同一項目トリップ（GLOBAL 保護の一部）を黙らせていた（過剰抑止）。case のクォート部は
+<br>
+リテラル扱いなので text に glob メタ文字があっても安全。
+</p>
+<h5 id="mod-mape-lib-sh-mape_is_quarantined-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 判定する提案テキスト（空なら常に非隔離）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_is_quarantined-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 隔離済み（analyze は再提案せず、同一項目ブレーカーからも除外される）</li>
+<li><strong>1</strong>: 未隔離／空文字／BACKLOG 不在</li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_quarantine_add">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_quarantine_add">mape_quarantine_add</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L551">mape/lib.sh:551 ↗</a></h4>
+<p class="sum">
+項目を「## ブロック中」へ追記（冪等・無毒化・ファイル末尾にセクション生成）。circuit-breaker から呼ぶ。
+<br>
+<strong>knowledge/BACKLOG.md を書き換える数少ない関数</strong>（他の mape_* は read-only）。
+<br>
+reason は外部由来なので mape_sanitize_signal を必ず通してから書く。
+</p>
+<h5 id="mod-mape-lib-sh-mape_quarantine_add-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 隔離する item（提案テキスト。必須）</li>
+<li><strong>$2</strong> (string): 隔離理由（省略時は「隔離」。無毒化してから書き込む）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_quarantine_add-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 隔離した／既に隔離済み／BACKLOG 不在でスキップ</li>
+<li><strong>1</strong>: item が空</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_quarantine_add-output-on-stderr" class="lbl">標準エラー出力</h5>
+<ul>
+<li><code>[mape] 隔離: &lt;item&gt;</code> または <code>[mape] 既に隔離済み: &lt;item&gt;</code></li>
+</ul>
+</article>
+<article class="fn" id="mod-mape-lib-sh-mape_cooldown_elapsed">
+<h4 class="fn-h"><a class="anch" href="#mod-mape-lib-sh-mape_cooldown_elapsed">mape_cooldown_elapsed</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/lib.sh#L579">mape/lib.sh:579 ↗</a></h4>
+<p class="sum">
+隔離クリアの最小 dwell が経過したか（MAPE_CB_COOLDOWN_H 時間）。tripped_at 不明/壊れは「経過」扱い
+<br>
+（安全＝クリア許可）。cooldown は回復を遅らせるだけで、暴走停止を緩めることは決してない。
+</p>
+<p class="noargs">引数を取らない</p>
+<h5 id="mod-mape-lib-sh-mape_cooldown_elapsed-exit-codes" class="lbl">終了コード</h5>
+<ul>
+<li><strong>0</strong>: 経過済み（cooldown 無効 0 / tripped_at 不在 / ts 破損 を含む）</li>
+<li><strong>1</strong>: 未経過（隔離による同一項目トリップのクリアをまだ許さない）</li>
+</ul>
+<h5 id="mod-mape-lib-sh-mape_cooldown_elapsed-see-also" class="lbl">関連</h5>
+<ul>
+<li><a href="#mod-mape-lib-sh-mape_epoch_utc">mape_epoch_utc</a></li>
+</ul>
+</article>
+</section>
+<section class="mod" id="mod-mape-monitor-sh">
+<h3 class="mod-h"><span class="mp">mape/monitor.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/monitor.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+M — Monitor（監視）。
+</p>
+<p class="sum">
+ADR-0010。
+</p>
+<p>
+リポジトリのシグナルを集めて $MAPE_STATE_DIR/monitor.env と monitor.md に書き出す。
+<br>
+読み取り専用（--record を渡したときだけ knowledge/HEALTH.md に1行追記する）。
+</p>
+<p>
+使い方:
+<br>
+bash mape/monitor.sh              # 収集のみ（state/ に出力、HEALTH は触らない）
+<br>
+bash mape/monitor.sh --with-gate  # scripts/check.sh を実行して合否と所要秒も測る
+<br>
+bash mape/monitor.sh --with-gate --record   # HEALTH.md に推移を1行追記
+</p>
+<p>
+注意: --with-gate は check.sh を回す。check.sh は mape テスト経由で monitor を呼ぶため、
+<br>
+テストからは --with-gate を使わない（無限再帰防止）。
+</p>
+<p>
+収集する指標: TODO/FIXME 件数・シェルスクリプト数・最長 SKILL.md 行数・CLAUDE.md 行数・
+<br>
+ADR 数・churn 首位ファイル・品質ゲート合否/所要秒・最終 HEALTH 追記からの経過時間(h)。
+</p>
+</section>
+<section class="mod" id="mod-mape-plan-sh">
+<h3 class="mod-h"><span class="mp">mape/plan.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/plan.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+P — Plan（計画）。
+</p>
+<p class="sum">
+ADR-0010 / ADR-0011。
+</p>
+<p class="note">内部ヘルパー 2 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+proposals.tsv を読み、リスク3分類（自動/承認/相談）のチェックリストとして
+<br>
+GitHub イシュー本文（$MAPE_STATE_DIR/issue-body.md）を生成する。投稿はスキル側が MCP で行う。
+<br>
+完了項目は実行台帳（ledger.jsonl）の green から &lt;details&gt; に畳み、板をスリムに保つ（ADR-0011）。
+</p>
+<p>
+このスクリプト自体は knowledge/ を一切書き換えない（生成物は state/ のみ）。
+<br>
+auto は既定チェック済み <code>[x]</code>、approve / consult は未チェック <code>[ ]</code> で描画する（人が選ぶ）。
+</p>
+</section>
+<section class="mod" id="mod-mape-run-sh">
+<h3 class="mod-h"><span class="mp">mape/run.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/run.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+MAPE-K の M→A→P を1周まわす統合ランナー。
+</p>
+<p class="sum">
+ADR-0010。
+</p>
+<p>
+読み取り中心（安価・安全）。夜通し何度でも回してよい。実装（Execute）は含まない。
+</p>
+<p>
+使い方:
+<br>
+bash mape/run.sh            # M→A→P を回し、state/ に成果物を出す（knowledge は触らない = ドライラン）
+<br>
+bash mape/run.sh --record   # HEALTH.md / BACKLOG.md / PROGRESS.md も更新する（本番の夜間周回）
+</p>
+<p>
+出力の要: $MAPE_STATE_DIR/issue-body.md（Plan が作る掲示用チェックリスト）
+</p>
+<p>
+実行順: safe-state 判定 → M(monitor) → K→A(efficacy) → A(analyze) → P(plan) →
+<br>
+safe-state=0 なら掲示本文の先頭へ Execute 抑止バナーを差し込む（NFR-SAFE-002）。
+</p>
+</section>
+<section class="mod" id="mod-mape-safe-state-sh">
+<h3 class="mod-h"><span class="mp">mape/safe-state.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/mape/safe-state.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+安全状態（safe-state）判定。
+</p>
+<p class="sum">
+ADR-0016 / NFR-SAFE-001 / NFR-SAFE-002。
+</p>
+<p class="note">内部ヘルパー 1 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+MAPE-K の散在した fail-safe 断片（circuit-breaker・赤→破棄・1周1件・consult 除外・guard）を
+<br>
+「安全状態」という1つの不変条件へ集約する。無人 Execute はこの判定が MAPE_SAFE=1 の
+<br>
+ときだけ許される（危険時は Execute を抑止＝安全側へ縮退）。
+</p>
+<p>
+判定する不変条件（すべて満たすとき MAPE_SAFE=1）:
+<br>
+1) 保護ブランチ(main/master)上でない（トピックブランチ + PR 運用。CLAUDE.md 絶対原則）
+<br>
+2) knowledge/ 整合性が green（mape_verify_knowledge。細胞の DNA が壊れていない）
+<br>
+3) 作業ツリーがクリーン（未コミット変更に無人 Execute を重ねない）
+<br>
+4) サーキットブレーカーが既知かつ非 tripped（暴走検知が発火していない）
+</p>
+<p>
+フェイルセーフ: 判定情報が得られない（git 不在・detached HEAD・mape_verify_knowledge 未定義など）
+<br>
+ときは MAPE_SAFE=0（不安全）へ倒す（guard-* と同じ安全側）。移植性: LC_ALL=C・git branch --show-current。
+<br>
+ブレーカー status の 0/3 以外（例 exit 4＝パーサ不在で判定不能）は「状態不明」として unsafe に畳む。
+</p>
+</section>
+<h2 class="g" id="g-tool">ツール — 生成物のビルド</h2>
+<p class="g answer">プラグイン配布物とこのリファレンスを生成する。</p>
+<p class="g">生成物は手で編集せず、--check で正本（ソース）との乖離を検知する。</p>
+<section class="mod" id="mod-scripts-build-docs-sh">
+<h3 class="mod-h"><span class="mp">scripts/build-docs.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+シェルスクリプトのリファレンス（docs/reference.html）生成器
+</p>
+<p>
+scripts/*.sh・mape/*.sh・.claude/hooks/*.sh のコメントを vendoring した shdoc
+<br>
+（tools/shdoc/shdoc・MIT）で Markdown 化し、単一の docs/reference.html にまとめる。
+</p>
+<p>
+正本はシェルスクリプト側のコメントであり、docs/reference.html は生成物。手で編集しない。
+</p>
+<p>
+bash scripts/build-docs.sh          … docs/reference.html を再生成する
+<br>
+bash scripts/build-docs.sh --check  … ソースと docs/reference.html の乖離を検査（差があれば exit 1）
+</p>
+<p>
+「読んで分かる」ことを優先した構成にする:
+<br>
+1) モジュールを役割（品質ゲート / フック / MAPE-K / ツール / テスト）でグループ化する
+<br>
+（GROUP_DEFS が定義。どれにも当てはまらないファイルは「その他」に必ず出す＝黙って落とさない）
+<br>
+2) 索引に各関数の説明の先頭1文を添える（識別子の羅列にしない）
+<br>
+3) 索引を関数名・説明で絞り込む検索を付ける（依存ゼロの inline JS。無効でも全件見える）
+<br>
+4) 引数・終了コード・出力は日本語ラベルにし、定義元（GitHub の行番号）へリンクする
+</p>
+<p>
+依存は gawk のみ（shdoc が <code>gawk -E</code> を要求する）。Markdown→HTML の変換は
+<br>
+外部ツールに頼らず下の MD2HTML（awk）で行う。gawk が無い環境では「判定不能」を
+<br>
+合格に倒さず、明示メッセージ付きで非ゼロ終了する（fail-closed）。
+</p>
+<article class="fn" id="mod-scripts-build-docs-sh-list_targets">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-list_targets">list_targets</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L529">scripts/build-docs.sh:529 ↗</a></h4>
+<p class="sum">
+対象スクリプトを決定論的な順序で列挙する。
+</p>
+<h5 id="mod-scripts-build-docs-sh-list_targets-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>対象ファイルのパス（リポジトリルートからの相対、LC_ALL=C 順）</li>
+</ul>
+</article>
+<article class="fn" id="mod-scripts-build-docs-sh-slugify">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-slugify">slugify</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L540">scripts/build-docs.sh:540 ↗</a></h4>
+<p class="sum">
+パスやラベルからアンカー用の slug を作る。
+</p>
+<h5 id="mod-scripts-build-docs-sh-slugify-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 元の文字列</li>
+</ul>
+<h5 id="mod-scripts-build-docs-sh-slugify-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>英小文字・数字・_ と - だけからなる slug</li>
+</ul>
+</article>
+<article class="fn" id="mod-scripts-build-docs-sh-mod_id">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-mod_id">mod_id</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L547">scripts/build-docs.sh:547 ↗</a></h4>
+<p class="sum">
+パスからアンカー ID を作る（HTML の id と目次リンクで共有する）。
+</p>
+<h5 id="mod-scripts-build-docs-sh-mod_id-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 相対パス</li>
+</ul>
+<h5 id="mod-scripts-build-docs-sh-mod_id-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>mod- で始まるアンカー ID</li>
+</ul>
+</article>
+<article class="fn" id="mod-scripts-build-docs-sh-group_of">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-group_of">group_of</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L554">scripts/build-docs.sh:554 ↗</a></h4>
+<p class="sum">
+モジュールを読者にとっての役割で分類する（GROUP_DEFS のキーを返す）。
+</p>
+<h5 id="mod-scripts-build-docs-sh-group_of-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 相対パス</li>
+</ul>
+<h5 id="mod-scripts-build-docs-sh-group_of-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>グループキー。どれにも当てはまらなければ other（＝「その他」に必ず出る）</li>
+</ul>
+</article>
+<article class="fn" id="mod-scripts-build-docs-sh-fallback_md">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-fallback_md">fallback_md</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L569">scripts/build-docs.sh:569 ↗</a></h4>
+<p class="sum">
+shdoc 注記が無いファイル向けのフォールバック。先頭のコメントブロックを説明として使う。
+</p>
+<h5 id="mod-scripts-build-docs-sh-fallback_md-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 対象ファイル</li>
+</ul>
+<h5 id="mod-scripts-build-docs-sh-fallback_md-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>Markdown（段落のみ）</li>
+</ul>
+</article>
+<article class="fn" id="mod-scripts-build-docs-sh-line_map">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-line_map">line_map</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L578">scripts/build-docs.sh:578 ↗</a></h4>
+<p class="sum">
+関数名 → 定義行番号の対応表を作る（定義元リンクの #L に使う）。
+</p>
+<h5 id="mod-scripts-build-docs-sh-line_map-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 対象ファイル</li>
+</ul>
+<h5 id="mod-scripts-build-docs-sh-line_map-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li><code>関数名 &lt;TAB&gt; 行番号</code> の行（同名は最初の定義を採る）</li>
+</ul>
+</article>
+<article class="fn" id="mod-scripts-build-docs-sh-internal_count">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-internal_count">internal_count</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L593">scripts/build-docs.sh:593 ↗</a></h4>
+<p class="sum">
+ファイル中の @internal 注記（＝非公開ヘルパー）の件数を数える。
+</p>
+<h5 id="mod-scripts-build-docs-sh-internal_count-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 対象ファイル</li>
+</ul>
+<h5 id="mod-scripts-build-docs-sh-internal_count-output-on-stdout" class="lbl">標準出力</h5>
+<ul>
+<li>件数（0 以上の整数）</li>
+</ul>
+</article>
+<article class="fn" id="mod-scripts-build-docs-sh-split_group">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-split_group">split_group</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L645">scripts/build-docs.sh:645 ↗</a></h4>
+<p class="sum">
+GROUP_DEFS の1行を key / 見出し / 説明に分解して大域変数へ入れる。
+</p>
+<h5 id="mod-scripts-build-docs-sh-split_group-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): <code>key|見出し|説明</code> の1行</li>
+</ul>
+<h5 id="mod-scripts-build-docs-sh-split_group-variables-set" class="lbl">設定する変数</h5>
+<ul>
+<li><strong>g_key</strong> (string): グループキー</li>
+<li><strong>g_title</strong> (string): グループ見出し</li>
+<li><strong>g_desc</strong> (string): グループの1行説明</li>
+</ul>
+</article>
+<article class="fn" id="mod-scripts-build-docs-sh-split_sentence">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-build-docs-sh-split_sentence">split_sentence</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/build-docs.sh#L657">scripts/build-docs.sh:657 ↗</a></h4>
+<p class="sum">
+説明文を「結論の1文」と「残り」に割る（ピラミッド原則: 見出しの直後は1文の結論）。
+</p>
+<h5 id="mod-scripts-build-docs-sh-split_sentence-arguments" class="lbl">引数</h5>
+<ul>
+<li><strong>$1</strong> (string): 説明文（1行）</li>
+</ul>
+<h5 id="mod-scripts-build-docs-sh-split_sentence-variables-set" class="lbl">設定する変数</h5>
+<ul>
+<li><strong>s_head</strong> (string): 先頭1文（結論。句点が無ければ全体）</li>
+<li><strong>s_rest</strong> (string): 2文目以降（無ければ空）</li>
+</ul>
+</article>
+</section>
+<h2 class="g" id="g-test">テスト — ゲートとフック自身の自己検証</h2>
+<p class="g answer">一時フィクスチャで正常系と異常系を作り、「落ちるべきときに落ちる」ことを確かめる。</p>
+<p class="g">実ツリーは書き換えない。関数はテストケースそのもの。</p>
+<section class="mod" id="mod-scripts-test-build-docs-sh">
+<h3 class="mod-h"><span class="mp">scripts/test-build-docs.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-build-docs.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+が無いモジュール（結論段落を欠いたまま出さないための保険を確かめる検体）
+</p>
+<p class="note">内部ヘルパー 13 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+mktemp -d の合成フィクスチャで正常系・異常系を検証する。実ツリーは一切書き換えない。
+<br>
+重点は「黙って合格しない」こと: 乖離・ツール欠落・引数の誤記で必ず非ゼロに倒れること。
+<br>
+加えて「読んで分かる」ための表示契約（役割グループ・1行説明・未分類の救済・検索 UI・
+<br>
+日本語ラベル・非表示件数の明示）を固定する。
+</p>
+</section>
+<section class="mod" id="mod-scripts-test-docs-structure-sh">
+<h3 class="mod-h"><span class="mp">scripts/test-docs-structure.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+check-docs-structure.sh の動作テスト（一時フィクスチャで正常系・異常系を検証）。
+</p>
+<p class="note">内部ヘルパー 7 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+check-docs-structure.sh の動作テスト。一時フィクスチャで検査項目ごとに「正常系1・異常系1以上」を作り、
+<br>
+<strong>違反を作れば本当に落ちる</strong>ことを確かめる（検査が嘘をつかない証明）。
+<br>
+check.sh から呼ばれる。判定ロジックを変えたら再発防止ケースを追加すること。
+</p>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casea">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casea">caseA</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L125">scripts/test-docs-structure.sh:125 ↗</a></h4>
+<p class="sum">
+ケースA: 規約を満たすページ → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseb">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseb">caseB</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L129">scripts/test-docs-structure.sh:129 ↗</a></h4>
+<p class="sum">
+ケースB: 対象 HTML が1つも無い → 合格（黙って通さず明示する）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casec">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casec">caseC</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L133">scripts/test-docs-structure.sh:133 ↗</a></h4>
+<p class="sum">
+ケースC: 合格メッセージに検査件数が出る
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-cased">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-cased">caseD</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L137">scripts/test-docs-structure.sh:137 ↗</a></h4>
+<p class="sum">
+ケースD: 引数を渡すと使い方の誤り（未知引数を検査に倒さない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casef">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casef">caseF</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L158">scripts/test-docs-structure.sh:158 ↗</a></h4>
+<p class="sum">
+ケースF: 見出しの直後がただの &lt;p&gt; → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseg">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseg">caseG</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L162">scripts/test-docs-structure.sh:162 ↗</a></h4>
+<p class="sum">
+ケースG: 見出しの直後が &lt;div&gt; → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseh">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseh">caseH</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L166">scripts/test-docs-structure.sh:166 ↗</a></h4>
+<p class="sum">
+ケースH: 見出しの直後に地の文がある → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casei">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casei">caseI</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L170">scripts/test-docs-structure.sh:170 ↗</a></h4>
+<p class="sum">
+ケースI: 見出しが &lt;header&gt; に包まれ、結論がその外でも合格（閉じタグは読み飛ばす）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casej">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casej">caseJ</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L174">scripts/test-docs-structure.sh:174 ↗</a></h4>
+<p class="sum">
+ケースJ: 見出しを持たない構造用 section は対象外 → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casek">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casek">caseK</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L178">scripts/test-docs-structure.sh:178 ↗</a></h4>
+<p class="sum">
+ケースK: 入れ子 section の内側が違反 → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casel">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casel">caseL</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L182">scripts/test-docs-structure.sh:182 ↗</a></h4>
+<p class="sum">
+ケースL: 入れ子 section が両方とも規約どおり → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casem">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casem">caseM</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L186">scripts/test-docs-structure.sh:186 ↗</a></h4>
+<p class="sum">
+ケースM: 結論段落が無いまま section が閉じる → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casen">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casen">caseN</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L192">scripts/test-docs-structure.sh:192 ↗</a></h4>
+<p class="sum">
+ケースN: 結論に句点が2つ → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseo">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseo">caseO</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L196">scripts/test-docs-structure.sh:196 ↗</a></h4>
+<p class="sum">
+ケースO: 結論の句点が1つ → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casep">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casep">caseP</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L200">scripts/test-docs-structure.sh:200 ↗</a></h4>
+<p class="sum">
+ケースP: 結論段落が空 → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseq">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseq">caseQ</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L204">scripts/test-docs-structure.sh:204 ↗</a></h4>
+<p class="sum">
+ケースQ: 結論内のインライン要素を跨いだ2文も数える → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caser">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caser">caseR</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L208">scripts/test-docs-structure.sh:208 ↗</a></h4>
+<p class="sum">
+ケースR: 句点が無い体言止めの結論 → 合格（1文以内なので許す）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-cases">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-cases">caseS</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L214">scripts/test-docs-structure.sh:214 ↗</a></h4>
+<p class="sum">
+ケースS: h2 の次に h4 → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caset">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caset">caseT</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L218">scripts/test-docs-structure.sh:218 ↗</a></h4>
+<p class="sum">
+ケースT: h2→h3→h2→h3 は合格（浅い階層へ戻るのは可）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseu">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseu">caseU</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L224">scripts/test-docs-structure.sh:224 ↗</a></h4>
+<p class="sum">
+ケースU: 本文段落の後に図がある → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casev">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casev">caseV</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L228">scripts/test-docs-structure.sh:228 ↗</a></h4>
+<p class="sum">
+ケースV: 結論の直後に図 → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casew">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casew">caseW</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L232">scripts/test-docs-structure.sh:232 ↗</a></h4>
+<p class="sum">
+ケースW: figcaption 内の &lt;p&gt; を本文段落と数えない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casex">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casex">caseX</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L236">scripts/test-docs-structure.sh:236 ↗</a></h4>
+<p class="sum">
+ケースX: 図が無ければ本文だけでも合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casey">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casey">caseY</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L240">scripts/test-docs-structure.sh:240 ↗</a></h4>
+<p class="sum">
+ケースY: 次節の eyebrow を前の見出しブロックの本文と誤認しない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casez">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casez">caseZ</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L244">scripts/test-docs-structure.sh:244 ↗</a></h4>
+<p class="sum">
+ケースZ: 見出しブロック単位で判定する（h3 ブロックの図が本文より後）→ 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseaa">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseaa">caseAA</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L250">scripts/test-docs-structure.sh:250 ↗</a></h4>
+<p class="sum">
+ケースAA: 用語が注釈なしで本文に初出 → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseab">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseab">caseAB</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L254">scripts/test-docs-structure.sh:254 ↗</a></h4>
+<p class="sum">
+ケースAB: &lt;abbr title&gt; で注釈 → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseac">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseac">caseAC</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L258">scripts/test-docs-structure.sh:258 ↗</a></h4>
+<p class="sum">
+ケースAC: class=&quot;term&quot; で注釈 → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casead">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casead">caseAD</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L262">scripts/test-docs-structure.sh:262 ↗</a></h4>
+<p class="sum">
+ケースAD: title の無い &lt;abbr&gt; は注釈と数えない → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseae">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseae">caseAE</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L266">scripts/test-docs-structure.sh:266 ↗</a></h4>
+<p class="sum">
+ケースAE: &lt;code&gt; の中の用語は初出と数えない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseaf">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseaf">caseAF</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L270">scripts/test-docs-structure.sh:270 ↗</a></h4>
+<p class="sum">
+ケースAF: 見出しの中の用語は初出と数えない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseag">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseag">caseAG</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L274">scripts/test-docs-structure.sh:274 ↗</a></h4>
+<p class="sum">
+ケースAG: &lt;svg&gt; の中のラベルは初出と数えない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseah">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseah">caseAH</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L278">scripts/test-docs-structure.sh:278 ↗</a></h4>
+<p class="sum">
+ケースAH: 用語集（class=&quot;glossary&quot;）の中の定義は初出と数えない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseai">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseai">caseAI</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L282">scripts/test-docs-structure.sh:282 ↗</a></h4>
+<p class="sum">
+ケースAI: 語の一部（debug）を用語 deb の初出と数えない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseaj">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseaj">caseAJ</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L286">scripts/test-docs-structure.sh:286 ↗</a></h4>
+<p class="sum">
+ケースAJ: 注釈済みの後に同じ語が無注釈で再出現しても合格（初出だけ見る）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseak">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseak">caseAK</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L290">scripts/test-docs-structure.sh:290 ↗</a></h4>
+<p class="sum">
+ケースAK: 無注釈が先・注釈が後 → 失敗（初出で注釈する）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseal">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseal">caseAL</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L294">scripts/test-docs-structure.sh:294 ↗</a></h4>
+<p class="sum">
+ケースAL: 広い語（Stop フック）を注釈すれば、含まれる語（フック）も満たす → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseam">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseam">caseAM</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L300">scripts/test-docs-structure.sh:300 ↗</a></h4>
+<p class="sum">
+ケースAM: @keyframes があるのに prefers-reduced-motion が無い → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casean">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casean">caseAN</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L307">scripts/test-docs-structure.sh:307 ↗</a></h4>
+<p class="sum">
+ケースAN: @keyframes と prefers-reduced-motion が両方ある → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseao">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseao">caseAO</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L315">scripts/test-docs-structure.sh:315 ↗</a></h4>
+<p class="sum">
+ケースAO: アニメーションを使わないページは reduced-motion の指定が無くても合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseap">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseap">caseAP</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L321">scripts/test-docs-structure.sh:321 ↗</a></h4>
+<p class="sum">
+ケースAP: HTML コメント内の偽タグを構造と誤認しない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseaq">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseaq">caseAQ</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L325">scripts/test-docs-structure.sh:325 ↗</a></h4>
+<p class="sum">
+ケースAQ: script 内の文字列を構造と誤認しない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casear">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casear">caseAR</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L329">scripts/test-docs-structure.sh:329 ↗</a></h4>
+<p class="sum">
+ケースAR: &lt;pre&gt; のコード例に含まれる用語を初出と数えない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseas">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseas">caseAS</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L333">scripts/test-docs-structure.sh:333 ↗</a></h4>
+<p class="sum">
+ケースAS: &lt;main&gt; が無いページは文書全体を検査する（違反を見逃さない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseat">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseat">caseAT</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L344">scripts/test-docs-structure.sh:344 ↗</a></h4>
+<p class="sum">
+ケースAT: guide.html も検査対象（reference.html だけ見ていない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseau">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseau">caseAU</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L351">scripts/test-docs-structure.sh:351 ↗</a></h4>
+<p class="sum">
+ケースAU: reference.html も検査対象
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseav">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseav">caseAV</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L358">scripts/test-docs-structure.sh:358 ↗</a></h4>
+<p class="sum">
+ケースAV: 違反は1件目で打ち切らず全件を報告する
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseaw">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseaw">caseAW</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L364">scripts/test-docs-structure.sh:364 ↗</a></h4>
+<p class="sum">
+ケースAW: 違反の報告に「ファイル:行」が付く
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseax">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseax">caseAX</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L368">scripts/test-docs-structure.sh:368 ↗</a></h4>
+<p class="sum">
+ケースAX: 3ファイルすべて規約どおりなら合格（件数も合算される）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseay">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseay">caseAY</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L377">scripts/test-docs-structure.sh:377 ↗</a></h4>
+<p class="sum">
+ケースAY: 規約と検査スクリプトの用語集が一致していれば合格（正常系）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseaz">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseaz">caseAZ</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L381">scripts/test-docs-structure.sh:381 ↗</a></h4>
+<p class="sum">
+ケースAZ: 規約側に語を足すと落ちる（検査されない語が生まれるのを防ぐ）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-caseba">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-caseba">caseBA</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L388">scripts/test-docs-structure.sh:388 ↗</a></h4>
+<p class="sum">
+ケースBA: 検査スクリプト側に語を足すと落ちる（規約に無い語で落とさない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casebb">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casebb">caseBB</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L395">scripts/test-docs-structure.sh:395 ↗</a></h4>
+<p class="sum">
+ケースBB: 語の並び順が食い違うと落ちる（同じ集合でも順が違えば不一致）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casebc">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casebc">caseBC</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L402">scripts/test-docs-structure.sh:402 ↗</a></h4>
+<p class="sum">
+ケースBC: 規約ファイルが無ければ落ちる（照合不能を合格に倒さない = fail-closed）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-docs-structure-sh-casebd">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-docs-structure-sh-casebd">caseBD</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-docs-structure.sh#L409">scripts/test-docs-structure.sh:409 ↗</a></h4>
+<p class="sum">
+ケースBD: 規約から用語集を読み取れなければ落ちる（見出しを消しても素通りしない）
+</p>
+</article>
+</section>
+<section class="mod" id="mod-scripts-test-guard-git-sh">
+<h3 class="mod-h"><span class="mp">scripts/test-guard-git.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-guard-git.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+guard-git.sh の敵対的テスト（表駆動・直交組み合わせ）。
+</p>
+<p class="note">内部ヘルパー 7 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+guard-git.sh の敵対的テスト（表駆動）。scripts/test-hooks.sh の guard-git セクションを包含し、
+<br>
+コマンド形 × 前置 × force 形 × 保護 ref 到達形 × リモート × カレントブランチ × 破損入力を
+<br>
+直交的に組み合わせて検査する。
+</p>
+<p>
+契約（このファイルが固定する振る舞い）:
+<br>
+1. 実際に git が起動される位置に <code>git push</code> が現れ、かつ force / 全ブランチ / 保護 ref /
+<br>
+保護ブランチ上のカレント push のいずれかに該当するなら exit 2（ブロック）。
+<br>
+2. 前方一致（main-backup, mainline, feature/main …）や push でない文言は exit 0（誤爆しない）。
+<br>
+3. カレントブランチが判定できない（detached HEAD / リポジトリ外）状態で push 先未指定なら
+<br>
+fail-closed（ブロック）。情報欠落を許可に倒さない。
+<br>
+4. JSON パーサのバックエンド（jq / python3 / sed フォールバック）が違っても同じ判定になる。
+</p>
+<p>
+実 git コマンドは一切実行しない（擬似 JSON を stdin に流すだけ）。ブランチ依存の検証は
+<br>
+mktemp -d の隔離リポジトリで行い、コミットも作らない（symbolic-ref / HEAD 直書きで代用）。
+</p>
+</section>
+<section class="mod" id="mod-scripts-test-guard-protected-sh">
+<h3 class="mod-h"><span class="mp">scripts/test-guard-protected.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-guard-protected.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+guard-protected.sh の敵対的テスト（表駆動）。
+</p>
+<p class="note">内部ヘルパー 9 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+guard-protected.sh の敵対的テスト（表駆動）。
+<br>
+擬似ツールコール JSON を stdin に流し、ブロック(exit 2)/許可(exit 0) の契約を固定する。
+<br>
+観点: .env 系 / 鍵・証明書 / ロックファイル（各エコシステム）/ ADR ガバナンス /
+<br>
+パス形（相対・traversal・symlink・大小・空白・日本語・制御文字）/ フェイルセーフの向き。
+<br>
+方針: 判定不能なとき（git 不在・origin/main 不在・パーサ不在・相対化失敗）は
+<br>
+fail-closed（保護側=ブロック）に倒れることを検査する。fail-open は安全境界の侵食。
+<br>
+実リポジトリのファイルは一切書き換えない（JSON を流すだけ）。git 検証は隔離リポジトリで行う。
+</p>
+</section>
+<section class="mod" id="mod-scripts-test-hooks-sh">
+<h3 class="mod-h"><span class="mp">scripts/test-hooks.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-hooks.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+hooks（guard-git / guard-protected / quality-gate / session-start）の動作テスト。
+</p>
+<p class="note">内部ヘルパー 12 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+hooks の動作テスト: 擬似ツールコール JSON を各ガードフックに流し、期待どおり
+<br>
+ブロック（exit 2）/ 許可（exit 0）されるかを検証する。check.sh から呼ばれる。
+<br>
+ガードの判定を変更したら、ここに再発防止ケースを追加すること。
+</p>
+<p>
+後半（Round 9・#35）は quality-gate.sh と session-start.sh の契約テスト。実リポジトリの
+<br>
+状態に依存させず、すべて mktemp -d の隔離 git リポジトリと偽 check.sh スタブで検証する。
+</p>
+</section>
+<section class="mod" id="mod-scripts-test-skill-sync-sh">
+<h3 class="mod-h"><span class="mp">scripts/test-skill-sync.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+check-skill-sync.sh の動作テスト（一時フィクスチャで正常系・異常系を検証）。
+</p>
+<p class="note">内部ヘルパー 10 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+check-skill-sync.sh の動作テスト。一時フィクスチャで正常系・異常系を検証する。
+<br>
+check.sh から呼ばれる。判定ロジックを変えたら再発防止ケースを追加すること。
+</p>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-casea">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-casea">caseA</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L73">scripts/test-skill-sync.sh:73 ↗</a></h4>
+<p class="sum">
+ケースA: スキル・エージェントとも一覧と実体が一致 → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-caseb">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-caseb">caseB</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L80">scripts/test-skill-sync.sh:80 ↗</a></h4>
+<p class="sum">
+ケースB: 実体スキルが CLAUDE.md 一覧に無い → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-casec">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-casec">caseC</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L87">scripts/test-skill-sync.sh:87 ↗</a></h4>
+<p class="sum">
+ケースC: CLAUDE.md 一覧のスキルに実体が無い → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-cased">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-cased">caseD</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L94">scripts/test-skill-sync.sh:94 ↗</a></h4>
+<p class="sum">
+ケースD: 実体エージェントが CLAUDE.md 一覧に無い → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-casee">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-casee">caseE</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L101">scripts/test-skill-sync.sh:101 ↗</a></h4>
+<p class="sum">
+ケースE(回帰): 別セクションの表（例: ワークフロー）の名前をエージェントと誤認しない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-casef">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-casef">caseF</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L118">scripts/test-skill-sync.sh:118 ↗</a></h4>
+<p class="sum">
+ケースF(回帰): 実体スキルの行が無いのに、別行の説明列に <code>/name</code> が混じると
+<br>
+「宣言済み」と誤認してドリフトを見逃す（1列目のみ対象にする修正の回帰）→ 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_ws">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_ws">c_ws</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L161">scripts/test-skill-sync.sh:161 ↗</a></h4>
+<p class="sum">
+セル前後に余分な空白・タブがあっても1列目を読める
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_noeolpipe">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_noeolpipe">c_noeolpipe</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L172">scripts/test-skill-sync.sh:172 ↗</a></h4>
+<p class="sum">
+行末のパイプが無い表行でも1列目を読める
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_link">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_link">c_link</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L178">scripts/test-skill-sync.sh:178 ↗</a></h4>
+<p class="sum">
+1列目がリンク記法でもコマンド名を読める
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_sep_only">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_sep_only">c_sep_only</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L184">scripts/test-skill-sync.sh:184 ↗</a></h4>
+<p class="sum">
+区切り行（|---|---|）を宣言と誤認しない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_fullwidth_pipe">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_fullwidth_pipe">c_fullwidth_pipe</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L190">scripts/test-skill-sync.sh:190 ↗</a></h4>
+<p class="sum">
+全角パイプの行は表行と認めない＝宣言漏れとして失敗する（判定不能は安全側）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_desc_mention_ok">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_desc_mention_ok">c_desc_mention_ok</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L196">scripts/test-skill-sync.sh:196 ↗</a></h4>
+<p class="sum">
+説明列に他スキル名の <code>/name</code> があっても、正しく同期していれば合格（過剰検知しない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_agent_desc_mention">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_agent_desc_mention">c_agent_desc_mention</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L202">scripts/test-skill-sync.sh:202 ↗</a></h4>
+<p class="sum">
+エージェント表の説明列に別エージェント名があっても宣言と誤認しない（実体漏れを見逃さない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_fence_skill">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_fence_skill">c_fence_skill</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L210">scripts/test-skill-sync.sh:210 ↗</a></h4>
+<p class="sum">
+(回帰) スキル節のコードブロック内の表を宣言と誤認しない（幽霊スキルで偽赤にしない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_fence_agent">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_fence_agent">c_fence_agent</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L216">scripts/test-skill-sync.sh:216 ↗</a></h4>
+<p class="sum">
+(回帰) エージェント節のコードブロック内の表も拾わない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_fence_hides">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_fence_hides">c_fence_hides</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L222">scripts/test-skill-sync.sh:222 ↗</a></h4>
+<p class="sum">
+フェンスで実在スキルの行を隠すと宣言0件になり失敗する（fail-closed は維持）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_partial_heading">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_partial_heading">c_partial_heading</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L228">scripts/test-skill-sync.sh:228 ↗</a></h4>
+<p class="sum">
+(回帰) 見出しの部分一致（## スキルの書き方）の表を宣言と誤認しない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_partial_heading_agent">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_partial_heading_agent">c_partial_heading_agent</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L234">scripts/test-skill-sync.sh:234 ↗</a></h4>
+<p class="sum">
+エージェント側も同様（## エージェントの追加手順）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_order_swapped">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_order_swapped">c_order_swapped</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L240">scripts/test-skill-sync.sh:240 ↗</a></h4>
+<p class="sum">
+節の順序が逆（エージェントが先）でも判定できる
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_no_skill_section">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_no_skill_section">c_no_skill_section</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L246">scripts/test-skill-sync.sh:246 ↗</a></h4>
+<p class="sum">
+スキル節そのものが無い＋実体あり → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_no_agent_section">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_no_agent_section">c_no_agent_section</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L252">scripts/test-skill-sync.sh:252 ↗</a></h4>
+<p class="sum">
+エージェント節そのものが無い＋実体あり → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_other_section_cmd">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_other_section_cmd">c_other_section_cmd</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L258">scripts/test-skill-sync.sh:258 ↗</a></h4>
+<p class="sum">
+他セクションで <code>/name</code> が使われていてもスキル宣言に数えない（実体ありは失敗のまま）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_zero">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_zero">c_zero</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L266">scripts/test-skill-sync.sh:266 ↗</a></h4>
+<p class="sum">
+スキルもエージェントも0件で表も空 → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_zero_but_listed">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_zero_but_listed">c_zero_but_listed</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L272">scripts/test-skill-sync.sh:272 ↗</a></h4>
+<p class="sum">
+実体0件なのに一覧にある → 幽霊として失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_many">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_many">c_many</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L278">scripts/test-skill-sync.sh:278 ↗</a></h4>
+<p class="sum">
+大量（30件）でも一致すれば合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_many_missing">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_many_missing">c_many_missing</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L287">scripts/test-skill-sync.sh:287 ↗</a></h4>
+<p class="sum">
+大量のうち1件だけ一覧漏れ → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_jp_name">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_jp_name">c_jp_name</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L296">scripts/test-skill-sync.sh:296 ↗</a></h4>
+<p class="sum">
+日本語名スキルは命名規約外＝宣言として読めず失敗する（黙って合格にしない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_upper_name">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_upper_name">c_upper_name</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L302">scripts/test-skill-sync.sh:302 ↗</a></h4>
+<p class="sum">
+大文字を含むスキル名も規約外として失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_underscore_agent">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_underscore_agent">c_underscore_agent</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L308">scripts/test-skill-sync.sh:308 ↗</a></h4>
+<p class="sum">
+アンダースコアを含むエージェント名も規約外として失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_dir_without_md">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_dir_without_md">c_dir_without_md</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L314">scripts/test-skill-sync.sh:314 ↗</a></h4>
+<p class="sum">
+SKILL.md の無いディレクトリは実体に数えない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_agents_readme">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_agents_readme">c_agents_readme</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L321">scripts/test-skill-sync.sh:321 ↗</a></h4>
+<p class="sum">
+.claude/agents の非エージェント .md も実体として数える（見落とさない側に倒す）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_agent_only_drift">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_agent_only_drift">c_agent_only_drift</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L328">scripts/test-skill-sync.sh:328 ↗</a></h4>
+<p class="sum">
+スキルは一致・エージェントだけ不一致 → 失敗（両方検査される）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-skill-sync-sh-c_no_claude">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-skill-sync-sh-c_no_claude">c_no_claude</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-skill-sync.sh#L334">scripts/test-skill-sync.sh:334 ↗</a></h4>
+<p class="sum">
+CLAUDE.md が無い → 失敗
+</p>
+</article>
+</section>
+<section class="mod" id="mod-scripts-test-traceability-sh">
+<h3 class="mod-h"><span class="mp">scripts/test-traceability.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+check-traceability.sh の動作テスト（一時フィクスチャで正常系・異常系を検証）。
+</p>
+<p class="note">内部ヘルパー 5 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+check-traceability.sh の動作テスト。一時フィクスチャで正常系・異常系を検証する。
+<br>
+check.sh から呼ばれる。判定ロジックを変えたら再発防止ケースを追加すること。
+</p>
+<article class="fn" id="mod-scripts-test-traceability-sh-casea">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casea">caseA</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L52">scripts/test-traceability.sh:52 ↗</a></h4>
+<p class="sum">
+ケースA: 要件ディレクトリ自体が無い → 合格（対象なし）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-caseb">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-caseb">caseB</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L56">scripts/test-traceability.sh:56 ↗</a></h4>
+<p class="sum">
+ケースB: 要件宣言あり・対応テストなし → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casec">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casec">caseC</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L63">scripts/test-traceability.sh:63 ↗</a></h4>
+<p class="sum">
+ケースC: 要件宣言あり・対応テストは要件ツリー外・受入基準あり → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-cased">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-cased">caseD</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L71">scripts/test-traceability.sh:71 ↗</a></h4>
+<p class="sum">
+ケースD: 受入基準セクションが無い → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casee">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casee">caseE</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L79">scripts/test-traceability.sh:79 ↗</a></h4>
+<p class="sum">
+ケースE(回帰): 散文中の ID 言及は「幻の要件」にしない（宣言でないので被覆不要）→ 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casef">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casef">caseF</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L88">scripts/test-traceability.sh:88 ↗</a></h4>
+<p class="sum">
+ケースF(回帰): 自己参照（要件ツリー内の Verifies）は被覆と見なさない → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-caseg">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-caseg">caseG</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L96">scripts/test-traceability.sh:96 ↗</a></h4>
+<p class="sum">
+ケースG(回帰): 要件宣言のない index/README は受入基準チェックの対象外 → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-caseh">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-caseh">caseH</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L105">scripts/test-traceability.sh:105 ↗</a></h4>
+<p class="sum">
+ケースH(回帰): 宣言行に別IDの Verifies が同居しても、宣言側IDが発行済みになる → 被覆なしで失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casei">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casei">caseI</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L113">scripts/test-traceability.sh:113 ↗</a></h4>
+<p class="sum">
+ケースI(回帰): 不正形式ID（4桁）は形式エラーで失敗する（黙って握り潰さない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casej">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casej">caseJ</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L121">scripts/test-traceability.sh:121 ↗</a></h4>
+<p class="sum">
+ケースJ(回帰): 4桁ID への Verifies は3桁要件の被覆にならない（右端非アンカーの誤カウント）→ 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casek">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casek">caseK</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L129">scripts/test-traceability.sh:129 ↗</a></h4>
+<p class="sum">
+ケースK(回帰): コードフェンス内の見出し ### REQ-...: は実在要件として発行しない → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casel">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casel">caseL</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L138">scripts/test-traceability.sh:138 ↗</a></h4>
+<p class="sum">
+ケースL(回帰): 複数ファイル一括処理でフェンス状態が漏れない（閉じ忘れが後続ファイルの要件を消さない）
+<br>
+a.md に閉じ忘れフェンス、b.md に REQ-BBB-002(被覆なし)。漏れがあると BBB が消え合格してしまう→失敗であるべき
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casem">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casem">caseM</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L147">scripts/test-traceability.sh:147 ↗</a></h4>
+<p class="sum">
+ケースM(回帰): ~~~ フェンス内の要件見出しも無視する
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casen">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casen">caseN</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L155">scripts/test-traceability.sh:155 ↗</a></h4>
+<p class="sum">
+ケースN(回帰): 混在フェンス（<code></code><code> 外・~~~ 内）で早期クローズせず、内側の例示見出しを無視する</code>
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-caseo">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-caseo">caseO</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L165">scripts/test-traceability.sh:165 ↗</a></h4>
+<p class="sum">
+ケースO(回帰): ツリー外の <code>requirements</code> という名のディレクトリにある被覆も数える。
+<br>
+除外は basename ではなくパス接頭辞($REQ_DIR)で行う。basename 除外だと src/requirements/ の
+<br>
+Verifies が深さ無視で落ち、要件を未被覆と誤判定して gate が偽赤になる → 被覆ありで合格すべき。
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-casep">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-casep">caseP</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L173">scripts/test-traceability.sh:173 ↗</a></h4>
+<p class="sum">
+ケースP(回帰): $REQ_DIR 直下の自己参照は依然として被覆に数えない（パス接頭辞除外が効く）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_nospace">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_nospace">c_nospace</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L200">scripts/test-traceability.sh:200 ↗</a></h4>
+<p class="sum">
+空白なし（Verifies:REQ-…）でも被覆と認める
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_ws">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_ws">c_ws</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L203">scripts/test-traceability.sh:203 ↗</a></h4>
+<p class="sum">
+前後に余分な空白・タブがあっても被覆と認める
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_fullwidth">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_fullwidth">c_fullwidth</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L206">scripts/test-traceability.sh:206 ↗</a></h4>
+<p class="sum">
+全角コロン（Verifies：）は被覆と認めない＝判定不能は fail-closed に倒す
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_lower">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_lower">c_lower</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L209">scripts/test-traceability.sh:209 ↗</a></h4>
+<p class="sum">
+小文字 verifies: も被覆と認めない（表記を1つに固定する）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_comment">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_comment">c_comment</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L212">scripts/test-traceability.sh:212 ↗</a></h4>
+<p class="sum">
+HTML コメント内の Verifies（要件ツリー外）は被覆
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_multi_inline">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_multi_inline">c_multi_inline</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L215">scripts/test-traceability.sh:215 ↗</a></h4>
+<p class="sum">
+1行に複数 ID を列挙
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_multi_line">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_multi_line">c_multi_line</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L222">scripts/test-traceability.sh:222 ↗</a></h4>
+<p class="sum">
+複数行に分けた Verifies
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_partial">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_partial">c_partial</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L229">scripts/test-traceability.sh:229 ↗</a></h4>
+<p class="sum">
+複数要件のうち1つだけ被覆 → 失敗（部分被覆を合格にしない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_tablecell">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_tablecell">c_tablecell</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L236">scripts/test-traceability.sh:236 ↗</a></h4>
+<p class="sum">
+表セル内の Verifies も被覆
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_fenced_ref">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_fenced_ref">c_fenced_ref</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L239">scripts/test-traceability.sh:239 ↗</a></h4>
+<p class="sum">
+ツリー外ファイルのコードフェンス内 Verifies は被覆に数える（除外はツリーのみ）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_suffix">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_suffix">c_suffix</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L242">scripts/test-traceability.sh:242 ↗</a></h4>
+<p class="sum">
+右端の部分一致（REQ-FIX-001X）は被覆にしない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_prefix">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_prefix">c_prefix</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L245">scripts/test-traceability.sh:245 ↗</a></h4>
+<p class="sum">
+左端の部分一致（XREQ-FIX-001）は被覆にしない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_gitdir">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_gitdir">c_gitdir</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L248">scripts/test-traceability.sh:248 ↗</a></h4>
+<p class="sum">
+.git 配下の Verifies は被覆に数えない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_hidden">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_hidden">c_hidden</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L251">scripts/test-traceability.sh:251 ↗</a></h4>
+<p class="sum">
+隠しディレクトリ（.git 以外）の Verifies は被覆に数える
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_nfr_ok">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_nfr_ok">c_nfr_ok</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L256">scripts/test-traceability.sh:256 ↗</a></h4>
+<p class="sum">
+NFR を表行で宣言し被覆あり
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_nfr_ng">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_nfr_ng">c_nfr_ng</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L263">scripts/test-traceability.sh:263 ↗</a></h4>
+<p class="sum">
+NFR 被覆なし → 失敗
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_2digit">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_2digit">c_2digit</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L269">scripts/test-traceability.sh:269 ↗</a></h4>
+<p class="sum">
+連番2桁は形式エラー
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_lowerarea">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_lowerarea">c_lowerarea</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L276">scripts/test-traceability.sh:276 ↗</a></h4>
+<p class="sum">
+領域が小文字は形式エラー
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_unknown_prefix">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_unknown_prefix">c_unknown_prefix</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L283">scripts/test-traceability.sh:283 ↗</a></h4>
+<p class="sum">
+未知接頭辞（XYZ-/TEST-）は要件 ID として扱わない（過剰検知しない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_dup">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_dup">c_dup</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L289">scripts/test-traceability.sh:289 ↗</a></h4>
+<p class="sum">
+同一 ID を2ファイルで重複宣言 → 被覆1つで合格（重複を二重要求しない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_des_only">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_des_only">c_des_only</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L297">scripts/test-traceability.sh:297 ↗</a></h4>
+<p class="sum">
+DES-&lt;3桁&gt; 参照だけでは REQ の被覆にならない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_h1">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_h1">c_h1</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L302">scripts/test-traceability.sh:302 ↗</a></h4>
+<p class="sum">
+見出しレベル1でも宣言と見なす（被覆なし→失敗）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_indent">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_indent">c_indent</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L305">scripts/test-traceability.sh:305 ↗</a></h4>
+<p class="sum">
+行頭インデントのある宣言行も見逃さない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_broken_table">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_broken_table">c_broken_table</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L308">scripts/test-traceability.sh:308 ↗</a></h4>
+<p class="sum">
+ヘッダのない壊れた表行でも宣言として拾う（被覆なし→失敗）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_deep">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_deep">c_deep</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L311">scripts/test-traceability.sh:311 ↗</a></h4>
+<p class="sum">
+深い階層の要件ファイルも走査対象
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_txt">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_txt">c_txt</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L314">scripts/test-traceability.sh:314 ↗</a></h4>
+<p class="sum">
+.md 以外（.txt）は要件ファイルとして扱わない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_symlink">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_symlink">c_symlink</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L317">scripts/test-traceability.sh:317 ↗</a></h4>
+<p class="sum">
+symlink の要件ファイルも辿る（find -L）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_selfref_deep">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_selfref_deep">c_selfref_deep</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L324">scripts/test-traceability.sh:324 ↗</a></h4>
+<p class="sum">
+要件ツリーのサブディレクトリでの自己参照も被覆に数えない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_acc_en">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_acc_en">c_acc_en</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L332">scripts/test-traceability.sh:332 ↗</a></h4>
+<p class="sum">
+英語表記 Acceptance Criteria を認める
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_acc_lower">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_acc_lower">c_acc_lower</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L335">scripts/test-traceability.sh:335 ↗</a></h4>
+<p class="sum">
+小文字表記も認める（-i）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_acc_missing">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_acc_missing">c_acc_missing</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L338">scripts/test-traceability.sh:338 ↗</a></h4>
+<p class="sum">
+被覆はあるが受入基準が無い → 失敗（片方だけで合格にしない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_emptydir">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_emptydir">c_emptydir</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L343">scripts/test-traceability.sh:343 ↗</a></h4>
+<p class="sum">
+要件ディレクトリが空 → 対象なしで合格（過剰検知しない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_emptyfile">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_emptyfile">c_emptyfile</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L346">scripts/test-traceability.sh:346 ↗</a></h4>
+<p class="sum">
+空ファイルのみ → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_prose_only">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_prose_only">c_prose_only</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L349">scripts/test-traceability.sh:349 ↗</a></h4>
+<p class="sum">
+宣言のない散文だけ → 合格
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_nul_decl">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_nul_decl">c_nul_decl</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L353">scripts/test-traceability.sh:353 ↗</a></h4>
+<p class="sum">
+(回帰) NUL バイト混じりの要件ファイルでも宣言を見落とさない。
+<br>
+grep が入力をバイナリ扱いして一致行を捨てると「宣言なし＝合格」に倒れ、未被覆要件が素通りする。
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_nul_covered">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_nul_covered">c_nul_covered</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L359">scripts/test-traceability.sh:359 ↗</a></h4>
+<p class="sum">
+NUL 混じりでも被覆があれば合格（-a 追加が正常系を壊していない）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_nul_ref">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_nul_ref">c_nul_ref</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L366">scripts/test-traceability.sh:366 ↗</a></h4>
+<p class="sum">
+バイナリファイル中の 'Verifies:' 文字列は被覆に数えない（安全側）
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_huge">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_huge">c_huge</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L369">scripts/test-traceability.sh:369 ↗</a></h4>
+<p class="sum">
+巨大な要件ファイル（20万行）でも宣言・被覆判定が壊れない
+</p>
+</article>
+<article class="fn" id="mod-scripts-test-traceability-sh-c_space_path">
+<h4 class="fn-h"><a class="anch" href="#mod-scripts-test-traceability-sh-c_space_path">c_space_path</a> <a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-traceability.sh#L375">scripts/test-traceability.sh:375 ↗</a></h4>
+<p class="sum">
+リポジトリのパス・ファイル名に空白があっても壊れない（被覆あり→合格）
+</p>
+</article>
+</section>
+<section class="mod" id="mod-scripts-test-validate-foundation-sh">
+<h3 class="mod-h"><span class="mp">scripts/test-validate-foundation.sh</span><a class="src" href="https://github.com/nigoh/scoria/blob/main/scripts/test-validate-foundation.sh">GitHub ↗</a></h3>
+<p class="sum answer">
+validate-foundation.sh の網羅テスト（構造ルールごとに正常系/異常系を突く）。
+</p>
+<p class="note">内部ヘルパー 15 件は非表示（<code>@internal</code>）。実装はソースを参照。</p>
+<p>
+validate-foundation.sh の網羅テスト（構造ルールごとに 正常系 / 異常系 を突く）。
+</p>
+<p>
+本テストの本質は「検査が実際に違反を検知できるか」。ルールを1つずつ意図的に破った
+<br>
+フィクスチャ（mktemp -d の最小土台）を作り、validate-foundation.sh が非ゼロで落ちること
+<br>
+（＝嘘をつかないこと）と、正しい構成では落ちないこと（＝過剰検知しないこと）を固定する。
+<br>
+実リポジトリの内容には依存させない（決定論。実リポジトリは読み取りのみ）。
+</p>
+<p>
+背景（ドッグフーディングで発見）: workflow の .js は Workflow ツールが本体を async 関数で
+<br>
+ラップして実行する前提で、トップレベル return/await と export const meta を併用する。
+<br>
+素の <code>node --check</code> は package.json の type:module 有無で結果が変わり、スタック導入後
+<br>
+（type:module）に workflow を「構文エラー」と誤判定していた。ラップ検査に修正済み。
+<br>
+回帰ケース A/B/C はその再発防止（実リポジトリのコピーで検証）。
+</p>
+</section>
+</div>
+</div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>MIT License · <a href="https://github.com/nigoh/scoria">nigoh/scoria</a> · 土台は <a href="https://github.com/nigoh/deb">nigoh/deb</a></span>
+    <span><a href="https://github.com/nigoh/scoria">github.com/nigoh/scoria ↗</a></span>
+  </div>
+</footer>
+
+<a class="top-link" href="#top" aria-label="先頭へ戻る" title="先頭へ戻る">↑</a>
+
+<script>
+  (function () {
+    /* テーマ切替（OS 設定に追従しつつ、手動選択は localStorage に保存する） */
+    var b = document.getElementById('tt');
+    if (b) {
+      b.addEventListener('click', function () {
+        var r = document.documentElement;
+        var cur = r.getAttribute('data-theme');
+        if (!cur) { cur = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+        var next = cur === 'dark' ? 'light' : 'dark';
+        r.setAttribute('data-theme', next);
+        try { localStorage.setItem('scoria-docs-theme', next); } catch (e) {}
+      });
+    }
+
+    /* 索引の絞り込み（依存ゼロ。JS が無い環境では検索欄自体を出さず、索引は全件見える） */
+    var q = document.getElementById('q');
+    var find = document.getElementById('find');
+    var toc = document.getElementById('toc');
+    var out = document.getElementById('qn');
+    if (!q || !find || !toc) { return; }
+    find.hidden = false;
+
+    var mods = [].slice.call(toc.querySelectorAll('.mod-item')).map(function (m) {
+      var det = m.querySelector('details');
+      var head = m.querySelector('.mod-line');
+      return {
+        el: m,
+        det: det,
+        wasOpen: det ? det.open : false,
+        text: (head ? head.textContent : m.textContent).toLowerCase(),
+        fns: [].slice.call(m.querySelectorAll('.fn-item')).map(function (li) {
+          return { el: li, text: li.textContent.toLowerCase() };
+        })
+      };
+    });
+    var groups = [].slice.call(toc.querySelectorAll('.grp'));
+    var total = mods.reduce(function (a, m) { return a + m.fns.length; }, 0);
+
+    function every(terms, text) {
+      for (var i = 0; i < terms.length; i++) { if (text.indexOf(terms[i]) < 0) { return false; } }
+      return true;
+    }
+
+    function apply() {
+      var terms = q.value.toLowerCase().split(/\s+/).filter(function (t) { return t.length > 0; });
+      var hit = 0;
+      mods.forEach(function (m) {
+        var modHit = terms.length > 0 && every(terms, m.text);
+        var shown = 0;
+        m.fns.forEach(function (f) {
+          var v = terms.length === 0 || modHit || every(terms, f.text);
+          f.el.hidden = !v;
+          if (v) { shown++; }
+        });
+        hit += shown;
+        var vis = terms.length === 0 || modHit || shown > 0;
+        m.el.hidden = !vis;
+        /* 絞り込み中は一致した関数が見えるよう畳みを開き、クリアしたら元の状態へ戻す */
+        if (m.det) { m.det.open = terms.length > 0 ? (vis && shown > 0) : m.wasOpen; }
+      });
+      groups.forEach(function (g) {
+        var any = [].slice.call(g.querySelectorAll('.mod-item')).some(function (e) { return !e.hidden; });
+        g.hidden = !any;
+      });
+      if (out) { out.textContent = terms.length > 0 ? ('一致 ' + hit + ' / ' + total + ' 件') : ''; }
+    }
+
+    q.addEventListener('input', apply);
+    q.addEventListener('search', apply);
+    apply();
+  })();
+</script>
+</body>
+</html>

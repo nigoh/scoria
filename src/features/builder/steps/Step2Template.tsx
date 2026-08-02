@@ -9,8 +9,7 @@ import { TEMPLATE_CONTENTS, TEMPLATE_CONTENTS_EN } from "@/lib/templates";
 import type { TemplateId } from "@/types";
 
 export function Step2Template() {
-  const { formData, setTemplateId, setName, setDescription, setOutputLanguage } =
-    useWizardStore();
+  const { formData, setTemplateId, setName, setDescription, setOutputLanguage } = useWizardStore();
   const { extensionType, outputLanguage } = formData;
 
   const filteredTemplates = TEMPLATES.filter(

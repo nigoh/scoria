@@ -54,11 +54,7 @@ export function PreviewPanel() {
         <TabsContent value="files" className="flex-1">
           <ScrollArea className="h-full">
             <div className="p-4">
-              {generatedExtension ? (
-                <FileTreeView />
-              ) : (
-                <EmptyPlaceholder />
-              )}
+              {generatedExtension ? <FileTreeView /> : <EmptyPlaceholder />}
             </div>
           </ScrollArea>
         </TabsContent>
@@ -76,11 +72,7 @@ export function PreviewPanel() {
         <TabsContent value="blocks" className="flex-1">
           <ScrollArea className="h-full">
             <div className="p-4">
-              {generatedExtension ? (
-                <PromptBlockList />
-              ) : (
-                <EmptyPlaceholder />
-              )}
+              {generatedExtension ? <PromptBlockList /> : <EmptyPlaceholder />}
             </div>
           </ScrollArea>
         </TabsContent>

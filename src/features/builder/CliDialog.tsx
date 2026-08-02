@@ -43,9 +43,7 @@ export function CliDialog() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>CLIコマンド</DialogTitle>
-            <DialogDescription>
-              ターミナルに貼り付けてファイルを作成できます
-            </DialogDescription>
+            <DialogDescription>ターミナルに貼り付けてファイルを作成できます</DialogDescription>
           </DialogHeader>
           <div className="relative">
             <Button
@@ -58,9 +56,7 @@ export function CliDialog() {
               {copied ? "コピー済み" : "コピー"}
             </Button>
             <ScrollArea className="h-80 rounded-md border bg-muted/50 p-4">
-              <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed">
-                {script}
-              </pre>
+              <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed">{script}</pre>
             </ScrollArea>
           </div>
         </DialogContent>

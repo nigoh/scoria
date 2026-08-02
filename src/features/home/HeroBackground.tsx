@@ -1,9 +1,6 @@
 export function HeroBackground() {
   return (
-    <div
-      className="pointer-events-none absolute inset-0 overflow-hidden"
-      aria-hidden="true"
-    >
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
       {/* 六角形 */}
       <svg
         className="absolute -top-10 left-[10%] h-32 w-32 animate-geo-float-1 text-primary opacity-[0.07]"
@@ -30,12 +27,7 @@ export function HeroBackground() {
         className="absolute top-[40%] left-[5%] h-20 w-20 animate-geo-float-3 text-primary opacity-[0.08]"
         viewBox="0 0 100 100"
       >
-        <polygon
-          points="50,5 95,50 50,95 5,50"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+        <polygon points="50,5 95,50 50,95 5,50" fill="none" stroke="currentColor" strokeWidth="2" />
       </svg>
 
       {/* 三角形 */}
@@ -43,12 +35,7 @@ export function HeroBackground() {
         className="absolute bottom-10 right-[8%] h-28 w-28 animate-geo-float-4 text-primary opacity-[0.06]"
         viewBox="0 0 100 100"
       >
-        <polygon
-          points="50,8 95,92 5,92"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+        <polygon points="50,8 95,92 5,92" fill="none" stroke="currentColor" strokeWidth="2" />
       </svg>
 
       {/* 小さな円 */}

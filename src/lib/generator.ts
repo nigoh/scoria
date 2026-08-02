@@ -1,10 +1,5 @@
 import { nanoid } from "nanoid";
-import type {
-  ExtensionFormData,
-  GeneratedExtension,
-  GeneratedFile,
-  ContentBlock,
-} from "@/types";
+import type { ExtensionFormData, GeneratedExtension, GeneratedFile, ContentBlock } from "@/types";
 import { TEMPLATE_CONTENTS, TEMPLATE_CONTENTS_EN } from "./templates";
 
 function getTemplateMap(lang: "ja" | "en") {
@@ -84,11 +79,7 @@ function buildSkillFiles(
   body: string,
 ): GeneratedFile[] {
   const { skillConfig } = formData;
-  const frontmatter = [
-    "---",
-    `name: ${name}`,
-    `description: ${description}`,
-  ];
+  const frontmatter = ["---", `name: ${name}`, `description: ${description}`];
 
   if (skillConfig.argumentHint) {
     frontmatter.push(`argument-hint: ${skillConfig.argumentHint}`);
@@ -138,11 +129,7 @@ function buildAgentFiles(
   body: string,
 ): GeneratedFile[] {
   const { agentConfig } = formData;
-  const frontmatter = [
-    "---",
-    `name: ${name}`,
-    `description: ${description}`,
-  ];
+  const frontmatter = ["---", `name: ${name}`, `description: ${description}`];
 
   if (agentConfig.tools.length > 0) {
     frontmatter.push(`tools: ${agentConfig.tools.join(", ")}`);
@@ -194,11 +181,7 @@ function buildPluginFiles(
     const skillBlock = enabledBlocks.find((b) => SKILL_BODY_LABELS.includes(b.label));
     const skillBody = skillBlock ? `## 指示内容\n${skillBlock.content}` : "";
 
-    const frontmatter = [
-      "---",
-      `name: ${name}`,
-      `description: ${description}`,
-    ];
+    const frontmatter = ["---", `name: ${name}`, `description: ${description}`];
     if (skillConfig.allowedTools.length > 0) {
       frontmatter.push(`allowed-tools: ${skillConfig.allowedTools.join(", ")}`);
     }

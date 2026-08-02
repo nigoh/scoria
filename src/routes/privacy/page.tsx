@@ -13,12 +13,8 @@ export function Component() {
         トップに戻る
       </Link>
 
-      <h1 className="text-2xl font-bold text-foreground">
-        プライバシーポリシー
-      </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        最終更新日: 2026年3月18日
-      </p>
+      <h1 className="text-2xl font-bold text-foreground">プライバシーポリシー</h1>
+      <p className="mt-2 text-sm text-muted-foreground">最終更新日: 2026年3月18日</p>
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-foreground">
         <section>
@@ -35,26 +31,26 @@ export function Component() {
           </p>
           <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
             <li>
-              すべてのデータ（設定、プロンプト履歴等）はブラウザの localStorage / sessionStorage に保存されます
+              すべてのデータ（設定、プロンプト履歴等）はブラウザの localStorage / sessionStorage
+              に保存されます
             </li>
-            <li>
-              バックエンドサーバーやデータベースは存在しません
-            </li>
-            <li>
-              本サービス自体がユーザーデータを収集・送信することはありません
-            </li>
+            <li>バックエンドサーバーやデータベースは存在しません</li>
+            <li>本サービス自体がユーザーデータを収集・送信することはありません</li>
           </ul>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold">3. API キーの管理</h2>
           <p className="mt-2">
-            ユーザーが設定する LLM API キー（Anthropic、OpenAI 等）は、ブラウザ内で AES-GCM 方式により暗号化した上で localStorage に保存されます。
+            ユーザーが設定する LLM API キー（Anthropic、OpenAI 等）は、ブラウザ内で AES-GCM
+            方式により暗号化した上で localStorage に保存されます。
           </p>
           <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
             <li>API キーが本サービスのサーバーに送信されることはありません</li>
             <li>
-              LLM API への通信はユーザーのブラウザから各プロバイダー（api.anthropic.com、api.openai.com 等）へ直接送信されます
+              LLM API
+              への通信はユーザーのブラウザから各プロバイダー（api.anthropic.com、api.openai.com
+              等）へ直接送信されます
             </li>
             <li>各プロバイダーのプライバシーポリシーも併せてご確認ください</li>
           </ul>
@@ -63,7 +59,8 @@ export function Component() {
         <section>
           <h2 className="text-lg font-semibold">4. Cookie・アクセス解析</h2>
           <p className="mt-2">
-            本サービスは現時点で Cookie やアクセス解析ツールを使用していません。将来的に導入する場合は、本ポリシーを更新し事前にお知らせします。
+            本サービスは現時点で Cookie
+            やアクセス解析ツールを使用していません。将来的に導入する場合は、本ポリシーを更新し事前にお知らせします。
           </p>
         </section>
 

@@ -1,0 +1,47 @@
+name: テンプレートへのフィードバック
+description: deb をテンプレート/プラグインとして使って気づいた、土台への改善提案（`/feedback` からも起票可）
+title: "[feedback] "
+labels: [template-feedback]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        deb（土台）そのものへの改善提案です。アプリ固有・秘密情報は含めないでください（ADR-0009）。
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 種別
+      options:
+        - 機能要望（あった方がいい機能）
+        - 摩擦・不具合（使っていて困った）
+        - 気づき（再利用できるパターン）
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: 内容
+      description: 何を・なぜ（どのプロセス段階・どの機構で困ったか、どう改善したいか）
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 関係する機構 / 段階
+      options:
+        - CLAUDE.md
+        - rules
+        - skills
+        - agents
+        - workflows
+        - hooks
+        - docs/process（プロセス定義）
+        - plugin（コンパニオンプラグイン）
+        - その他
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: deb のバージョン / commit（任意）
+      description: "git rev-parse HEAD などがあれば"

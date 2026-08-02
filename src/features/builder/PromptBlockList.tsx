@@ -70,24 +70,15 @@ export function PromptBlockList() {
 
   return (
     <>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={blocks.map((b) => b.id)}
-          strategy={verticalListSortingStrategy}
-        >
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
             {blocks.map((block) => (
               <PromptBlock
                 key={block.id}
                 block={block}
                 onToggle={() => toggleBlock(block.id)}
-                onContentChange={(content) =>
-                  updateBlockContent(block.id, content)
-                }
+                onContentChange={(content) => updateBlockContent(block.id, content)}
                 onDelete={() => removeBlock(block.id)}
               />
             ))}
@@ -109,9 +100,7 @@ export function PromptBlockList() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>ブロックを追加</DialogTitle>
-            <DialogDescription>
-              カスタムのコンテンツブロックを追加します。
-            </DialogDescription>
+            <DialogDescription>カスタムのコンテンツブロックを追加します。</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
@@ -135,18 +124,10 @@ export function PromptBlockList() {
               />
             </div>
             <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setDialogOpen(false)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setDialogOpen(false)}>
                 キャンセル
               </Button>
-              <Button
-                size="sm"
-                onClick={handleAddBlock}
-                disabled={!newLabel.trim()}
-              >
+              <Button size="sm" onClick={handleAddBlock} disabled={!newLabel.trim()}>
                 追加
               </Button>
             </div>

@@ -1,0 +1,65 @@
+name: mape-nightly
+
+# MAPE-K の周回を1回まわして HEALTH 推移を刻む。**読み取り専用の M→A→P のみ**で、壊しうる Execute は
+# 含まない（無人での実装/マージはしない絶対原則を守る）。変更は knowledge/・mape/state/ の証跡に限られ、
+# 必ずトピックブランチ＋**ドラフト PR** で提出する（main 直接コミット禁止・無人マージ禁止）。
+#
+# **手動起動のみ**（ADR-0023 が ADR-0019 の夜間 cron を supersede）。毎晩の自動実行は、6日間の実測で
+# 新しい情報が gate_s の数値だけだった一方、解決済み提案が上位に残り続ける・失敗ブランチが溜まるという
+# 損が上回ったため止めた。トレンドが必要なときはラウンド開始時に手で1回まわす（Actions の Run workflow
+# か、対話セッションの `/mape night`）。
+
+on:
+  workflow_dispatch: {}
+
+# permissions は列挙外のスコープを全て落とす（過去の学び）。checkout=contents、push=contents:write、
+# PR 作成=pull-requests:write。issues は使わない（掲示は対話セッションの /mape night が担う）。
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: mape-nightly
+  cancel-in-progress: false
+
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: M→A→P（決定論・コードに対して読み取り専用。壊しうる Execute は含まない）
+        run: bash mape/run.sh --record
+
+      - name: 心拍を記録し証跡をトピックブランチ＋ドラフト PR で提出（main 直接禁止・無人マージ禁止）
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "mape-nightly[bot]"
+          git config user.email "noreply@anthropic.com"
+
+          # 変更が無ければ心拍のみ（PR は作らない）。
+          if git diff --quiet -- knowledge/ mape/state/; then
+            echo "変更なし（心拍のみ）。PR は作成しない。"
+            exit 0
+          fi
+
+          # 絶対原則: main/master へは直接コミット・push しない。必ずトピックブランチ。
+          base="${GITHUB_REF_NAME:-main}"
+          branch="chore/mape-cycle-$(date -u +%Y%m%d)-${GITHUB_RUN_NUMBER}"
+          case "$branch" in
+            main|master) echo "ブランチ名が保護名。中止。" >&2; exit 1 ;;
+          esac
+
+          git checkout -b "$branch"
+          git add knowledge/ mape/state/
+          git commit -m "chore(mape): nightly M→A→P cycle (automated heartbeat)"
+          git push -u origin "$branch"
+
+          # ドラフト PR（人間がレビューしてマージ。**無人ではマージしない**）。
+          gh pr create --draft --base "$base" --head "$branch" \
+            --title "chore(mape): nightly cycle $(date -u +%Y-%m-%d)" \
+            --body "自動 MAPE-K 夜間周回（決定論 M→A→P・コードに対して読み取り専用）。knowledge/ の diff と計画イシューの提案をレビューしてください。**無人ではマージしません**（ドラフト）。壊しうる Execute は含みません（対話セッションの \`/mape execute\` が担当）。"
