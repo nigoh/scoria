@@ -101,9 +101,7 @@ export const useExtensionStore = create<ExtensionState>()(
           return {
             generatedExtension: {
               ...state.generatedExtension,
-              blocks: state.generatedExtension.blocks.filter(
-                (b) => b.id !== blockId,
-              ),
+              blocks: state.generatedExtension.blocks.filter((b) => b.id !== blockId),
             },
           };
         }),

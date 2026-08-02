@@ -4,15 +4,11 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { to: "/builder", label: "ビルダー", icon: Compass },
-];
+const navItems = [{ to: "/builder", label: "ビルダー", icon: Compass }];
 
 function getResolvedTheme(theme: string): "light" | "dark" {
   if (theme === "system") {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
   return theme as "light" | "dark";
 }
@@ -20,10 +16,7 @@ function getResolvedTheme(theme: string): "light" | "dark" {
 export function AppShell() {
   const { theme } = useTheme();
   const resolved = getResolvedTheme(theme);
-  const logoSrc =
-    resolved === "dark"
-      ? "/scoria-logo-dark.svg"
-      : "/scoria-logo-light.svg";
+  const logoSrc = resolved === "dark" ? "/scoria-logo-dark.svg" : "/scoria-logo-light.svg";
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,11 +27,7 @@ export function AppShell() {
               to="/"
               className="animate-logo-in transition-transform duration-200 hover:scale-[1.03]"
             >
-              <img
-                src={logoSrc}
-                alt="Scoria"
-                className="h-7"
-              />
+              <img src={logoSrc} alt="Scoria" className="h-7" />
             </NavLink>
             <nav className="flex items-center gap-1">
               {navItems.map((item) => (

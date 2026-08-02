@@ -23,8 +23,8 @@ export function HeroSection() {
             学術研究を加速する Claude Code 拡張をつくる
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            系統的レビュー、メタ分析、引用チェックなど、学術研究に特化した
-            Claude Code のスキル・エージェント・プラグインをウィザード形式で簡単に作成。
+            系統的レビュー、メタ分析、引用チェックなど、学術研究に特化した Claude Code
+            のスキル・エージェント・プラグインをウィザード形式で簡単に作成。
             ZIPでダウンロードしてすぐに使えます。
           </p>
           <div className="mt-10">

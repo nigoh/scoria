@@ -1,0 +1,36 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 注意: permissions を書くと列挙外のスコープはすべて落ちる。checkout には contents: read が必要
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ソースリファレンス生成（shdoc）が gawk を要求する（ADR-0021）。個別の「チェック」ではなく
+      # ゲートを実行するための前提ツールの用意なので、ここに置く（検査自体は check.sh 側にある）。
+      # 入れないと build-docs.sh --check が「検査不能」で落ちる（fail-closed。黙って通ることはない）。
+      - name: Install gawk (shdoc の前提)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gawk
+
+      # スタック固有ゲート（typecheck / lint / format:check / test）の前提（ADR-0024）。
+      # gawk と同じく「ゲートを実行するための道具立て」であり、検査自体は check.sh 側にある。
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 品質ゲートの唯一の入口。ゲートの追加は scripts/check.sh 側に行う（ADR-0004）
+      - name: Run quality gate
+        run: bash scripts/check.sh

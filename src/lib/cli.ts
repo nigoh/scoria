@@ -9,22 +9,16 @@ export function generateCliScript(files: GeneratedFile[]): string {
   const commands: string[] = [];
 
   for (const file of files) {
-    const dir = file.path.includes("/")
-      ? file.path.split("/").slice(0, -1).join("/")
-      : null;
+    const dir = file.path.includes("/") ? file.path.split("/").slice(0, -1).join("/") : null;
 
-    const delimiter = file.content.includes("SCORIA_EOF")
-      ? "SCORIA_END"
-      : "SCORIA_EOF";
+    const delimiter = file.content.includes("SCORIA_EOF") ? "SCORIA_END" : "SCORIA_EOF";
 
     if (dir) {
       commands.push(
         `mkdir -p ${dir} && cat <<'${delimiter}' > ${file.path}\n${file.content}${delimiter}`,
       );
     } else {
-      commands.push(
-        `cat <<'${delimiter}' > ${file.path}\n${file.content}${delimiter}`,
-      );
+      commands.push(`cat <<'${delimiter}' > ${file.path}\n${file.content}${delimiter}`);
     }
   }
 

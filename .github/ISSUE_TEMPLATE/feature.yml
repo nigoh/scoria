@@ -1,0 +1,28 @@
+name: 機能要求
+description: 新機能・改善の提案
+title: "[feat] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: ユーザーストーリー
+      placeholder: "〜として、〜したい。なぜなら〜"
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: スコープ / 影響範囲
+    validations:
+      required: true
+  - type: dropdown
+    id: adr
+    attributes:
+      label: ADR の要否
+      description: 設計・技術選定の決定を伴うか
+      options:
+        - 不要（既存の決定の範囲内）
+        - 必要（先に /adr で起票する）
+    validations:
+      required: true

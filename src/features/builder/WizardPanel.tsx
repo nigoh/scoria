@@ -67,12 +67,7 @@ export function WizardPanel() {
       </div>
       <div className="flex-1 overflow-y-auto p-4">{stepComponent}</div>
       <div className="flex items-center justify-between border-t border-border px-4 py-3">
-        <Button
-          variant="ghost"
-          onClick={prevStep}
-          disabled={currentStep === 1}
-          className="gap-1"
-        >
+        <Button variant="ghost" onClick={prevStep} disabled={currentStep === 1} className="gap-1">
           <ArrowLeft size={16} />
           戻る
         </Button>

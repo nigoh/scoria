@@ -1,0 +1,10 @@
+# 真に一時的な生成物は追跡しない（証跡として残すのは monitor.env/analysis.md/proposals.tsv/issue-body.md/ledger.jsonl）
+gate.log
+*.raw
+*.skipped
+*.bak
+breaker.tripped_at
+.cb_reds
+safe.env
+efficacy.tsv
+.signal_texts

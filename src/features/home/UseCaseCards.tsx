@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   MedicalIllustration,
   CSIllustration,
@@ -56,15 +50,10 @@ export function UseCaseCards() {
         inView ? "animate-fade-in-up" : "opacity-0",
       )}
     >
-      <h2 className="mb-12 text-center text-2xl font-semibold text-foreground">
-        ユースケース
-      </h2>
+      <h2 className="mb-12 text-center text-2xl font-semibold text-foreground">ユースケース</h2>
       <div className="grid gap-6 sm:grid-cols-2">
         {useCases.map((uc) => (
-          <Card
-            key={uc.title}
-            className="transition-colors hover:bg-muted/50"
-          >
+          <Card key={uc.title} className="transition-colors hover:bg-muted/50">
             <CardHeader>
               <div className="flex items-center gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary/5">

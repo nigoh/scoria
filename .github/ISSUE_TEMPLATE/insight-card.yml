@@ -1,0 +1,24 @@
+name: 気づきカード
+description: 開発中に発見したパターン・仮説・学びの記録（ラウンドの振り返りで規約反映を検討する）
+title: "[insight] "
+labels: [insight-card]
+body:
+  - type: textarea
+    id: insight
+    attributes:
+      label: 気づき
+      description: 発見したパターン・仮説を1つだけ書く（1カード1気づき）
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 発見の文脈
+      description: どの作業・どのファイルで気づいたか
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 規約への反映案（あれば）
+      description: CLAUDE.md / rules / hooks / ADR のどこに反映しうるか

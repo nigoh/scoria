@@ -31,10 +31,7 @@ const AccordionTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <CaretDown
-        size={16}
-        className="shrink-0 transition-transform duration-200"
-      />
+      <CaretDown size={16} className="shrink-0 transition-transform duration-200" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));

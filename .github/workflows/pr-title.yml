@@ -1,0 +1,23 @@
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  conventional-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title (Conventional Commits)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "PR title: $PR_TITLE"
+          if printf '%s' "$PR_TITLE" | grep -Eq '^(feat|fix|docs|test|refactor|chore|ci)(\([a-z0-9._/-]+\))?!?: .+'; then
+            echo "OK"
+          else
+            echo "::error::PR タイトルは Conventional Commits 形式にしてください: feat|fix|docs|test|refactor|chore|ci(scope): subject"
+            exit 1
+          fi

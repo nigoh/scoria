@@ -54,12 +54,7 @@ export function HistoryDialog() {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="gap-1.5"
-        onClick={() => setOpen(true)}
-      >
+      <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setOpen(true)}>
         <ClockCounterClockwise size={16} />
         履歴
       </Button>
@@ -68,9 +63,7 @@ export function HistoryDialog() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>保存した拡張</DialogTitle>
-            <DialogDescription>
-              過去に保存した拡張を読み込んで再編集できます
-            </DialogDescription>
+            <DialogDescription>過去に保存した拡張を読み込んで再編集できます</DialogDescription>
           </DialogHeader>
 
           {entries.length === 0 ? (
@@ -88,9 +81,7 @@ export function HistoryDialog() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="truncate text-sm font-medium">
-                            {entry.name}
-                          </span>
+                          <span className="truncate text-sm font-medium">{entry.name}</span>
                           <Badge variant="outline" className="shrink-0 text-[10px]">
                             {TYPE_LABELS[entry.extensionType] ?? entry.extensionType}
                           </Badge>

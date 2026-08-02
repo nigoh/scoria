@@ -173,7 +173,7 @@ export const HOOK_PRESETS: HookPreset[] = [
     event: "PreToolUse",
     matcher: "Bash",
     hookType: "command",
-    command: "echo \"Bash command intercepted\"",
+    command: 'echo "Bash command intercepted"',
   },
 ];
 
