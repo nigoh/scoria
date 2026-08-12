@@ -155,4 +155,73 @@ test.describe("Scoria E2E - Claude Code Extension Generator", () => {
     await page.getByText("スキル（Slash Command）").click();
     await expect(nextBtn).toBeEnabled();
   });
+
+  test("AI 設計フロー（API モック・BYOK）", async ({ page }) => {
+    // Anthropic API を偽装する。ブラウザ直呼びなので CORS プリフライトにも応える。
+    const cors = {
+      "access-control-allow-origin": "*",
+      "access-control-allow-headers": "*",
+      "access-control-allow-methods": "POST, OPTIONS",
+    };
+    await page.route("https://api.anthropic.com/**", async (route) => {
+      if (route.request().method() === "OPTIONS") {
+        await route.fulfill({ status: 204, headers: cors });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        headers: { ...cors, "content-type": "application/json" },
+        body: JSON.stringify({
+          id: "msg_mock",
+          type: "message",
+          role: "assistant",
+          model: "claude-opus-5",
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                name: "grounded-theory-coding",
+                description: "グラウンデッド・セオリーのコーディングを支援する",
+                blocks: [
+                  { label: "オープンコーディング", content: "データを断片化して概念を付与する" },
+                  { label: "軸足コーディング", content: "概念をカテゴリに束ねる" },
+                ],
+              }),
+            },
+          ],
+          stop_reason: "end_turn",
+          stop_sequence: null,
+          usage: { input_tokens: 10, output_tokens: 10 },
+        }),
+      });
+    });
+
+    await goto(page, "/builder");
+
+    // 設定で API キーを登録（BYOK）
+    await page.getByRole("button", { name: "設定" }).click();
+    await page.locator("#anthropic-api-key").fill("sk-ant-e2e-mock");
+    await page.getByRole("button", { name: "完了" }).click();
+
+    // Step 1: タイプ選択
+    await page.getByText("スキル（Slash Command）").click();
+    await page.getByRole("button", { name: "次へ" }).click();
+
+    // Step 2: AI 設計モードに切り替えて自由記述
+    await page.getByRole("tab", { name: /AI 設計/ }).click();
+    await page
+      .locator("#ai-brief")
+      .fill("質的研究のグラウンデッド・セオリーでインタビューデータをコーディングしたい");
+    await page.getByRole("button", { name: "次へ" }).click();
+
+    // Step 3: AI で生成
+    await expect(page.getByRole("heading", { name: "詳細設定" })).toBeVisible();
+    await page.getByRole("button", { name: "AI で生成" }).click();
+
+    // Step 4: AI が設計したブロックが編集対象になり、ファイルは決定論側が組み立てる
+    await expect(page.getByRole("heading", { name: "内容を編集" })).toBeVisible();
+    await expect(page.getByText("オープンコーディング").first()).toBeVisible();
+    await page.getByRole("tab", { name: "プレビュー" }).click();
+    await expect(page.getByText("name: grounded-theory-coding")).toBeVisible();
+  });
 });

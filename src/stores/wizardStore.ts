@@ -59,9 +59,17 @@ const initialFormData: ExtensionFormData = {
   mcpEntries: [],
 };
 
+export type DesignMode = "template" | "ai";
+
 interface WizardState {
   currentStep: WizardStep;
   formData: ExtensionFormData;
+  /** 生成の経路。template=既存のテンプレート選択 / ai=自由記述から AI 設計（ADR-0027） */
+  designMode: DesignMode;
+  /** AI 設計に渡す研究内容の自由記述 */
+  aiBrief: string;
+  setDesignMode: (mode: DesignMode) => void;
+  setAiBrief: (brief: string) => void;
   setStep: (step: WizardStep) => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -101,6 +109,12 @@ interface WizardState {
 export const useWizardStore = create<WizardState>()((set) => ({
   currentStep: 1,
   formData: { ...initialFormData },
+  designMode: "template",
+  aiBrief: "",
+
+  setDesignMode: (mode) => set({ designMode: mode }),
+
+  setAiBrief: (brief) => set({ aiBrief: brief }),
 
   setStep: (step) => set({ currentStep: step }),
 
@@ -330,5 +344,6 @@ export const useWizardStore = create<WizardState>()((set) => ({
 
   setFormData: (data) => set({ formData: { ...data } }),
 
-  reset: () => set({ currentStep: 1, formData: { ...initialFormData } }),
+  reset: () =>
+    set({ currentStep: 1, formData: { ...initialFormData }, designMode: "template", aiBrief: "" }),
 }));
