@@ -137,3 +137,13 @@ export interface HistoryEntry {
   generatedAt: string;
   savedAt: string;
 }
+
+// ─── AI 設計（ADR-0027） ─────────────────────────────────────
+
+export interface AiDesignResult {
+  name: string;
+  description: string;
+  blocks: { label: string; content: string }[];
+}
+
+export type AiOutcome = { ok: true; value: AiDesignResult } | { ok: false; error: string };

@@ -11,6 +11,7 @@ ZIP でダウンロードできる Web アプリ。開発の進め方は deb 由
 - `.claude/` … steering 一式（rules / skills / agents / workflows / hooks / settings）。案内は `.claude/README.md`
 - `docs/adr/` … 意思決定記録（index: docs/adr/README.md）
 - `docs/process/` … 開発プロセス定義（V字・段階ゲート・要件・トレーサビリティ・検証）
+- `docs/requirements/` … 要件仕様（REQ/NFR。`check-traceability.sh` が被覆を検証）
 - `docs/reference.html` … 開発基盤スクリプトのリファレンス（`scripts/build-docs.sh` が生成。手で編集しない）
 - `scripts/check.sh` … **品質ゲートの唯一の入口**（Stop フックと CI が同じものを実行する）
 - `mape/` … MAPE-K セルフ改善の決定論スクリプト（ADR-0010。手動起動のみ。ADR-0023）
@@ -35,6 +36,7 @@ components/
   illustrations/      # SVG イラスト
 stores/               # zustand（wizard / extension / history）
 lib/                  # generator, templates, constants, cli, zip, utils
+  ai/                 # AI 設計（BYOK。プロンプト構築・応答検証・決定論組み立て。ADR-0027）
 ```
 
 ## 技術スタック
@@ -44,6 +46,7 @@ lib/                  # generator, templates, constants, cli, zip, utils
 - **デザイン:** コンソール方向（ADR-0026）。色は `src/index.css` のトークンが正本で、
   個別コンポーネントに色を直書きしない。角丸 0・等幅が既定・琥珀は主アクション専用
 - **状態:** zustand / **ルーティング:** react-router-dom v7 / **ZIP:** JSZip / **DnD:** dnd-kit
+- **AI:** @anthropic-ai/sdk（BYOK・ブラウザ直呼び。キーは localStorage のみ。ADR-0027）
 - **テスト:** Vitest（ユニット）+ Playwright（E2E）
 - **リンタ/フォーマッタ:** ESLint (flat config) / Prettier
 - **デプロイ:** Cloudflare Pages（`wrangler.jsonc`）
