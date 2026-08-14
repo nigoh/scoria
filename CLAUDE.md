@@ -50,7 +50,8 @@ lib/                  # generator, templates, constants, cli, zip, utils
 - **状態:** zustand / **ルーティング:** react-router-dom v7 / **ZIP:** JSZip / **DnD:** dnd-kit
 - **AI:** @anthropic-ai/sdk（BYOK・ブラウザ直呼び。キーは localStorage のみ。ADR-0027）
 - **論文データ:** OpenAlex（CC0・キー不要・ブラウザ直呼び・mailto 付き。ADR-0028）
-- **テスト:** Vitest（ユニット）+ Playwright（E2E）
+- **テスト:** Vitest（ユニット + jsdom コンポーネント）+ Playwright（E2E）。
+  `src/lib` は網羅率ゲートつき（ADR-0029。閾値は `vite.config.ts`）
 - **リンタ/フォーマッタ:** ESLint (flat config) / Prettier
 - **デプロイ:** Cloudflare Pages（`wrangler.jsonc`）
 

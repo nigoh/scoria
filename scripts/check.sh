@@ -84,7 +84,8 @@ run bash scripts/test-skill-sync.sh
 run npm run typecheck
 run npm run lint
 run npm run format:check
-run npm test
+# テストは網羅率つきで実行する（src/lib の閾値ゲート。ADR-0029。閾値は vite.config.ts）
+run npm run test:coverage
 
 if [ "$fail" -ne 0 ]; then
   echo "品質ゲート失敗" >&2

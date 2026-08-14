@@ -154,3 +154,74 @@ export async function fetchCiting(
 ): Promise<PapersOutcome> {
   return fetchWorkList(buildCitingUrl(id, page), fetchFn);
 }
+
+// ─── DOI 直指定（REQ-GRAPH-007） ─────────────────────────────
+
+const DOI_PATTERN = /^10\.\d{4,9}\/\S+$/;
+
+/** 素の DOI・https://doi.org/ URL・doi: 接頭辞を素の DOI に揃える。DOI でなければ null */
+export function normalizeDoi(input: string): string | null {
+  let doi = input.trim();
+  const lower = doi.toLowerCase();
+  if (lower.startsWith("https://doi.org/")) doi = doi.slice("https://doi.org/".length);
+  else if (lower.startsWith("http://doi.org/")) doi = doi.slice("http://doi.org/".length);
+  else if (lower.startsWith("doi:")) doi = doi.slice("doi:".length);
+  return DOI_PATTERN.test(doi) ? doi : null;
+}
+
+export function buildDoiUrl(doi: string): string {
+  const url = new URL(`${API_BASE}/works/doi:${doi}`);
+  url.searchParams.set("select", WORK_FIELDS);
+  url.searchParams.set("mailto", OPENALEX_MAILTO);
+  return url.toString();
+}
+
+/** DOI で単一 work を取得し、1 件のリストとして返す（検索結果と同じ形で扱えるように） */
+export async function fetchWorkByDoi(
+  doi: string,
+  fetchFn: typeof globalThis.fetch = globalThis.fetch,
+): Promise<PapersOutcome> {
+  let response: Response;
+  try {
+    response = await fetchFn(buildDoiUrl(doi));
+  } catch {
+    return { ok: false, error: "OpenAlex に接続できません。ネットワークを確認してください。" };
+  }
+
+  if (response.status === 404) {
+    return { ok: false, error: `DOI「${doi}」の論文が見つかりません。入力を確認してください。` };
+  }
+  if (response.status === 429) {
+    return { ok: false, error: "OpenAlex が混み合っています。少し待ってから試してください。" };
+  }
+  if (!response.ok) {
+    return {
+      ok: false,
+      error: `OpenAlex がエラーを返しました（${response.status}）。時間をおいて試してください。`,
+    };
+  }
+
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    return { ok: false, error: "OpenAlex の応答を解釈できませんでした。もう一度試してください。" };
+  }
+
+  const paper = parseWork(body);
+  if (paper === null) {
+    return { ok: false, error: "OpenAlex の応答形式が想定と異なります。もう一度試してください。" };
+  }
+  return { ok: true, value: [paper] };
+}
+
+/** 検索欄の入力を DOI とキーワードに振り分ける単一の入口 */
+export async function lookupPapers(
+  query: string,
+  fetchFn: typeof globalThis.fetch = globalThis.fetch,
+): Promise<PapersOutcome> {
+  if (query.trim() === "") return { ok: true, value: [] };
+  const doi = normalizeDoi(query);
+  if (doi !== null) return fetchWorkByDoi(doi, fetchFn);
+  return searchPapers(query, fetchFn);
+}
