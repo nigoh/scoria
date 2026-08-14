@@ -24,12 +24,13 @@ main.tsx              # React エントリーポイント
 App.tsx               # ルートコンポーネント（Provider 束ね）
 index.css             # グローバルCSS + デザイントークン
 types/index.ts        # 全機能で共有する型定義
-routes/               # ルーティング（home / builder / privacy / terms）
+routes/               # ルーティング（home / builder / graph / privacy / terms）
 features/
   home/               # ランディング（Hero・StepFlow・UseCase・TutorialCTA）
   builder/            # ウィザード本体
     steps/            # Step1ExtensionType 〜 Step4Content
     HooksEditor / McpEditor / PreviewPanel / FileTreeView など
+  graph/              # 論文グラフ探索（検索→類似グラフ→AI 設計へ引き渡し。ADR-0028）
 components/
   ui/                 # shadcn/ui（Radix ベース）
   layout/             # AppShell, PageContainer
@@ -37,6 +38,7 @@ components/
 stores/               # zustand（wizard / extension / history）
 lib/                  # generator, templates, constants, cli, zip, utils
   ai/                 # AI 設計（BYOK。プロンプト構築・応答検証・決定論組み立て。ADR-0027）
+  graph/              # 論文グラフ（OpenAlex クライアント・類似度・レイアウト。ADR-0028）
 ```
 
 ## 技術スタック
@@ -47,6 +49,7 @@ lib/                  # generator, templates, constants, cli, zip, utils
   個別コンポーネントに色を直書きしない。角丸 0・等幅が既定・琥珀は主アクション専用
 - **状態:** zustand / **ルーティング:** react-router-dom v7 / **ZIP:** JSZip / **DnD:** dnd-kit
 - **AI:** @anthropic-ai/sdk（BYOK・ブラウザ直呼び。キーは localStorage のみ。ADR-0027）
+- **論文データ:** OpenAlex（CC0・キー不要・ブラウザ直呼び・mailto 付き。ADR-0028）
 - **テスト:** Vitest（ユニット）+ Playwright（E2E）
 - **リンタ/フォーマッタ:** ESLint (flat config) / Prettier
 - **デプロイ:** Cloudflare Pages（`wrangler.jsonc`）
