@@ -114,7 +114,8 @@ export function GraphExplorer() {
             <p className="p-4 font-sans text-xs text-muted-foreground">
               OpenAlex（CC0 の学術データベース）から論文を検索し、種論文を選ぶと
               引用関係の近さでグラフが組まれます。DOI（10.… / https://doi.org/…）を
-              貼ると直接その論文から始められます。
+              貼ると直接その論文から始められます。選んだ論文は方法論の根拠として AI
+              設計（研究ソフトウェア向け拡張の生成）に渡せます。
             </p>
           )}
           <ul>

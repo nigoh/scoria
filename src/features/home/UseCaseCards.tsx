@@ -1,37 +1,37 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  MedicalIllustration,
-  CSIllustration,
-  SocialScienceIllustration,
-  InterdisciplinaryIllustration,
+  ReproIllustration,
+  SciTestIllustration,
+  ReleaseIllustration,
+  PluginIllustration,
 } from "@/components/illustrations/UseCaseIllustrations";
 import { useInView } from "@/lib/useInView";
 import { cn } from "@/lib/utils";
 
 const useCases = [
   {
-    Illustration: CSIllustration,
+    Illustration: ReproIllustration,
     title: "再現性コードレビュー",
     subtitle: "/repro-review スキル",
     description:
       "乱数シード・環境固定・データ来歴の観点で解析コードをレビュー。第三者が再現するための最小作業も洗い出します。",
   },
   {
-    Illustration: MedicalIllustration,
+    Illustration: SciTestIllustration,
     title: "数値コードのテスト設計",
     subtitle: "sci-test-agent エージェント",
     description:
       "許容誤差・性質ベース・ゴールデンデータの3層で、数値・データ処理コードのテストを設計・実装します。",
   },
   {
-    Illustration: SocialScienceIllustration,
+    Illustration: ReleaseIllustration,
     title: "リリース・DOI アーカイブ",
     subtitle: "/release-doi スキル",
     description:
       "バージョン判定・CHANGELOG・CITATION.cff の更新から DOI 発行メタデータまで、引用可能なリリースを準備します。",
   },
   {
-    Illustration: InterdisciplinaryIllustration,
+    Illustration: PluginIllustration,
     title: "プラグインパッケージ",
     subtitle: "スキル + エージェント + CLAUDE.md",
     description:

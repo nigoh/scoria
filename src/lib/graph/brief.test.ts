@@ -52,6 +52,12 @@ describe("formatPapersForBrief", () => {
     expect(text).toContain("OpenAlex: W11");
   });
 
+  it("前文は研究ソフトウェア開発の文脈（ADR-0030）で、論文を方法論の根拠と位置づける", () => {
+    const text = formatPapersForBrief([paper({})]);
+    expect(text).toContain("研究ソフトウェア");
+    expect(text).toContain("根拠");
+  });
+
   it("空の選択なら空文字列（見出しだけの断片を作らない）", () => {
     expect(formatPapersForBrief([])).toBe("");
   });
