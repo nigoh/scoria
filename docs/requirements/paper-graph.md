@@ -87,6 +87,31 @@
     状態で開く
 - 対応テスト: `Verifies: REQ-GRAPH-006`（`src/lib/graph/brief.test.ts` / `e2e/graph.spec.ts`）
 
+### REQ-GRAPH-007: DOI で種論文を直接指定できる
+
+- 優先度: 中
+- ユーザーストーリー: 研究者として、手元にある論文の DOI をそのまま貼って出発点にしたい。
+  なぜなら読んでいる論文から探索を始めるときはキーワード検索より確実だから
+- 受入基準（Acceptance Criteria）:
+  - Given DOI（`10.…/…` 形式・`https://doi.org/…` URL・`doi:` 接頭辞のいずれか）When 正規化する
+    Then 素の DOI（`10.…/…`）になり、DOI でない入力は null と判定される
+  - Given 正規化済み DOI When 検索欄に入力して検索する Then キーワード検索ではなく OpenAlex の
+    単一 work 取得（`/works/doi:…`）が発行され、該当論文が候補一覧に 1 件表示される
+  - Given 存在しない DOI（404）Then 見つからない旨のエラー結果になる（例外で落ちない）
+- 対応テスト: `Verifies: REQ-GRAPH-007`（`src/lib/graph/openalex.test.ts`）
+
+### REQ-GRAPH-008: グラフのノードから再探索できる
+
+- 優先度: 中
+- ユーザーストーリー: 研究者として、グラフで見つけた論文を新しい種にして探索を続けたい。
+  なぜなら文献調査は 1 ホップでは終わらず、芋づる式にたどるものだから
+- 受入基準（Acceptance Criteria）:
+  - Given 表示中のグラフ When ノードをダブルクリックする Then その論文を種とした近傍収集が走り、
+    グラフが新しい種のもとで組み直される
+  - Given 再探索の前に選択していた論文 Then 選択は維持され、新しい種が選択に加わる
+    （ホップをまたいで文献リストを積み上げられる）
+- 対応テスト: `Verifies: REQ-GRAPH-008`（`e2e/graph.spec.ts`）
+
 ## 非機能要件（7カテゴリを一巡。対象外は明示）
 
 | 分類 | ID | 内容 / 受入基準（測定可能な閾値＋根拠） | 対象外の場合の理由 |
@@ -104,3 +129,4 @@
 | 日付 | 変更 ID | 内容 | 理由 | 影響（DES/TEST） |
 |---|---|---|---|---|
 | 2026-08-14 | 初版 | 論文グラフ探索の要件を定義 | ADR-0028 | src/lib/graph/*.test.ts / e2e/graph.spec.ts |
+| 2026-08-14 | REQ-GRAPH-007 / REQ-GRAPH-008 追加 | DOI 直指定と、ノードを新しい種にする再探索 | 探索の出発点と継続性の強化（磨き込みラウンド） | openalex.test.ts / e2e/graph.spec.ts に対応テスト追加 |

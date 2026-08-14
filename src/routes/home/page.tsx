@@ -4,6 +4,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { HeroSection } from "@/features/home/HeroSection";
 import { StepFlow } from "@/features/home/StepFlow";
 import { UseCaseCards } from "@/features/home/UseCaseCards";
+import { GraphIntro } from "@/features/home/GraphIntro";
 import { TutorialCTA } from "@/features/home/TutorialCTA";
 
 export function Component() {
@@ -12,6 +13,7 @@ export function Component() {
       <HeroSection />
       <StepFlow />
       <UseCaseCards />
+      <GraphIntro />
       <TutorialCTA />
       <footer className="mt-16 border-t border-border py-8 text-center text-sm text-muted-foreground">
         <div className="mt-3 flex items-center justify-center gap-4">

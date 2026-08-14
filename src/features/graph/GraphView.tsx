@@ -11,6 +11,8 @@ interface GraphViewProps {
   positions: NodePosition[];
   selectedIds: ReadonlySet<string>;
   onToggle: (paper: PaperSummary) => void;
+  /** ダブルクリックでこの論文を新しい種として再探索する（REQ-GRAPH-008） */
+  onReseed: (paper: PaperSummary) => void;
   width: number;
   height: number;
 }
@@ -24,6 +26,7 @@ export function GraphView({
   positions,
   selectedIds,
   onToggle,
+  onReseed,
   width,
   height,
 }: GraphViewProps) {
@@ -65,6 +68,7 @@ export function GraphView({
             tabIndex={0}
             className="cursor-pointer"
             onClick={() => onToggle(node.paper)}
+            onDoubleClick={() => onReseed(node.paper)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();

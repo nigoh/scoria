@@ -9,9 +9,13 @@ import {
   searchPapers,
   fetchWorksBatch,
   fetchCiting,
+  normalizeDoi,
+  buildDoiUrl,
+  fetchWorkByDoi,
+  lookupPapers,
 } from "./openalex";
 
-// Verifies: REQ-GRAPH-001, REQ-GRAPH-002, NFR-REL-002, NFR-SEC-002, NFR-OPS-001
+// Verifies: REQ-GRAPH-001, REQ-GRAPH-002, REQ-GRAPH-007, NFR-REL-002, NFR-SEC-002, NFR-OPS-001
 
 /** OpenAlex 生応答の 1 work（実際の API 形状の縮約） */
 function rawWork(id: string, over: Record<string, unknown> = {}): Record<string, unknown> {
@@ -163,6 +167,77 @@ describe("searchPapers（REQ-GRAPH-001）", () => {
   it("results が配列でない応答はエラー結果（fail-closed）", async () => {
     const result = await searchPapers("q", okJson({ results: "broken" }));
     expect(result.ok).toBe(false);
+  });
+});
+
+describe("DOI 直指定（REQ-GRAPH-007）", () => {
+  it("normalizeDoi は素の DOI・URL・doi: 接頭辞を受け付け、素の DOI に揃える", () => {
+    expect(normalizeDoi("10.7717/peerj.4375")).toBe("10.7717/peerj.4375");
+    expect(normalizeDoi("https://doi.org/10.7717/peerj.4375")).toBe("10.7717/peerj.4375");
+    expect(normalizeDoi("doi:10.1000/xyz123")).toBe("10.1000/xyz123");
+    expect(normalizeDoi("  DOI:10.1000/xyz123  ")).toBe("10.1000/xyz123");
+  });
+
+  it("DOI でない入力は null（キーワード検索に回す判定になる）", () => {
+    expect(normalizeDoi("grounded theory")).toBeNull();
+    expect(normalizeDoi("")).toBeNull();
+    expect(normalizeDoi("10.x")).toBeNull();
+    expect(normalizeDoi("https://example.com/10.1000/xyz")).toBeNull();
+  });
+
+  it("DOI URL は単一 work 取得になり、mailto と select を持つ", () => {
+    const url = new URL(buildDoiUrl("10.7717/peerj.4375"));
+    expect(url.pathname).toBe("/works/doi:10.7717/peerj.4375");
+    expect(url.searchParams.get("mailto")).toBe(OPENALEX_MAILTO);
+    expect(url.searchParams.get("select")).toContain("referenced_works");
+  });
+
+  it("該当論文を 1 件の正規化済み論文として返す", async () => {
+    const result = await fetchWorkByDoi("10.7717/peerj.4375", okJson(rawWork("W1")));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.map((p) => p.id)).toEqual(["W1"]);
+  });
+
+  it("存在しない DOI（404）は見つからない旨のエラー結果になる", async () => {
+    const fetchFn = vi.fn(async () => new Response("{}", { status: 404 }));
+    const result = await fetchWorkByDoi("10.1000/nope", fetchFn);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain("見つかりません");
+  });
+
+  it("work の形をしていない応答はエラー結果（fail-closed）", async () => {
+    const result = await fetchWorkByDoi("10.1000/xyz", okJson({ junk: true }));
+    expect(result.ok).toBe(false);
+  });
+});
+
+describe("lookupPapers（DOI とキーワードの振り分け）", () => {
+  it("DOI 入力なら単一 work 取得の URL を呼ぶ", async () => {
+    const urls: string[] = [];
+    const fetchFn: typeof globalThis.fetch = async (input) => {
+      urls.push(String(input));
+      return new Response(JSON.stringify(rawWork("W1")));
+    };
+    const result = await lookupPapers("https://doi.org/10.7717/peerj.4375", fetchFn);
+    expect(result.ok).toBe(true);
+    expect(urls[0]).toContain("/works/doi:10.7717/peerj.4375");
+  });
+
+  it("キーワード入力なら検索 URL を呼ぶ", async () => {
+    const urls: string[] = [];
+    const fetchFn: typeof globalThis.fetch = async (input) => {
+      urls.push(String(input));
+      return new Response(JSON.stringify({ results: [rawWork("W1")] }));
+    };
+    await lookupPapers("grounded theory", fetchFn);
+    expect(new URL(urls[0]).searchParams.get("search")).toBe("grounded theory");
+  });
+
+  it("空白のみならリクエストせず空結果", async () => {
+    const fetchFn = vi.fn();
+    const result = await lookupPapers("   ", fetchFn as unknown as typeof globalThis.fetch);
+    expect(result).toEqual({ ok: true, value: [] });
+    expect(fetchFn).not.toHaveBeenCalled();
   });
 });
 

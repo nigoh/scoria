@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CircleNotch, Graph, MagnifyingGlass, Sparkle } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { searchPapers, fetchWorksBatch, fetchCiting } from "@/lib/graph/openalex";
+import { lookupPapers, fetchWorksBatch, fetchCiting } from "@/lib/graph/openalex";
 import { collectNeighborhood } from "@/lib/graph/neighborhood";
 import { buildGraph } from "@/lib/graph/build";
 import { layoutGraph, type NodePosition } from "@/lib/graph/layout";
@@ -39,7 +39,7 @@ export function GraphExplorer() {
     event.preventDefault();
     setBusy("search");
     setError(null);
-    const result = await searchPapers(query);
+    const result = await lookupPapers(query);
     setBusy("idle");
     if (!result.ok) {
       setError(result.error);
@@ -48,7 +48,8 @@ export function GraphExplorer() {
     setResults(result.value);
   };
 
-  const handleSelectSeed = async (seed: PaperSummary) => {
+  /** keepSelection=true は再探索（REQ-GRAPH-008）: 積んだ文献リストを保ったまま種を替える */
+  const exploreSeed = async (seed: PaperSummary, keepSelection: boolean) => {
     setBusy("collect");
     setError(null);
     const result = await collectNeighborhood(seed, { fetchWorksBatch, fetchCiting });
@@ -60,8 +61,15 @@ export function GraphExplorer() {
     const built = buildGraph(seed, result.value.papers);
     setGraph(built);
     setPositions(layoutGraph(built, VIEW_WIDTH, VIEW_HEIGHT));
-    setSelected(new Map([[seed.id, seed]]));
+    setSelected((prev) => {
+      const next = keepSelection ? new Map(prev) : new Map<string, PaperSummary>();
+      next.set(seed.id, seed);
+      return next;
+    });
   };
+
+  const handleSelectSeed = (seed: PaperSummary) => exploreSeed(seed, false);
+  const handleReseed = (seed: PaperSummary) => exploreSeed(seed, true);
 
   const toggleSelect = (paper: PaperSummary) => {
     setSelected((prev) => {
@@ -88,7 +96,7 @@ export function GraphExplorer() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="キーワードで種論文を検索"
+            placeholder="キーワードか DOI で種論文を検索"
             aria-label="論文検索"
           />
           <Button type="submit" variant="secondary" disabled={busy !== "idle"} className="gap-1">
@@ -105,7 +113,8 @@ export function GraphExplorer() {
           {results.length === 0 && (
             <p className="p-4 font-sans text-xs text-muted-foreground">
               OpenAlex（CC0 の学術データベース）から論文を検索し、種論文を選ぶと
-              引用関係の近さでグラフが組まれます。
+              引用関係の近さでグラフが組まれます。DOI（10.… / https://doi.org/…）を
+              貼ると直接その論文から始められます。
             </p>
           )}
           <ul>
@@ -166,14 +175,20 @@ export function GraphExplorer() {
           </div>
         )}
         {graph ? (
-          <GraphView
-            graph={graph}
-            positions={positions}
-            selectedIds={new Set(selected.keys())}
-            onToggle={toggleSelect}
-            width={VIEW_WIDTH}
-            height={VIEW_HEIGHT}
-          />
+          <>
+            <p className="absolute bottom-0 left-0 z-10 border-t border-r border-border bg-card px-3 py-1 font-sans text-[11px] text-muted-foreground">
+              クリック = 選択 / ダブルクリック = この論文で再探索
+            </p>
+            <GraphView
+              graph={graph}
+              positions={positions}
+              selectedIds={new Set(selected.keys())}
+              onToggle={toggleSelect}
+              onReseed={(paper) => void handleReseed(paper)}
+              width={VIEW_WIDTH}
+              height={VIEW_HEIGHT}
+            />
+          </>
         ) : (
           <div className="flex h-full items-center justify-center">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">

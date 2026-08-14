@@ -39,3 +39,4 @@
 | [0026](0026-console-design-direction.md) | 画面デザインの方向を「コンソール」に定め、デザイントークンを作り直す | Accepted |
 | [0027](0027-byok-ai-design-freemium.md) | マネタイズの主軸を「AI 設計フリーミアム × BYOK」とし、AI はブロックを設計し組み立ては決定論に任せる | Accepted |
 | [0028](0028-paper-graph-explorer-on-openalex.md) | 論文グラフ探索は OpenAlex 直呼びで作り、AI 設計への入力口とする | Proposed |
+| [0029](0029-jsdom-component-tests-and-coverage-gate.md) | UI コンポーネントテスト（jsdom）と網羅率ゲートを導入する | Proposed |
