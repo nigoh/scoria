@@ -40,3 +40,4 @@
 | [0027](0027-byok-ai-design-freemium.md) | マネタイズの主軸を「AI 設計フリーミアム × BYOK」とし、AI はブロックを設計し組み立ては決定論に任せる | Accepted |
 | [0028](0028-paper-graph-explorer-on-openalex.md) | 論文グラフ探索は OpenAlex 直呼びで作り、AI 設計への入力口とする | Proposed |
 | [0029](0029-jsdom-component-tests-and-coverage-gate.md) | UI コンポーネントテスト（jsdom）と網羅率ゲートを導入する | Proposed |
+| [0030](0030-pivot-to-research-software-engineering.md) | 製品の焦点を「研究ソフトウェア開発（RSE）」に定める | Proposed |

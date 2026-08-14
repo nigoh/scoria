@@ -10,7 +10,7 @@ test.describe("Scoria E2E - Claude Code Extension Generator", () => {
   test("ホームページが正しく表示される", async ({ page }) => {
     await goto(page, "/");
     await expect(
-      page.getByRole("heading", { name: /学術研究のための/ }),
+      page.getByRole("heading", { name: /研究ソフトウェアのための/ }),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "拡張をつくる" })).toBeVisible();
     await expect(
@@ -44,9 +44,9 @@ test.describe("Scoria E2E - Claude Code Extension Generator", () => {
     await expect(
       page.getByRole("heading", { name: "テンプレート & 基本設定" }),
     ).toBeVisible();
-    await page.getByText("系統的文献レビュー").first().click();
+    await page.getByText("再現性コードレビュー").first().click();
     const nameInput = page.locator("#ext-name");
-    await expect(nameInput).toHaveValue("systematic-review");
+    await expect(nameInput).toHaveValue("repro-review");
     await page.getByRole("button", { name: "次へ" }).click();
 
     // Step 3: 詳細設定
@@ -64,7 +64,7 @@ test.describe("Scoria E2E - Claude Code Extension Generator", () => {
     // プレビュータブでファイル内容確認
     await page.getByRole("tab", { name: "プレビュー" }).click();
     await expect(
-      page.getByText("name: systematic-review"),
+      page.getByText("name: repro-review"),
     ).toBeVisible();
 
     // ZIPダウンロードボタン
@@ -79,15 +79,15 @@ test.describe("Scoria E2E - Claude Code Extension Generator", () => {
     await page.getByText("エージェント（Subagent）").click();
     await page.getByRole("button", { name: "次へ" }).click();
 
-    await page.getByText("メタ分析支援").first().click();
-    await expect(page.locator("#ext-name")).toHaveValue("meta-analysis-agent");
+    await page.getByText("数値・データ処理のテスト設計").first().click();
+    await expect(page.locator("#ext-name")).toHaveValue("sci-test-agent");
     await page.getByRole("button", { name: "次へ" }).click();
 
     await expect(page.getByText("最大ターン数")).toBeVisible();
     await page.getByRole("button", { name: "生成" }).click();
 
     await page.getByRole("tab", { name: "プレビュー" }).click();
-    await expect(page.getByText("name: meta-analysis-agent")).toBeVisible();
+    await expect(page.getByText("name: sci-test-agent")).toBeVisible();
     await expect(page.getByText("maxTurns:")).toBeVisible();
   });
 
@@ -97,7 +97,7 @@ test.describe("Scoria E2E - Claude Code Extension Generator", () => {
     await page.getByRole("button", { name: "プラグインパッケージ" }).click();
     await page.getByRole("button", { name: "次へ" }).click();
 
-    await page.getByText("引用・参考文献チェック").first().click();
+    await page.getByText("README・引用整備").first().click();
     await page.getByRole("button", { name: "次へ" }).click();
 
     await expect(page.getByText("スキル（SKILL.md）")).toBeVisible();

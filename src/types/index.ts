@@ -5,12 +5,13 @@ export type ExtensionType = "skill" | "agent" | "plugin";
 // ─── テンプレート ────────────────────────────────────────────
 
 export type TemplateId =
-  | "systematic_review"
-  | "meta_analysis"
-  | "citation_check"
-  | "methodology_advisor"
-  | "paper_structure"
-  | "search_strategy"
+  | "repro_review"
+  | "sci_test_design"
+  | "research_readme"
+  | "data_pipeline_doc"
+  | "experiment_repro"
+  | "release_archive"
+  | "lab_onboarding"
   | "custom";
 
 export interface TemplateDefinition {

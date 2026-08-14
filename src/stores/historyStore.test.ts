@@ -13,7 +13,7 @@ const blocks: ContentBlock[] = [{ id: "b1", label: "手順", content: "1. やる
 function formData(name: string): ExtensionFormData {
   return {
     extensionType: "skill",
-    templateId: "systematic_review",
+    templateId: "repro_review",
     name,
     description: "説明",
     outputLanguage: "ja",
@@ -70,7 +70,7 @@ describe("saveEntry", () => {
 
     expect(entry.name).toBe("my-skill");
     expect(entry.extensionType).toBe("skill");
-    expect(entry.templateId).toBe("systematic_review");
+    expect(entry.templateId).toBe("repro_review");
     expect(entry.blocks).toEqual(blocks);
     expect(entry.generatedAt).toBe("2026-08-02T00:00:00.000Z");
   });

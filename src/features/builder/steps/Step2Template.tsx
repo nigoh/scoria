@@ -55,7 +55,7 @@ export function Step2Template() {
     <div className="space-y-6">
       <StepHeading
         title="テンプレート & 基本設定"
-        hint="テンプレートから選ぶか、研究内容を書いて AI に設計させます。"
+        hint="テンプレートから選ぶか、開発・研究内容を書いて AI に設計させます。"
       />
 
       <div className="flex border border-border" role="tablist" aria-label="設計方法">
@@ -91,7 +91,7 @@ export function Step2Template() {
 
       {designMode === "ai" && (
         <div className="space-y-2">
-          <Label htmlFor="ai-brief">研究内容（自由記述）</Label>
+          <Label htmlFor="ai-brief">開発・研究内容（自由記述）</Label>
           <Textarea
             id="ai-brief"
             value={aiBrief}

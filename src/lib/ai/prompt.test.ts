@@ -13,8 +13,10 @@ describe("buildSystemPrompt", () => {
     expect(skill).not.toBe(agent);
   });
 
-  it("学術研究の文脈が含まれる", () => {
-    expect(buildSystemPrompt("skill", "ja")).toContain("学術研究");
+  it("研究ソフトウェアの文脈と再現性の設計原則が含まれる", () => {
+    const p = buildSystemPrompt("skill", "ja");
+    expect(p).toContain("研究ソフトウェア");
+    expect(p).toContain("再現性");
   });
 
   it("出力言語 en では本文を英語で書く指示が入る", () => {

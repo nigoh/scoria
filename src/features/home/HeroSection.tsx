@@ -22,16 +22,17 @@ export function HeroSection() {
           <p className="mb-5 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
             <span className="text-primary">$</span>
             <span className="text-signal">scoria</span>
-            <span>new skill --template systematic-review</span>
+            <span>new skill --template repro-review</span>
           </p>
           {/* 見出しだけ和文ゴシックにする。等幅の和文フォールバックは字送りが緩く、
               大きな級数では締まりが出ない（ADR-0026 の混植方針） */}
           <h1 className="text-balance font-sans text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
-            学術研究のための Claude Code 拡張をつくる
+            研究ソフトウェアのための Claude Code 拡張をつくる
           </h1>
           <p className="mt-6 max-w-xl font-sans text-base leading-relaxed text-muted-foreground">
-            系統的レビュー、メタ分析、引用チェック。研究の手順をスキル・エージェント・プラグインに落とし、
-            ZIP かコマンド1行で手元のリポジトリに置けます。
+            再現性レビュー、数値コードのテスト設計、DOI つきリリース。研究コード開発の手順を
+            スキル・エージェント・プラグインに落とし、ZIP
+            かコマンド1行で手元のリポジトリに置けます。
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <Button asChild size="lg" className="gap-2">

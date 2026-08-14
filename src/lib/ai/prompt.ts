@@ -1,11 +1,11 @@
 import type { ExtensionType } from "@/types";
 
 /**
- * AI 設計のプロンプト構築（ADR-0027 / REQ-AI-001）。
+ * AI 設計のプロンプト構築（ADR-0027 / ADR-0030 / REQ-AI-001）。
  *
  * AI に任せるのは「ブロック（見出し＋本文）の設計」だけで、frontmatter やファイル構成は
  * 決定論ジェネレータが組み立てる。だからここでは Claude Code の書式仕様を細かく教えず、
- * 学術研究の手順設計に集中させる。
+ * 研究ソフトウェア開発の手順設計に集中させる。
  */
 
 const TYPE_CONTEXT: Record<ExtensionType, string> = {
@@ -30,14 +30,15 @@ export function buildSystemPrompt(
       : "ブロックの見出しと本文は日本語で書く。";
 
   return [
-    "あなたは学術研究の方法論に精通した、Claude Code 拡張の設計者である。",
-    "利用者は研究者で、研究の手順（系統的レビュー・メタ分析・引用チェックなど）を",
-    "Claude Code の拡張として再利用できる形にしたい。",
+    "あなたは研究ソフトウェア工学（RSE）に精通した、Claude Code 拡張の設計者である。",
+    "利用者は学術研究のソフトウェア（解析コード・データパイプライン・研究用パッケージ）を",
+    "開発する研究者・研究エンジニアで、その開発作業を Claude Code の拡張として再利用できる形にしたい。",
     "",
     TYPE_CONTEXT[extensionType],
     "",
     "設計の要件:",
-    "- 研究手法の正確さを最優先する（PRISMA・PICO 等の枠組みは正しく使う）",
+    "- 再現性と検証可能性を最優先する（乱数シード・環境固定・データ来歴・許容誤差の明示）",
+    "- 破壊的・不可逆な操作（データ上書き・公開・タグ付け）は確認を挟む設計にする",
     "- 各ブロックは独立した節（見出し label と本文 content）で、上から順に実行できる構成にする",
     "- ブロックは3〜8個。手順・判断基準・出力形式・注意事項を過不足なく含める",
     "- name は kebab-case の短い識別子、description は1文で用途が分かる説明にする",
@@ -54,7 +55,12 @@ export interface UserPromptInput {
 }
 
 export function buildUserPrompt({ brief, name, description }: UserPromptInput): string {
-  const lines = ["次の研究内容に合わせて拡張を設計してください。", "", "## 研究内容", brief.trim()];
+  const lines = [
+    "次の開発・研究内容に合わせて拡張を設計してください。",
+    "",
+    "## 開発・研究内容",
+    brief.trim(),
+  ];
 
   if (name.trim() || description.trim()) {
     lines.push("", "## 利用者の希望");

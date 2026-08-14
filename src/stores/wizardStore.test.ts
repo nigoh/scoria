@@ -143,13 +143,13 @@ describe("setFormData", () => {
       ...store().formData,
       name: "restored",
       extensionType: "agent" as const,
-      templateId: "meta_analysis" as const,
+      templateId: "sci_test_design" as const,
     };
 
     store().setFormData(restored);
 
     expect(store().formData.name).toBe("restored");
     expect(store().formData.extensionType).toBe("agent");
-    expect(store().formData.templateId).toBe("meta_analysis");
+    expect(store().formData.templateId).toBe("sci_test_design");
   });
 });

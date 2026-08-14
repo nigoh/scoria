@@ -51,16 +51,16 @@ describe("generateExtension", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "skill",
-      templateId: "systematic_review",
-      name: "systematic-review",
-      description: "PRISMA準拠の系統的文献レビューを実行する",
+      templateId: "repro_review",
+      name: "repro-review",
+      description: "研究コードを再現性の観点でレビューする",
     };
 
     const result = generateExtension(formData);
 
     expect(result.files).toHaveLength(1);
-    expect(result.files[0].path).toBe(".claude/skills/systematic-review/SKILL.md");
-    expect(result.files[0].content).toContain("name: systematic-review");
+    expect(result.files[0].path).toBe(".claude/skills/repro-review/SKILL.md");
+    expect(result.files[0].content).toContain("name: repro-review");
     expect(result.files[0].content).toContain("allowed-tools: Read, Grep, Glob");
     expect(result.files[0].content).toContain("model: sonnet");
     expect(result.blocks.length).toBeGreaterThan(0);
@@ -71,16 +71,16 @@ describe("generateExtension", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "agent",
-      templateId: "meta_analysis",
-      name: "meta-analysis-agent",
-      description: "メタ分析を自律的に支援するエージェント",
+      templateId: "sci_test_design",
+      name: "sci-test-agent",
+      description: "テストを設計・実装するエージェント",
     };
 
     const result = generateExtension(formData);
 
     expect(result.files).toHaveLength(1);
-    expect(result.files[0].path).toBe(".claude/agents/meta-analysis-agent.md");
-    expect(result.files[0].content).toContain("name: meta-analysis-agent");
+    expect(result.files[0].path).toBe(".claude/agents/sci-test-agent.md");
+    expect(result.files[0].content).toContain("name: sci-test-agent");
     expect(result.files[0].content).toContain("maxTurns: 30");
   });
 
@@ -88,9 +88,9 @@ describe("generateExtension", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "plugin",
-      templateId: "citation_check",
-      name: "citation-check",
-      description: "引用チェックプラグイン",
+      templateId: "research_readme",
+      name: "research-readme",
+      description: "研究ソフトの文書整備プラグイン",
       pluginConfig: {
         ...baseFormData.pluginConfig,
         includeSkills: true,
@@ -104,8 +104,8 @@ describe("generateExtension", () => {
     const result = generateExtension(formData);
 
     const paths = result.files.map((f) => f.path);
-    expect(paths).toContain("skills/citation-check/SKILL.md");
-    expect(paths).toContain("agents/citation-check-agent.md");
+    expect(paths).toContain("skills/research-readme/SKILL.md");
+    expect(paths).toContain("agents/research-readme-agent.md");
     expect(paths).toContain("hooks/hooks.json");
     expect(paths).toContain("CLAUDE.md");
     expect(paths).not.toContain(".mcp.json");
@@ -117,9 +117,9 @@ describe("generateExtension", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "plugin",
-      templateId: "citation_check",
-      name: "citation-check",
-      description: "引用チェックプラグイン",
+      templateId: "research_readme",
+      name: "research-readme",
+      description: "研究ソフトの文書整備プラグイン",
       pluginConfig: {
         ...baseFormData.pluginConfig,
         includePluginJson: true,
@@ -134,7 +134,7 @@ describe("generateExtension", () => {
     expect(pluginFile).toBeTruthy();
 
     const parsed = JSON.parse(pluginFile!.content);
-    expect(parsed.name).toBe("citation-check");
+    expect(parsed.name).toBe("research-readme");
     expect(parsed.version).toBe("2.0.0");
     expect(parsed.author.name).toBe("Test Author");
     expect(parsed.keywords).toEqual(["academic", "citation"]);
@@ -145,9 +145,9 @@ describe("generateExtension", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "plugin",
-      templateId: "citation_check",
-      name: "citation-check",
-      description: "引用チェックプラグイン",
+      templateId: "research_readme",
+      name: "research-readme",
+      description: "研究ソフトの文書整備プラグイン",
       pluginConfig: {
         ...baseFormData.pluginConfig,
         includeReadme: true,
@@ -157,8 +157,8 @@ describe("generateExtension", () => {
     const result = generateExtension(formData);
     const readme = result.files.find((f) => f.path === "README.md");
     expect(readme).toBeTruthy();
-    expect(readme!.content).toContain("# citation-check");
-    expect(readme!.content).toContain("引用チェックプラグイン");
+    expect(readme!.content).toContain("# research-readme");
+    expect(readme!.content).toContain("研究ソフトの文書整備プラグイン");
     expect(readme!.content).toContain("claude plugin install");
   });
 
@@ -172,7 +172,7 @@ describe("generateExtension", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "skill",
-      templateId: "systematic_review",
+      templateId: "repro_review",
       name: "my-skill",
       description: "テスト",
       skillConfig: {
@@ -201,7 +201,7 @@ describe("generateExtension", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "agent",
-      templateId: "meta_analysis",
+      templateId: "sci_test_design",
       name: "my-agent",
       description: "テスト",
       agentConfig: {
@@ -226,7 +226,7 @@ describe("generateExtension", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "skill",
-      templateId: "systematic_review",
+      templateId: "repro_review",
       name: "my-skill",
       description: "テスト",
     };
@@ -262,26 +262,26 @@ describe("generateExtension (English)", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "skill",
-      templateId: "systematic_review",
-      name: "systematic-review",
-      description: "Conduct PRISMA-compliant reviews",
+      templateId: "repro_review",
+      name: "repro-review",
+      description: "Review research code for reproducibility",
       outputLanguage: "en",
     };
 
     const result = generateExtension(formData);
 
-    expect(result.files[0].content).toContain("name: systematic-review");
+    expect(result.files[0].content).toContain("name: repro-review");
     expect(result.blocks[0].label).toBe("Role Definition");
-    expect(result.blocks[0].content).toContain("PRISMA 2020");
+    expect(result.blocks[0].content).toContain("reproducibility");
   });
 
   it("英語プラグインのラベルマッチングが動作する", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "plugin",
-      templateId: "citation_check",
-      name: "citation-check",
-      description: "Citation check plugin",
+      templateId: "research_readme",
+      name: "research-readme",
+      description: "Research software docs plugin",
       outputLanguage: "en",
       pluginConfig: {
         ...baseFormData.pluginConfig,
@@ -296,7 +296,7 @@ describe("generateExtension (English)", () => {
     const result = generateExtension(formData);
 
     const skillFile = result.files.find((f) => f.path.includes("SKILL.md"));
-    expect(skillFile?.content).toContain("citation");
+    expect(skillFile?.content).toContain("CITATION.cff");
 
     const claudeFile = result.files.find((f) => f.path === "CLAUDE.md");
     expect(claudeFile?.content).toBeTruthy();
@@ -308,7 +308,7 @@ describe("hooks/MCP dynamic generation", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "plugin",
-      templateId: "citation_check",
+      templateId: "research_readme",
       name: "test-plugin",
       description: "test",
       pluginConfig: {
@@ -358,7 +358,7 @@ describe("hooks/MCP dynamic generation", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "plugin",
-      templateId: "citation_check",
+      templateId: "research_readme",
       name: "test-plugin",
       description: "test",
       pluginConfig: {
@@ -395,8 +395,8 @@ describe("regenerateFiles", () => {
     const formData: ExtensionFormData = {
       ...baseFormData,
       extensionType: "skill",
-      templateId: "systematic_review",
-      name: "systematic-review",
+      templateId: "repro_review",
+      name: "repro-review",
       description: "テスト",
     };
 

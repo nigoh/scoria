@@ -10,32 +10,32 @@ import { cn } from "@/lib/utils";
 
 const useCases = [
   {
-    Illustration: MedicalIllustration,
-    title: "系統的文献レビュー",
-    subtitle: "/systematic-review スキル",
+    Illustration: CSIllustration,
+    title: "再現性コードレビュー",
+    subtitle: "/repro-review スキル",
     description:
-      "PRISMA 2020準拠のスキルを生成。PICO分解、検索戦略策定、スクリーニング基準設定を一貫してサポートします。",
+      "乱数シード・環境固定・データ来歴の観点で解析コードをレビュー。第三者が再現するための最小作業も洗い出します。",
   },
   {
-    Illustration: CSIllustration,
-    title: "メタ分析支援",
-    subtitle: "meta-analysis-agent エージェント",
+    Illustration: MedicalIllustration,
+    title: "数値コードのテスト設計",
+    subtitle: "sci-test-agent エージェント",
     description:
-      "効果量計算、異質性評価、分析コード生成を自律的に行うサブエージェントを作成します。",
+      "許容誤差・性質ベース・ゴールデンデータの3層で、数値・データ処理コードのテストを設計・実装します。",
   },
   {
     Illustration: SocialScienceIllustration,
-    title: "引用チェック",
-    subtitle: "/citation-check スキル",
+    title: "リリース・DOI アーカイブ",
+    subtitle: "/release-doi スキル",
     description:
-      "論文の引用整合性を検証し、参考文献リストの完全性・書式一貫性を自動チェックするスキルを生成します。",
+      "バージョン判定・CHANGELOG・CITATION.cff の更新から DOI 発行メタデータまで、引用可能なリリースを準備します。",
   },
   {
     Illustration: InterdisciplinaryIllustration,
     title: "プラグインパッケージ",
     subtitle: "スキル + エージェント + CLAUDE.md",
     description:
-      "スキル・エージェント・フック・CLAUDE.mdを一括生成。研究プロジェクト全体をClaude Codeで加速します。",
+      "スキル・エージェント・フック・CLAUDE.mdを一括生成。研究ソフトのリポジトリ全体をClaude Codeで加速します。",
   },
 ];
 

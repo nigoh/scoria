@@ -19,22 +19,22 @@ interface Line {
 
 const LINES: Line[] = [
   { no: 1, text: "---" },
-  { no: 2, key: "name", value: "systematic-review" },
-  { no: 3, key: "description", value: "PRISMA 準拠の系統的文献レビューを実行する" },
-  { no: 4, key: "allowed-tools", value: "Read, Grep, Glob, WebSearch" },
+  { no: 2, key: "name", value: "repro-review" },
+  { no: 3, key: "description", value: "研究コードを再現性の観点でレビューする" },
+  { no: 4, key: "allowed-tools", value: "Read, Grep, Glob, Bash" },
   { no: 5, key: "model", value: "sonnet" },
   { no: 6, text: "---" },
   { no: 7, text: "" },
-  { no: 8, heading: "## 検索戦略" },
-  { no: 9, text: "研究課題を PICO に分解し、データベースごとの" },
-  { no: 10, text: "検索式を組み立てる。" },
+  { no: 8, heading: "## タスク指示" },
+  { no: 9, text: "乱数シード・環境固定・データ来歴の観点で" },
+  { no: 10, text: "変更差分をレビューする。" },
 ];
 
 export function HeroTerminal() {
   return (
     <figure className="m-0 border border-border bg-card">
       <figcaption className="flex items-center justify-between border-b border-border px-3 py-2 text-xs">
-        <span className="truncate text-signal">.claude/skills/systematic-review/SKILL.md</span>
+        <span className="truncate text-signal">.claude/skills/repro-review/SKILL.md</span>
         <span className="shrink-0 text-muted-foreground">生成物</span>
       </figcaption>
       <pre className="overflow-x-auto p-3 text-xs leading-relaxed">
