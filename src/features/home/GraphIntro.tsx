@@ -58,8 +58,9 @@ export function GraphIntro() {
         </h2>
         <p className="mt-2 max-w-lg font-sans text-sm text-muted-foreground">
           キーワードや DOI から種論文を選ぶと、引用関係（書誌結合・共引用）の近さで
-          関連論文がグラフに広がります。気になるノードをたどって文献リストを組み、 そのまま AI
-          設計の入力にできます。データは OpenAlex（CC0）、登録不要です。
+          関連論文がグラフに広がります。たどって組んだ手法論文のリストは、それを実装する
+          研究ソフトウェア拡張の AI 設計に根拠として渡せます。データは
+          OpenAlex（CC0）、登録不要です。
         </p>
         <Button asChild variant="outline" className="mt-6">
           <Link to="/graph">論文グラフを開く</Link>

@@ -27,7 +27,8 @@ export function formatPaperLine(paper: PaperSummary): string {
 export function formatPapersForBrief(papers: PaperSummary[]): string {
   if (papers.length === 0) return "";
   return [
-    "次の実在論文（OpenAlex ID 付き）を土台に、この文献群を扱う研究を支援する拡張を設計してください。",
+    "次の実在論文（OpenAlex ID 付き）を方法論の根拠として、これらの手法を実装・利用する",
+    "研究ソフトウェア開発を支援する拡張を設計してください。",
     "",
     "## 参考文献",
     ...papers.map(formatPaperLine),

@@ -4,7 +4,103 @@ interface Props {
   className?: string;
 }
 
-export function MedicalIllustration({ className }: Props) {
+/**
+ * ユースケースカードのイラスト（ADR-0030 の RSE ユースケースに対応）。
+ * 色は useIllustrationColors 経由でテーマトークンから取り、直書きしない（ADR-0026）。
+ */
+
+/** 再現性レビュー: 2つの実行が同じ出力になる（=）ことを表す */
+export function ReproIllustration({ className }: Props) {
+  const c = useIllustrationColors();
+  return (
+    <svg
+      viewBox="0 0 100 86"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      {[14, 58].map((x) => (
+        <g key={x}>
+          <rect x={x} y="18" width="28" height="34" rx="2" fill={c.accentLt} />
+          <rect x={x + 4} y="24" width="20" height="2.5" rx="1.25" fill={c.accent} opacity="0.6" />
+          <rect x={x + 4} y="31" width="14" height="2.5" rx="1.25" fill={c.accent} opacity="0.4" />
+          <rect x={x + 4} y="38" width="18" height="2.5" rx="1.25" fill={c.accent} opacity="0.5" />
+          <rect x={x + 4} y="45" width="10" height="2.5" rx="1.25" fill={c.accent} opacity="0.3" />
+        </g>
+      ))}
+      <path
+        d="M46,31 L54,31 M46,39 L54,39"
+        stroke={c.accent}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <text
+        x="50"
+        y="72"
+        textAnchor="middle"
+        fontSize="8"
+        fill={c.accent}
+        opacity="0.6"
+        fontFamily="monospace"
+        fontWeight="700"
+      >
+        seed=42
+      </text>
+    </svg>
+  );
+}
+
+/** 数値テスト設計: 許容誤差バンドの中に測定点が収まる */
+export function SciTestIllustration({ className }: Props) {
+  const c = useIllustrationColors();
+  return (
+    <svg
+      viewBox="0 0 100 86"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M16,14 L16,66 L88,66" stroke={c.g1} strokeWidth="2" strokeLinecap="round" />
+      {/* 許容誤差バンド */}
+      <path
+        d="M16,42 C36,26 60,26 86,34 L86,46 C60,38 36,38 16,54 Z"
+        fill={c.accent}
+        opacity="0.12"
+      />
+      <path
+        d="M16,48 C36,32 60,32 86,40"
+        stroke={c.accent}
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
+      {[
+        [28, 41],
+        [44, 35],
+        [62, 34],
+        [78, 38],
+      ].map(([cx, cy]) => (
+        <circle key={cx} cx={cx} cy={cy} r="3" fill={c.accent} />
+      ))}
+      <text
+        x="70"
+        y="22"
+        fontSize="8"
+        fill={c.accent}
+        opacity="0.6"
+        fontFamily="monospace"
+        fontWeight="700"
+      >
+        ±tol
+      </text>
+    </svg>
+  );
+}
+
+/** リリース・DOI: バージョンタグと DOI ラベル */
+export function ReleaseIllustration({ className }: Props) {
   const c = useIllustrationColors();
   const fg = c.bg === "#ffffff" ? "#fff" : "#000";
   return (
@@ -15,76 +111,34 @@ export function MedicalIllustration({ className }: Props) {
       className={className}
       aria-hidden="true"
     >
-      <circle cx="50" cy="32" r="18" fill={c.accentLt} />
-      <path
-        d="M42,32 L58,32 M50,24 L50,40"
-        stroke={c.accent}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      {["P", "I", "C", "O"].map((l, i) => (
-        <g key={l}>
-          <rect
-            x={12 + i * 22}
-            y={60}
-            width={18}
-            height={16}
-            rx={3}
-            fill={c.accent}
-            opacity={0.55 - i * 0.1}
-          />
-          <text
-            x={21 + i * 22}
-            y={71}
-            textAnchor="middle"
-            fontSize="8"
-            fill={fg}
-            fontFamily="monospace"
-            fontWeight="700"
-          >
-            {l}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-export function CSIllustration({ className }: Props) {
-  const c = useIllustrationColors();
-  const termBg = c.bg === "#ffffff" ? "#1f2937" : "#18181b";
-  const termScreen = c.bg === "#ffffff" ? "#111827" : "#09090b";
-  return (
-    <svg
-      viewBox="0 0 100 86"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect x="14" y="10" width="72" height="44" rx="5" fill={termBg} />
-      <rect x="18" y="16" width="64" height="34" rx="3" fill={termScreen} />
-      <text x="24" y="30" fontSize="10" fill={c.accent} fontFamily="monospace" fontWeight="700">
-        &gt;_
+      {/* タグ形 */}
+      <path d="M22,22 L52,22 L66,36 L52,50 L22,50 Z" fill={c.accentLt} />
+      <circle cx="30" cy="36" r="3.5" fill={c.accent} opacity="0.6" />
+      <text x="39" y="39" fontSize="9" fill={c.accent} fontFamily="monospace" fontWeight="700">
+        v1.2
       </text>
-      <rect x="44" y="25" width="30" height="2.5" rx="1.25" fill={c.accent} opacity="0.4" />
-      <rect x="24" y="34" width="48" height="2" rx="1" fill={c.g3} opacity="0.25" />
+      {/* DOI バッジ */}
+      <rect x="40" y="58" width="24" height="14" rx="2" fill={c.accent} opacity="0.85" />
       <text
-        x="30"
-        y="72"
-        fontSize="13"
-        fill={c.accent}
-        opacity="0.3"
+        x="52"
+        y="68"
+        textAnchor="middle"
+        fontSize="8"
+        fill={fg}
         fontFamily="monospace"
         fontWeight="700"
       >
-        {"{ }"}
+        DOI
       </text>
+      <rect x="66" y="58" width="18" height="14" rx="2" fill={c.g1} />
+      <rect x="69" y="63" width="12" height="2" rx="1" fill={c.accent} opacity="0.4" />
+      <rect x="69" y="67" width="8" height="2" rx="1" fill={c.accent} opacity="0.25" />
     </svg>
   );
 }
 
-export function SocialScienceIllustration({ className }: Props) {
+/** プラグインパッケージ: スキル・エージェント・設定を束ねた箱 */
+export function PluginIllustration({ className }: Props) {
   const c = useIllustrationColors();
   return (
     <svg
@@ -94,49 +148,33 @@ export function SocialScienceIllustration({ className }: Props) {
       className={className}
       aria-hidden="true"
     >
-      {[
-        [34, 28],
-        [66, 28],
-        [50, 50],
-      ].map(([cx, cy], i) => (
-        <g key={i}>
-          <circle cx={cx} cy={cy} r="12" fill={c.accentLt} />
-          <circle cx={cx} cy={cy} r="4" fill={c.accent} opacity={0.5 - i * 0.1} />
-        </g>
-      ))}
-      <line x1="42" y1="32" x2="46" y2="42" stroke={c.accent} strokeWidth="1.2" opacity="0.2" />
-      <line x1="58" y1="32" x2="54" y2="42" stroke={c.accent} strokeWidth="1.2" opacity="0.2" />
-      <line x1="44" y1="26" x2="58" y2="26" stroke={c.accent} strokeWidth="1.2" opacity="0.2" />
-      <rect x="14" y="68" width="72" height="5" rx="2.5" fill={c.g1} />
-      <rect x="14" y="68" width="44" height="5" rx="2.5" fill={c.accent} opacity="0.2" />
-    </svg>
-  );
-}
-
-export function InterdisciplinaryIllustration({ className }: Props) {
-  const c = useIllustrationColors();
-  return (
-    <svg
-      viewBox="0 0 100 86"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-    >
-      <circle cx="40" cy="36" r="20" fill={c.accent} opacity="0.1" />
-      <circle cx="58" cy="32" r="20" fill={c.accent} opacity="0.08" />
-      <circle cx="50" cy="50" r="20" fill={c.accent} opacity="0.06" />
-      <circle cx="50" cy="39" r="5" fill={c.accent} opacity="0.35" />
-      {[0, 1, 2, 3, 4].map((i) => (
+      <path d="M50,10 L78,22 L78,52 L50,64 L22,52 L22,22 Z" fill={c.accent} opacity="0.1" />
+      <path d="M50,10 L78,22 L50,34 L22,22 Z" fill={c.accent} opacity="0.2" />
+      <path d="M50,34 L50,64" stroke={c.accent} strokeWidth="1.2" opacity="0.3" />
+      <path
+        d="M22,22 L22,52 L50,64"
+        stroke={c.accent}
+        strokeWidth="1.2"
+        opacity="0.2"
+        fill="none"
+      />
+      <path
+        d="M78,22 L78,52 L50,64"
+        stroke={c.accent}
+        strokeWidth="1.2"
+        opacity="0.2"
+        fill="none"
+      />
+      {[0, 1, 2].map((i) => (
         <rect
           key={i}
-          x={10 + i * 17}
-          y={68}
-          width={13}
+          x={20 + i * 22}
+          y={70}
+          width={18}
           height={8}
           rx={2}
           fill={c.accent}
-          opacity={0.35 - i * 0.06}
+          opacity={0.4 - i * 0.1}
         />
       ))}
     </svg>
