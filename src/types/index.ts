@@ -147,3 +147,40 @@ export interface AiDesignResult {
 }
 
 export type AiOutcome = { ok: true; value: AiDesignResult } | { ok: false; error: string };
+
+// ─── 論文グラフ（ADR-0028） ─────────────────────────────────
+
+export interface PaperSummary {
+  /** OpenAlex の短縮 ID（例 W2741809807） */
+  id: string;
+  title: string;
+  year: number | null;
+  authors: string[];
+  citedByCount: number;
+  /** この論文が引用している論文の短縮 ID */
+  referencedWorks: string[];
+}
+
+export interface PaperGraphNode {
+  paper: PaperSummary;
+  /** 種論文との類似度（種論文自身は 0） */
+  score: number;
+  isSeed: boolean;
+}
+
+export interface PaperGraphEdge {
+  source: string;
+  target: string;
+  weight: number;
+}
+
+export interface PaperGraph {
+  nodes: PaperGraphNode[];
+  edges: PaperGraphEdge[];
+}
+
+export type PapersOutcome = { ok: true; value: PaperSummary[] } | { ok: false; error: string };
+
+export type NeighborhoodOutcome =
+  | { ok: true; value: { papers: PaperSummary[]; requestCount: number } }
+  | { ok: false; error: string };

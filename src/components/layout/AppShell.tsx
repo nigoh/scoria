@@ -1,10 +1,13 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { Compass } from "@phosphor-icons/react";
+import { Compass, Graph } from "@phosphor-icons/react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 
-const navItems = [{ to: "/builder", label: "ビルダー", icon: Compass }];
+const navItems = [
+  { to: "/builder", label: "ビルダー", icon: Compass },
+  { to: "/graph", label: "論文グラフ", icon: Graph },
+];
 
 export function AppShell() {
   return (
