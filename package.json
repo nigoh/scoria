@@ -2,7 +2,7 @@
   "name": "scoria",
   "version": "1.0.0",
   "private": true,
-  "description": "学術研究に特化したClaude Codeのスキル・エージェント・プラグインを自動生成するツール",
+  "description": "研究ソフトウェア開発に特化したClaude Codeのスキル・エージェント・プラグインを自動生成するツール",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -12,7 +12,8 @@ const steps = [
   {
     Icon: Sliders,
     title: "テンプレート & 設定",
-    description: "学術テンプレートを選び、名前・ツール・モデルなどの詳細を設定します。",
+    description:
+      "研究ソフトウェア開発のテンプレートを選ぶか、AI 設計に任せ、名前・ツール・モデルを設定します。",
   },
   {
     Icon: Lightning,

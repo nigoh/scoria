@@ -20,8 +20,8 @@ export function Component() {
         <section>
           <h2 className="text-lg font-semibold">1. サービスの概要</h2>
           <p className="mt-2">
-            Scoria（以下「本サービス」）は、学術研究に関する AI
-            プロンプトを自動生成するウェブアプリケーションです。本サービスを利用することで、以下の利用規約に同意したものとみなします。
+            Scoria（以下「本サービス」）は、研究ソフトウェア開発に関する Claude Code
+            拡張を自動生成するウェブアプリケーションです。本サービスを利用することで、以下の利用規約に同意したものとみなします。
           </p>
         </section>
 

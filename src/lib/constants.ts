@@ -16,7 +16,7 @@ export const EXTENSION_TYPES: ExtensionTypeInfo[] = [
     labelJa: "スキル（Slash Command）",
     labelEn: "Skill (Slash Command)",
     descriptionJa:
-      "/literature-review のようなスラッシュコマンドを作成します。繰り返し使うワークフローに最適です。",
+      "/repro-review のようなスラッシュコマンドを作成します。繰り返し使うワークフローに最適です。",
     icon: "Command",
   },
   {
@@ -24,7 +24,7 @@ export const EXTENSION_TYPES: ExtensionTypeInfo[] = [
     labelJa: "エージェント（Subagent）",
     labelEn: "Agent (Subagent)",
     descriptionJa:
-      "文献分析やデータ整理などの専門タスクを自律的に実行するサブエージェントを作成します。",
+      "再現性監査やテスト実装などの専門タスクを自律的に実行するサブエージェントを作成します。",
     icon: "Robot",
   },
   {
@@ -41,45 +41,52 @@ export const EXTENSION_TYPES: ExtensionTypeInfo[] = [
 
 export const TEMPLATES: TemplateDefinition[] = [
   {
-    id: "systematic_review",
-    labelJa: "系統的文献レビュー",
-    labelEn: "Systematic Review",
-    descriptionJa: "PRISMA準拠の系統的レビューを支援するプロンプトを生成します。",
+    id: "repro_review",
+    labelJa: "再現性コードレビュー",
+    labelEn: "Reproducibility Review",
+    descriptionJa: "研究コードを再現性の観点（乱数・環境・データ来歴）でレビューします。",
     supportedTypes: ["skill", "agent", "plugin"],
   },
   {
-    id: "meta_analysis",
-    labelJa: "メタ分析支援",
-    labelEn: "Meta-Analysis",
-    descriptionJa: "効果量計算やフォレストプロット解釈を支援します。",
+    id: "sci_test_design",
+    labelJa: "数値・データ処理のテスト設計",
+    labelEn: "Scientific Test Design",
+    descriptionJa: "許容誤差・性質ベース・ゴールデンデータの3層でテストを設計します。",
     supportedTypes: ["skill", "agent", "plugin"],
   },
   {
-    id: "citation_check",
-    labelJa: "引用・参考文献チェック",
-    labelEn: "Citation Check",
-    descriptionJa: "論文の引用整合性や参考文献リストを検証します。",
+    id: "research_readme",
+    labelJa: "README・引用整備",
+    labelEn: "README & Citation",
+    descriptionJa: "第三者が使えて引用できる README と CITATION.cff を整備します。",
     supportedTypes: ["skill", "agent", "plugin"],
   },
   {
-    id: "methodology_advisor",
-    labelJa: "研究手法アドバイザー",
-    labelEn: "Methodology Advisor",
-    descriptionJa: "研究デザインや統計手法の選定をガイドします。",
+    id: "data_pipeline_doc",
+    labelJa: "データ・パイプライン文書化",
+    labelEn: "Data Pipeline Docs",
+    descriptionJa: "データ台帳と変換フロー図で生データから図表までを追跡可能にします。",
     supportedTypes: ["skill", "agent", "plugin"],
   },
   {
-    id: "paper_structure",
-    labelJa: "論文構成支援",
-    labelEn: "Paper Structure",
-    descriptionJa: "IMRaD形式に沿った論文構成のアウトラインを生成します。",
+    id: "experiment_repro",
+    labelJa: "実験の再現実行",
+    labelEn: "Experiment Reproduction",
+    descriptionJa: "環境検査→縮小実行→本実行→結果比較の手順で実験を再現します。",
     supportedTypes: ["skill", "agent", "plugin"],
   },
   {
-    id: "search_strategy",
-    labelJa: "データベース検索戦略",
-    labelEn: "Search Strategy",
-    descriptionJa: "学術データベース向けの検索クエリ・戦略を策定します。",
+    id: "release_archive",
+    labelJa: "リリース・DOI アーカイブ",
+    labelEn: "Release & DOI",
+    descriptionJa: "バージョン判定・CHANGELOG・DOI メタデータのリリース準備を支援します。",
+    supportedTypes: ["skill", "agent", "plugin"],
+  },
+  {
+    id: "lab_onboarding",
+    labelJa: "ラボ開発規約・オンボーディング",
+    labelEn: "Lab Onboarding",
+    descriptionJa: "CONTRIBUTING・オンボーディング手順・イシュー運用を整備します。",
     supportedTypes: ["skill", "agent", "plugin"],
   },
   {
@@ -189,18 +196,11 @@ export interface McpTemplate {
 
 export const MCP_TEMPLATES: McpTemplate[] = [
   {
-    labelJa: "PubMed API",
-    labelEn: "PubMed API",
-    name: "pubmed-api",
+    labelJa: "GitHub",
+    labelEn: "GitHub",
+    name: "github",
     command: "npx",
-    args: "@anthropic/mcp-pubmed",
-  },
-  {
-    labelJa: "Semantic Scholar",
-    labelEn: "Semantic Scholar",
-    name: "semantic-scholar",
-    command: "npx",
-    args: "@anthropic/mcp-semantic-scholar",
+    args: "@modelcontextprotocol/server-github",
   },
   {
     labelJa: "ファイルシステム",

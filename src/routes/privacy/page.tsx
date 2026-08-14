@@ -20,7 +20,7 @@ export function Component() {
         <section>
           <h2 className="text-lg font-semibold">1. はじめに</h2>
           <p className="mt-2">
-            Scoria（以下「本サービス」）は、学術研究のための Claude Code
+            Scoria（以下「本サービス」）は、研究ソフトウェアのための Claude Code
             拡張ジェネレータです。本サービスはユーザーのプライバシーを尊重し、個人情報の保護に努めます。
           </p>
         </section>
